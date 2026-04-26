@@ -9,3 +9,9 @@ export type ScheduleEntry = {
   endTime: string;
   isActive?: boolean;
 };
+
+export type DayLineup = {
+  day: number;
+  artists: Artist[];
+  schedules: ScheduleEntry[];
+};
