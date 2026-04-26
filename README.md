@@ -1,0 +1,94 @@
+# 🤝 협업 가이드라인
+
+## 1. 이슈 및 브랜치 관리
+
+- **이슈 선 생성**: 작업 전 이슈 생성 필수 (이슈 단위와 브랜치 단위 일치)
+- **담당자 할당**: 본인(Assignee) 설정 및 체크리스트 작성
+- **이슈 템플릿 사용**: 정해진 양식에 따른 이슈 작성
+- **브랜치 명명**: `type/#이슈번호` 형식 준수 (ex: `feat/#10`)
+
+## 2. 커밋 컨벤션 (Commit Convention)
+
+- **메시지 형식**: `[#이슈번호]Type: 메시지` (ex: `[#2]Feat: 로그인 기능 구현`)
+- **작성 규칙**:
+  - 제목은 명령형 사용 및 끝 마침표(.) 금지
+  - 제목과 본문 사이 한 줄 개행 필수
+  - 본문은 "어떻게"보다 **"무엇을", "왜"** 위주로 설명
+  - 여러 줄 메시지 작성 시 `-`로 구분
+
+| Type         | 설명                                           |
+| :----------- | :--------------------------------------------- |
+| **Feat**     | 새로운 기능 추가                               |
+| **Fix**      | 버그 수정                                      |
+| **!HOTFIX**  | 치명적 버그 긴급 수정                          |
+| **Design**   | CSS 등 UI 디자인 변경                          |
+| **Style**    | 코드 포맷팅, 세미콜론 누락 등 (로직 수정 없음) |
+| **Refactor** | 코드 리팩토링                                  |
+| **Comment**  | 주석 추가 및 변경                              |
+| **Docs**     | 문서 수정 (README.md 등)                       |
+| **Test**     | 테스트 코드 추가 및 리팩토링                   |
+| **Rename**   | 파일/폴더명 변경                               |
+| **Remove**   | 파일/폴더 삭제                                 |
+| **Chore**    | 패키지 매니저 설정, 빌드 업무 등 기타          |
+
+## 3. PR 및 코드 리뷰
+
+- **할당**: 본인(Assignee), 팀원 전체(Reviewer) 할당
+- **Merge 조건**: 리뷰 승인(Approve) 후 Merge 진행 및 이슈 종료
+- **피드백 대응**: 수정 요청 시 해당 PR에서 수정 후 재검토 요청
+
+## 4. 브랜치 전략
+
+- `main` : 최종 배포용 브랜치
+- `develop` : 기능 통합 및 개발용 브랜치
+
+## 5. 프로젝트 구조
+
+```txt
+src
+├─ apis/          # axios 인스턴스, 공통 타입, API 모듈
+├─ assets/        # 이미지, 아이콘 등 정적 리소스
+├─ components/    # 공통 UI 컴포넌트
+├─ constants/     # 상수
+├─ hooks/         # 커스텀 훅
+├─ lib/           # 도메인과 분리된 유틸성 로직
+├─ mocks/         # 테스트/개발용 mock 데이터
+├─ pages/         # 라우트 페이지
+├─ providers/     # 앱 전역 Provider
+├─ stores/        # 전역 상태
+├─ styles/        # Emotion theme, Global styles
+├─ types/         # 공통 타입
+└─ utils/         # 범용 유틸
+```
+
+## 6. 스타일링 규칙 (Emotion)
+
+- Tailwind 대신 `@emotion/react`, `@emotion/styled`를 사용합니다.
+- 공통 토큰은 `src/styles/theme.ts`에서 관리합니다.
+- 전역 스타일은 `src/styles/global.tsx`의 `GlobalStyles`를 통해 주입합니다.
+- 재사용 가능한 스타일은 컴포넌트 내부 `styled` 또는 별도 스타일 모듈로 분리합니다.
+
+## 7. API 공통 레이어 (axios)
+
+- 공통 API 레이어는 `src/apis`에서 관리합니다.
+- 환경 변수는 `.env.example`을 기준으로 설정합니다.
+  - `VITE_API_BASE_URL`
+  - `VITE_API_TIMEOUT_MS`
+- 공통 응답 포맷은 `ApiResponse<T>`를 사용하며, `result === "FAIL"`은 공통 에러로 처리합니다.
+- 백엔드 에러 포맷(`error.state`, `error.code`, `error.message`)도 공통 파서에서 처리합니다.
+- 수정 API(PATCH)는 변경 필드만 보내는 방식(`Partial`)을 기본 규칙으로 사용합니다.
+- 엔드포인트 규칙은 `src/apis/endpoints.ts`에서 관리합니다.
+- 상세 사용 방식은 `src/apis/README.md`를 참고해주세요.
+
+## 8. 실행 명령어
+
+- 개발 서버 실행: `pnpm dev`
+- 프로덕션 빌드: `pnpm build`
+- 린트: `pnpm lint`
+- 포맷 검사: `pnpm format:check`
+- 단위/통합 테스트 실행: `pnpm test`
+- 테스트 watch 모드: `pnpm test:watch`
+- E2E 브라우저 설치: `pnpm test:e2e:install`
+- E2E 실행: `pnpm test:e2e`
+- E2E UI 모드: `pnpm test:e2e:ui`
+- E2E 리포트 확인: `pnpm test:e2e:report`
