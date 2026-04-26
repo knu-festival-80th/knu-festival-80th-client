@@ -2,6 +2,7 @@ import { configDefaults, defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 const sentryPlugin =
   process.env.SENTRY_AUTH_TOKEN && process.env.VITE_SENTRY_ORG && process.env.VITE_SENTRY_PROJECT
@@ -15,6 +16,7 @@ const sentryPlugin =
 
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     react({
       jsxImportSource: '@emotion/react',
       babel: {
