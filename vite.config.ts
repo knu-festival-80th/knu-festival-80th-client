@@ -15,16 +15,7 @@ const sentryPlugin =
     : null;
 
 export default defineConfig({
-  plugins: [
-    tailwindcss(),
-    react({
-      jsxImportSource: '@emotion/react',
-      babel: {
-        plugins: ['@emotion/babel-plugin'],
-      },
-    }),
-    sentryPlugin,
-  ],
+  plugins: [tailwindcss(), react(), sentryPlugin],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
