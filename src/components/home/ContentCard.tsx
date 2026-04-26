@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import GlassCircleButton from './GlassCircleButton';
 
 type ContentCardProps = {
   category: string;
@@ -12,7 +13,7 @@ export default function ContentCard({ category, title, imageSrc, to }: ContentCa
   return (
     <Link
       to={to}
-      className="relative flex aspect-[4/5] w-full flex-col justify-between overflow-hidden rounded-md p-6"
+      className="relative flex aspect-4/5 w-full flex-col justify-between overflow-hidden rounded-md p-6"
     >
       <div aria-hidden className="absolute inset-0">
         {imageSrc ? (
@@ -35,9 +36,7 @@ export default function ContentCard({ category, title, imageSrc, to }: ContentCa
       </div>
 
       <div className="relative flex justify-end">
-        <div className="flex size-12 items-center justify-center rounded-full border border-white/50 bg-white/30">
-          <ArrowRight className="size-6 text-text" />
-        </div>
+        <GlassCircleButton icon={<ArrowRight className="size-6 text-text" />} />
       </div>
     </Link>
   );
