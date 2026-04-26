@@ -22,6 +22,10 @@
   --font-sans:
     'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', system-ui, sans-serif;
 
+  --text-countdown: 4.375rem;
+  --text-countdown--line-height: 1;
+  --text-countdown--font-weight: 700;
+
   --text-display1: 2.5rem;
   --text-display1--line-height: 3rem;
   --text-display1--font-weight: 700;
