@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
-import { FIRST_SECTION_ID, NAV_ITEMS } from '../../constants/constants';
+import { FIRST_SECTION_ID, NAV_ITEMS } from '../../constants/navigationDrawer';
 import type { NavigationDrawerProps } from '../../types/navigationDrawer';
 import { useDrawerState } from '../../hooks/useDrawerState';
 import { NavSectionItem } from './NavSectionItem';
