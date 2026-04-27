@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { FiChevronDown, FiChevronRight, FiMapPin, FiMenu, FiX } from 'react-icons/fi';
 
 import tavernMapTempImage from '@/assets/images/tavern-map-temp.svg';
+import tavernMenuTempImage from '@/assets/images/tavern-menu-temp.svg';
 import {
   tavernFaqs,
   taverns,
@@ -11,6 +12,13 @@ import {
 } from '@/constants/taverns';
 
 type TopTab = 'intro' | 'map' | 'list' | 'reservation';
+
+type WaitingReservation = {
+  tavern: Tavern;
+  name: string;
+  partySize: string;
+  phoneNumber: string;
+};
 
 const topTabs: Array<{ key: TopTab; label: string }> = [
   { key: 'intro', label: '소개' },
@@ -37,31 +45,43 @@ export default function TavernMapExperience() {
   const [activeTab, setActiveTab] = useState<TopTab>('intro');
   const [sortKey, setSortKey] = useState<TavernSortKey>('shortWait');
   const [selectedTavern, setSelectedTavern] = useState<Tavern | null>(null);
+  const [detailTavern, setDetailTavern] = useState<Tavern | null>(null);
   const [expandedMenuId, setExpandedMenuId] = useState<string | null>(null);
-  const [registeredTavern, setRegisteredTavern] = useState<Tavern | null>(null);
+  const [registrationTarget, setRegistrationTarget] = useState<Tavern | null>(null);
+  const [waitingReservation, setWaitingReservation] = useState<WaitingReservation | null>(null);
 
   const sortedTaverns = useMemo(() => sortTaverns(sortKey), [sortKey]);
 
   const handleRegister = (tavern: Tavern) => {
     setSelectedTavern(tavern);
-    setRegisteredTavern(tavern);
+    setRegistrationTarget(tavern);
+  };
+
+  const handleTabChange = (tab: TopTab) => {
+    setActiveTab(tab);
+    setDetailTavern(null);
   };
 
   return (
     <div className="min-h-dvh bg-white text-black">
-      <TavernHeader activeTab={activeTab} onTabChange={setActiveTab} />
+      <TavernHeader activeTab={activeTab} onTabChange={handleTabChange} />
 
       {activeTab === 'intro' ? (
-        <IntroOverview onTabChange={setActiveTab} />
+        <IntroOverview onTabChange={handleTabChange} />
       ) : activeTab === 'list' ? (
-        <TavernListView
-          expandedMenuId={expandedMenuId}
-          sortKey={sortKey}
-          taverns={sortedTaverns}
-          onMenuToggle={setExpandedMenuId}
-          onRegister={handleRegister}
-          onSortChange={setSortKey}
-        />
+        detailTavern ? (
+          <TavernDetailView tavern={detailTavern} onRegister={handleRegister} />
+        ) : (
+          <TavernListView
+            expandedMenuId={expandedMenuId}
+            sortKey={sortKey}
+            taverns={sortedTaverns}
+            onMenuToggle={setExpandedMenuId}
+            onRegister={handleRegister}
+            onSelectTavern={setDetailTavern}
+            onSortChange={setSortKey}
+          />
+        )
       ) : activeTab === 'reservation' ? (
         <ReservationLookup />
       ) : (
@@ -74,8 +94,22 @@ export default function TavernMapExperience() {
         />
       )}
 
-      {registeredTavern && (
-        <WaitingCompleteModal tavern={registeredTavern} onClose={() => setRegisteredTavern(null)} />
+      {registrationTarget && (
+        <WaitingRegistrationModal
+          tavern={registrationTarget}
+          onClose={() => setRegistrationTarget(null)}
+          onSubmit={(reservation) => {
+            setRegistrationTarget(null);
+            setWaitingReservation(reservation);
+          }}
+        />
+      )}
+
+      {waitingReservation && (
+        <WaitingCompleteModal
+          reservation={waitingReservation}
+          onClose={() => setWaitingReservation(null)}
+        />
       )}
     </div>
   );
@@ -251,6 +285,7 @@ function TavernListView({
   taverns,
   onMenuToggle,
   onRegister,
+  onSelectTavern,
   onSortChange,
 }: {
   expandedMenuId: string | null;
@@ -258,6 +293,7 @@ function TavernListView({
   taverns: Tavern[];
   onMenuToggle: (id: string | null) => void;
   onRegister: (tavern: Tavern) => void;
+  onSelectTavern: (tavern: Tavern) => void;
   onSortChange: (key: TavernSortKey) => void;
 }) {
   return (
@@ -272,8 +308,72 @@ function TavernListView({
             tavern={tavern}
             onMenuToggle={() => onMenuToggle(expandedMenuId === tavern.id ? null : tavern.id)}
             onRegister={() => onRegister(tavern)}
+            onSelect={() => onSelectTavern(tavern)}
           />
         ))}
+      </div>
+    </section>
+  );
+}
+
+function TavernDetailView({
+  tavern,
+  onRegister,
+}: {
+  tavern: Tavern;
+  onRegister: (tavern: Tavern) => void;
+}) {
+  return (
+    <section className="flex flex-col gap-5 px-5 py-5">
+      <article className="bg-white">
+        <div className="flex flex-col gap-4 pb-2.5">
+          <div className="flex flex-col gap-1">
+            <p className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
+              {tavern.department} · {tavern.category}
+            </p>
+            <h1 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">
+              {tavern.name}
+            </h1>
+            <p className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
+              {tavern.description}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <TavernMetric label="웨이팅" value={tavern.waitTeams} suffix="팀 대기중" />
+            <TavernMetric
+              label="잔여좌석"
+              value={tavern.availableSeats}
+              suffix={`/ ${tavern.totalSeats} 석`}
+            />
+          </div>
+          <button
+            type="button"
+            className="h-[51px] w-full rounded-[8px] bg-[#ff3d3d] text-[16px] font-semibold tracking-[-0.32px] text-white"
+            onClick={() => onRegister(tavern)}
+          >
+            대기 등록하기
+          </button>
+        </div>
+      </article>
+
+      <div className="h-px bg-[#e5e5e5]" />
+
+      <div className="flex flex-col gap-2">
+        <h2 className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
+          메뉴
+        </h2>
+        <img
+          src={tavernMenuTempImage}
+          alt={`${tavern.name} 메뉴 임시 이미지`}
+          className="h-[353px] w-full object-cover"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <h2 className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
+          위치
+        </h2>
+        <CampusMap selectedTavern={tavern} onSelectTavern={() => undefined} />
       </div>
     </section>
   );
@@ -507,32 +607,44 @@ function TavernCard({
   tavern,
   onMenuToggle,
   onRegister,
+  onSelect,
 }: {
   expanded: boolean;
   tavern: Tavern;
   onMenuToggle: () => void;
   onRegister: () => void;
+  onSelect?: () => void;
 }) {
+  const cardSummary = (
+    <>
+      <div>
+        <p className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
+          {tavern.department} · {tavern.category}
+        </p>
+        <h3 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">{tavern.name}</h3>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <TavernMetric label="웨이팅" value={tavern.waitTeams} suffix="팀 대기중" />
+        <TavernMetric
+          label="잔여좌석"
+          value={tavern.availableSeats}
+          suffix={`/ ${tavern.totalSeats} 석`}
+        />
+      </div>
+    </>
+  );
+
   return (
     <article className="overflow-hidden rounded-[12px] border border-[#e5e5e5] bg-white">
       <div className="flex flex-col items-center gap-2.5 px-6 pb-2.5 pt-5">
         <div className="flex w-full flex-col gap-4">
-          <div>
-            <p className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
-              {tavern.department} · {tavern.category}
-            </p>
-            <h3 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">
-              {tavern.name}
-            </h3>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <TavernMetric label="웨이팅" value={tavern.waitTeams} suffix="팀 대기중" />
-            <TavernMetric
-              label="잔여좌석"
-              value={tavern.availableSeats}
-              suffix={`/ ${tavern.totalSeats} 석`}
-            />
-          </div>
+          {onSelect ? (
+            <button type="button" className="flex flex-col gap-4 text-left" onClick={onSelect}>
+              {cardSummary}
+            </button>
+          ) : (
+            <div className="flex flex-col gap-4">{cardSummary}</div>
+          )}
           <button
             type="button"
             className="h-[51px] w-full rounded-[8px] bg-[#ff3d3d] text-[16px] font-semibold tracking-[-0.32px] text-white"
@@ -583,28 +695,150 @@ function TavernMetric({ label, value, suffix }: { label: string; value: number; 
   );
 }
 
-function WaitingCompleteModal({ tavern, onClose }: { tavern: Tavern; onClose: () => void }) {
+function WaitingRegistrationModal({
+  tavern,
+  onClose,
+  onSubmit,
+}: {
+  tavern: Tavern;
+  onClose: () => void;
+  onSubmit: (reservation: WaitingReservation) => void;
+}) {
+  const [name, setName] = useState('');
+  const [partySize, setPartySize] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const canSubmit =
+    name.trim().length > 0 && partySize.trim().length > 0 && phoneNumber.trim().length > 0;
+
   return (
     <div className="fixed inset-0 z-50 flex justify-center bg-black/30">
-      <div className="relative min-h-dvh w-full max-w-[375px] overflow-hidden">
-        <div className="absolute inset-x-5 top-16 h-[269px] overflow-hidden opacity-70">
-          <CampusMap selectedTavern={tavern} onSelectTavern={() => undefined} />
-        </div>
-        <div className="absolute left-5 right-5 top-1/2 -translate-y-1/2 overflow-hidden rounded-[12px] bg-white pb-6 pt-4">
+      <div className="relative min-h-dvh w-full max-w-[375px]">
+        <section
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="waiting-registration-title"
+          className="absolute left-5 right-5 top-[170px] overflow-hidden rounded-[12px] bg-white pb-6 pt-4"
+        >
           <div className="flex items-center justify-between px-5">
-            <h2 className="w-full text-center text-[18px] font-semibold leading-[1.5] tracking-[-0.18px]">
-              웨이팅 등록 완료!
+            <h2
+              id="waiting-registration-title"
+              className="w-full text-center text-[18px] font-semibold leading-[1.5] tracking-[-0.18px]"
+            >
+              대기 등록하기
             </h2>
             <button
               type="button"
               className="absolute right-5 top-4 flex size-8 items-center justify-center"
+              aria-label="대기 등록 모달 닫기"
               onClick={onClose}
             >
               <FiX size={24} />
             </button>
           </div>
+
+          <form
+            className="mt-8 flex flex-col gap-8 px-6"
+            onSubmit={(event) => {
+              event.preventDefault();
+
+              if (canSubmit) {
+                onSubmit({
+                  tavern,
+                  name,
+                  partySize,
+                  phoneNumber,
+                });
+              }
+            }}
+          >
+            <div className="flex flex-col gap-[18px]">
+              <div className="flex flex-col gap-1">
+                <p className="text-[16px] font-semibold leading-[1.5] tracking-[-0.16px]">
+                  예약 주막
+                </p>
+                <p className="text-[16px] font-semibold leading-[1.4] tracking-[-0.32px] text-[#ff3d3d]">
+                  {tavern.name}
+                </p>
+              </div>
+              <FieldInput
+                id="waiting-name"
+                label="예약자명"
+                placeholder="이름을 입력해주세요"
+                value={name}
+                autoComplete="name"
+                onChange={setName}
+              />
+              <FieldInput
+                id="waiting-party-size"
+                label="인원"
+                placeholder="예약 인원을 입력해주세요 (숫자만)"
+                value={partySize}
+                inputMode="numeric"
+                onChange={setPartySize}
+              />
+              <FieldInput
+                id="waiting-phone"
+                label="연락처"
+                placeholder="번호를 입력해주세요 ('-' 없이 번호만)"
+                value={phoneNumber}
+                autoComplete="tel"
+                inputMode="numeric"
+                onChange={setPhoneNumber}
+              />
+            </div>
+            <button
+              type="submit"
+              className={`h-[51px] w-full rounded-[8px] text-[16px] font-semibold tracking-[-0.32px] text-white ${
+                canSubmit ? 'bg-[#ff3d3d]' : 'bg-[#cccccc]'
+              }`}
+              disabled={!canSubmit}
+            >
+              대기 등록하기
+            </button>
+          </form>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function WaitingCompleteModal({
+  reservation,
+  onClose,
+}: {
+  reservation: WaitingReservation;
+  onClose: () => void;
+}) {
+  const { tavern } = reservation;
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-center bg-black/30">
+      <div className="relative min-h-dvh w-full max-w-[375px]">
+        <section
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="waiting-complete-title"
+          className="absolute left-5 right-5 top-1/2 -translate-y-1/2 overflow-hidden rounded-[12px] bg-white pb-6 pt-4"
+        >
+          <div className="flex items-center justify-between px-5">
+            <h2
+              id="waiting-complete-title"
+              className="w-full text-center text-[18px] font-semibold leading-[1.5] tracking-[-0.18px]"
+            >
+              웨이팅 등록 완료!
+            </h2>
+            <button
+              type="button"
+              className="absolute right-5 top-4 flex size-8 items-center justify-center"
+              aria-label="웨이팅 등록 완료 모달 닫기"
+              onClick={onClose}
+            >
+              <FiX size={24} />
+            </button>
+          </div>
+
           <div className="mt-5 px-6">
-            <div className="px-5 pb-2.5">
+            <div className="pb-2.5">
               <div className="flex items-center gap-1">
                 <h3 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">
                   {tavern.name}
@@ -624,18 +858,18 @@ function WaitingCompleteModal({ tavern, onClose }: { tavern: Tavern; onClose: ()
               </div>
             </div>
             <div className="my-4 h-px bg-[#e5e5e5]" />
-            <dl className="grid gap-2.5 px-5 text-[16px] font-medium leading-[1.6] tracking-[-0.32px]">
-              <div className="flex justify-between">
+            <dl className="grid gap-2.5 text-[16px] font-medium leading-[1.6] tracking-[-0.32px]">
+              <div className="flex justify-between gap-4">
                 <dt className="text-[#808080]">예약자명</dt>
-                <dd>홍길동</dd>
+                <dd className="text-right">{reservation.name}</dd>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <dt className="text-[#808080]">인원</dt>
-                <dd>2명</dd>
+                <dd className="text-right">{reservation.partySize}명</dd>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <dt className="text-[#808080]">연락처</dt>
-                <dd>01012345678</dd>
+                <dd className="text-right">{reservation.phoneNumber}</dd>
               </div>
             </dl>
             <div className="my-4 h-px bg-[#e5e5e5]" />
@@ -645,7 +879,7 @@ function WaitingCompleteModal({ tavern, onClose }: { tavern: Tavern; onClose: ()
               전화를 받지 않을 시 예약이 취소될 수 있습니다.
             </p>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );
@@ -689,7 +923,7 @@ function ReservationResultModal({
           </div>
 
           <div className="mt-5 px-6">
-            <div className="px-5 pb-2.5">
+            <div className="pb-2.5">
               <div className="flex items-center gap-1">
                 <h3 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">
                   {tavern.name}
@@ -710,7 +944,7 @@ function ReservationResultModal({
             </div>
 
             <div className="my-4 h-px bg-[#e5e5e5]" />
-            <dl className="grid gap-2.5 px-5 text-[16px] font-medium leading-[1.6] tracking-[-0.32px]">
+            <dl className="grid gap-2.5 text-[16px] font-medium leading-[1.6] tracking-[-0.32px]">
               <div className="flex justify-between gap-4">
                 <dt className="text-[#808080]">예약자명</dt>
                 <dd className="text-right">{name}</dd>
