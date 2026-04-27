@@ -1,18 +1,12 @@
 import { useMemo, useState } from 'react';
 import { FiChevronDown, FiChevronRight, FiMapPin, FiMenu, FiX } from 'react-icons/fi';
 
-import {
-  tavernFaqs,
-  taverns,
-  tavernSortOptions,
-  type Tavern,
-  type TavernSortKey,
-} from '@/constants/taverns';
+import tavernMapTempImage from '@/assets/images/tavern-map-temp.svg';
+import { taverns, tavernSortOptions, type Tavern, type TavernSortKey } from '@/constants/taverns';
 
-type TopTab = 'intro' | 'map' | 'list' | 'reservation';
+type TopTab = 'map' | 'list' | 'reservation';
 
 const topTabs: Array<{ key: TopTab; label: string }> = [
-  { key: 'intro', label: '소개' },
   { key: 'map', label: '지도' },
   { key: 'list', label: '주막 목록' },
   { key: 'reservation', label: '예약 조회' },
@@ -35,12 +29,11 @@ const sortTaverns = (sortKey: TavernSortKey) => {
 export default function TavernMapExperience() {
   const [activeTab, setActiveTab] = useState<TopTab>('map');
   const [sortKey, setSortKey] = useState<TavernSortKey>('shortWait');
-  const [selectedTavern, setSelectedTavern] = useState<Tavern>(taverns[0]);
+  const [selectedTavern, setSelectedTavern] = useState<Tavern | null>(null);
   const [expandedMenuId, setExpandedMenuId] = useState<string | null>(null);
   const [registeredTavern, setRegisteredTavern] = useState<Tavern | null>(null);
 
   const sortedTaverns = useMemo(() => sortTaverns(sortKey), [sortKey]);
-  const visibleTaverns = activeTab === 'map' ? sortedTaverns.slice(0, 3) : sortedTaverns;
 
   const handleRegister = (tavern: Tavern) => {
     setSelectedTavern(tavern);
@@ -62,20 +55,16 @@ export default function TavernMapExperience() {
         />
       ) : activeTab === 'reservation' ? (
         <ReservationLookup
-          selectedTavern={selectedTavern}
-          onRegister={() => handleRegister(selectedTavern)}
+          selectedTavern={selectedTavern ?? taverns[0]}
+          onRegister={() => handleRegister(selectedTavern ?? taverns[0])}
         />
       ) : (
         <MapOverview
           expandedMenuId={expandedMenuId}
           selectedTavern={selectedTavern}
-          sortKey={sortKey}
-          taverns={visibleTaverns}
           onMenuToggle={setExpandedMenuId}
           onRegister={handleRegister}
           onSelectTavern={setSelectedTavern}
-          onSortChange={setSortKey}
-          onTabChange={setActiveTab}
         />
       )}
 
@@ -113,6 +102,12 @@ function TavernHeader({
         </button>
       </div>
       <nav className="flex gap-7 border-b border-[#e5e5e5] px-5" aria-label="주막 지도 메뉴">
+        <a
+          href="/"
+          className="flex h-8 shrink-0 items-start text-[16px] font-normal leading-6 tracking-[-0.32px] text-[#808080]"
+        >
+          홈
+        </a>
         {topTabs.map((tab) => {
           const selected = activeTab === tab.key;
 
@@ -126,7 +121,7 @@ function TavernHeader({
               onClick={() => onTabChange(tab.key)}
             >
               <span>{tab.label}</span>
-              {selected && <span className="mt-[7px] h-px w-full bg-[#ff3d3d]" />}
+              {selected && <span className="mt-[7px] h-px w-full bg-black" />}
             </button>
           );
         })}
@@ -138,95 +133,38 @@ function TavernHeader({
 function MapOverview({
   expandedMenuId,
   selectedTavern,
-  sortKey,
-  taverns,
   onMenuToggle,
   onRegister,
   onSelectTavern,
-  onSortChange,
-  onTabChange,
 }: {
   expandedMenuId: string | null;
-  selectedTavern: Tavern;
-  sortKey: TavernSortKey;
-  taverns: Tavern[];
+  selectedTavern: Tavern | null;
   onMenuToggle: (id: string | null) => void;
   onRegister: (tavern: Tavern) => void;
   onSelectTavern: (tavern: Tavern) => void;
-  onSortChange: (key: TavernSortKey) => void;
-  onTabChange: (tab: TopTab) => void;
 }) {
   return (
-    <>
-      <section className="relative flex min-h-64 flex-col justify-center overflow-hidden px-5 py-[42px]">
-        <div className="absolute inset-0 bg-[linear-gradient(132deg,#fff0a8_0%,#ff9d84_54%,#ffffff_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.65),transparent_150px)]" />
-        <div className="relative flex flex-col gap-[30px]">
-          <h1 className="text-[40px] font-bold uppercase leading-none tracking-[-2px] text-[#1a1a1a]">
-            지도 및
-            <br />
-            주막 정보
-          </h1>
-          <button
-            type="button"
-            className="flex w-fit items-center gap-1.5 rounded-full border border-white/30 bg-white/20 py-2.5 pl-5 pr-3.5 text-[14px] font-medium text-[#1a1a1a]"
-            onClick={() => onTabChange('list')}
-          >
-            인기 주막 둘러보기
-            <FiChevronRight size={20} />
-          </button>
-        </div>
-      </section>
+    <section className="flex flex-col gap-5 px-5 py-6">
+      <div className="flex flex-col gap-0.5">
+        <h1 className="text-[24px] font-bold leading-[1.6] tracking-[-0.48px]">지도</h1>
+        <p className="text-[16px] font-normal leading-[1.4] tracking-[-0.32px] text-[#808080]">
+          가고 싶은 주막의 아이콘을 클릭해보세요.
+        </p>
+      </div>
 
-      <section className="flex flex-col gap-12 px-5 py-16">
-        <SectionHeading
-          eyebrow="How to use"
-          title="지도에서 주막 위치를 확인하고 빠르게 예약해요"
+      <CampusMap selectedTavern={selectedTavern} onSelectTavern={onSelectTavern} />
+
+      {selectedTavern && (
+        <TavernCard
+          expanded={expandedMenuId === selectedTavern.id}
+          tavern={selectedTavern}
+          onMenuToggle={() =>
+            onMenuToggle(expandedMenuId === selectedTavern.id ? null : selectedTavern.id)
+          }
+          onRegister={() => onRegister(selectedTavern)}
         />
-        <GuideCard
-          eyebrow="Map"
-          title="원하는 주막 아이콘 터치하기"
-          description="메뉴와 대기 시간을 확인할 수 있어요."
-        />
-        <GuideCard
-          eyebrow="Reservation"
-          title="실시간 대기 현황 확인 및 예약"
-          description="줄을 서지 않고 미리 예약해 기다릴 수 있어요."
-        />
-
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-4">
-            <SectionHeading eyebrow="Map" title="지도에서 모든 주막 리스트를 확인해요." />
-            <button
-              type="button"
-              className="flex w-fit items-center gap-1.5 rounded-full border border-black py-2.5 pl-5 pr-3.5 text-[14px] font-medium"
-              onClick={() => onTabChange('list')}
-            >
-              주막 전체보기
-              <FiChevronRight size={20} />
-            </button>
-          </div>
-          <CampusMap selectedTavern={selectedTavern} onSelectTavern={onSelectTavern} />
-        </div>
-
-        <TavernSortTabs sortKey={sortKey} onSortChange={onSortChange} />
-        <div className="flex flex-col gap-3">
-          {taverns.map((tavern) => (
-            <TavernCard
-              key={tavern.id}
-              expanded={expandedMenuId === tavern.id}
-              tavern={tavern}
-              onMenuToggle={() => onMenuToggle(expandedMenuId === tavern.id ? null : tavern.id)}
-              onRegister={() => onRegister(tavern)}
-            />
-          ))}
-        </div>
-      </section>
-
-      <FaqSection />
-      <ContactSection />
-      <TavernFooter />
-    </>
+      )}
+    </section>
   );
 }
 
@@ -299,87 +237,48 @@ function ReservationLookup({
   );
 }
 
-function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <p className="text-[16px] font-bold leading-[1.4] tracking-[-0.32px]">{eyebrow}</p>
-      <h2 className="text-[18px] font-bold leading-[1.4] tracking-[-0.36px]">{title}</h2>
-    </div>
-  );
-}
-
-function GuideCard({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <article className="relative h-[430px] overflow-hidden rounded-[6px] bg-[#f9f9f9]">
-      <div className="absolute inset-0 bg-[linear-gradient(132deg,#ffffff_34%,rgba(255,255,255,0)_100%)]" />
-      <div className="relative flex h-[104px] flex-col justify-center p-6">
-        <p className="text-[16px] font-bold leading-[1.4] tracking-[-0.32px] text-[#1a1a1a]">
-          {eyebrow}
-        </p>
-        <h3 className="mt-1.5 text-[20px] font-bold leading-[1.4] tracking-[-0.4px] text-[#1a1a1a]">
-          {title}
-        </h3>
-        <p className="mt-2 text-[16px] font-normal leading-[1.4] tracking-[-0.32px] text-[#808080]">
-          {description}
-        </p>
-      </div>
-      <div className="absolute inset-x-0 bottom-0 h-[326px] overflow-hidden">
-        <div className="absolute bottom-0 left-7 h-28 w-16 rounded-t-full bg-[#f7c35f]" />
-        <div className="absolute bottom-12 left-24 h-32 w-24 bg-[#4b9b74] [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
-        <div className="absolute bottom-10 left-44 h-40 w-28 bg-[#2f7c61] [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
-        <div className="absolute bottom-8 right-5 h-24 w-20 bg-[#64b17d] [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
-        <div className="absolute bottom-6 left-10 h-14 w-24 border-b-[10px] border-l-[8px] border-[#7a3327]" />
-        <div className="absolute bottom-4 h-6 w-full bg-[#e8f6dc]" />
-      </div>
-    </article>
-  );
-}
-
 function CampusMap({
   selectedTavern,
   onSelectTavern,
 }: {
-  selectedTavern: Tavern;
+  selectedTavern: Tavern | null;
   onSelectTavern: (tavern: Tavern) => void;
 }) {
   return (
     <div className="relative h-[269px] overflow-hidden bg-[#d8e2f0]">
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_0_44%,rgba(255,255,255,0.38)_44%_49%,transparent_49%),linear-gradient(18deg,transparent_0_36%,rgba(255,255,255,0.5)_36%_41%,transparent_41%)]" />
-      <div className="absolute left-[-10%] top-[22%] h-7 w-[72%] rotate-[16deg] rounded-full bg-[#f6f0df]" />
-      <div className="absolute right-[-18%] top-[8%] h-8 w-[78%] -rotate-[18deg] rounded-full bg-[#f6f0df]" />
-      <div className="absolute bottom-[18%] left-[8%] h-12 w-[36%] rounded-sm bg-[#bdd5a7]" />
-      <div className="absolute bottom-[12%] right-[8%] h-14 w-[42%] rounded-sm bg-[#bdd5a7]" />
-      <div className="absolute left-[46%] top-[40%] h-24 w-20 rounded-full border-[10px] border-[#9fb5d1]" />
+      <img
+        src={tavernMapTempImage}
+        alt="주막 지도 임시 이미지"
+        className="absolute inset-0 size-full object-cover"
+      />
       {taverns.map((tavern) => {
-        const selected = selectedTavern.id === tavern.id;
+        const selected = selectedTavern?.id === tavern.id;
 
         return (
           <button
             key={tavern.id}
             type="button"
             aria-label={`${tavern.name} 지도 위치`}
-            className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md ${
-              selected ? 'size-9 bg-[#ff3d3d]' : 'size-7 bg-[#1a1a1a]'
-            }`}
+            aria-pressed={selected}
+            className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
             style={{ left: tavern.mapPosition.left, top: tavern.mapPosition.top }}
             onClick={() => onSelectTavern(tavern)}
           >
-            <FiMapPin className="m-auto text-white" size={selected ? 20 : 15} />
+            <span
+              className={`flex items-center justify-center rounded-full border shadow-md ${
+                selected
+                  ? 'size-[29px] border-[#ff3d3d] bg-white'
+                  : 'size-7 border-white bg-[#ff3d3d]'
+              }`}
+            >
+              <FiMapPin className={selected ? 'text-[#ff3d3d]' : 'text-white'} size={17} />
+            </span>
+            <span className="max-w-[72px] overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-semibold leading-[1.4] tracking-[-0.24px] text-[#ff3d3d]">
+              {tavern.name}
+            </span>
           </button>
         );
       })}
-      <div className="absolute bottom-3 left-3 rounded-[8px] bg-white/90 px-3 py-2 shadow-sm">
-        <p className="text-[12px] font-semibold text-[#808080]">{selectedTavern.department}</p>
-        <p className="text-[14px] font-bold text-[#1a1a1a]">{selectedTavern.name}</p>
-      </div>
     </div>
   );
 }
@@ -559,93 +458,5 @@ function WaitingCompleteModal({ tavern, onClose }: { tavern: Tavern; onClose: ()
         </div>
       </div>
     </div>
-  );
-}
-
-function FaqSection() {
-  return (
-    <section className="flex flex-col gap-12 px-5 py-8">
-      <SectionHeading eyebrow="FAQ" title="자주 묻는 질문" />
-      <div className="flex flex-col gap-2.5">
-        {tavernFaqs.map((faq, index) => (
-          <details key={faq.question} className="bg-[#f9f9f9] p-5" open={index === 0}>
-            <summary className="flex cursor-pointer list-none items-start justify-between text-[16px] font-bold leading-[1.5]">
-              {faq.question}
-              <FiChevronDown size={20} />
-            </summary>
-            <p className="mt-3 text-[16px] font-medium leading-[1.5] text-[#4d4d4d]">
-              {faq.answer}
-            </p>
-          </details>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ContactSection() {
-  return (
-    <section className="flex flex-col gap-12 px-5 py-16">
-      <SectionHeading eyebrow="Contact" title="문의하기" />
-      <div className="grid gap-5 bg-[#f9f9f9] p-5">
-        <ContactItem label="이메일" value="likelion_knu@knu.ac.kr" />
-        <ContactItem label="전화" value="02-1234-5678" />
-        <ContactItem label="위치" value="경북대학교 본관" />
-      </div>
-      <div className="flex flex-col gap-5">
-        <h2 className="text-[18px] font-bold leading-[1.4] tracking-[-0.36px]">
-          궁금한 점 간편하게 문의하기
-        </h2>
-        <button
-          type="button"
-          className="flex w-fit items-center gap-1.5 rounded-full border border-black py-2.5 pl-5 pr-3.5 text-[14px]"
-        >
-          간편 문의하기
-          <FiChevronRight size={20} />
-        </button>
-      </div>
-    </section>
-  );
-}
-
-function ContactItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid gap-3 text-[16px] leading-[1.5]">
-      <strong>{label}</strong>
-      <span className="font-medium text-[#4d4d4d]">{value}</span>
-    </div>
-  );
-}
-
-function TavernFooter() {
-  return (
-    <footer className="flex flex-col gap-12 bg-[#1a1a1a] px-5 pb-[124px] pt-16 text-white">
-      <div className="flex items-end gap-1">
-        <span className="font-serif text-[14px] font-black italic leading-none">
-          The Grand Moment
-        </span>
-        <span className="text-[14px] font-black leading-none text-[#ff3d3d]">KNU80</span>
-      </div>
-      <nav className="flex flex-col gap-5 text-[16px] font-bold leading-[1.5]">
-        <a href="/map">지도 정보</a>
-        <a href="/guestbook">롤링페이퍼</a>
-        <a href="#insta">인스타팅</a>
-        <a href="#photo">포토부스</a>
-        <a href="#notice">공지사항</a>
-      </nav>
-      <div className="flex flex-col gap-4 text-[14px] leading-none">
-        <a href="#privacy" className="underline">
-          개인정보 보호
-        </a>
-        <a href="#terms" className="underline">
-          서비스 이용 약관
-        </a>
-        <a href="#cookies" className="underline">
-          쿠키 설정
-        </a>
-      </div>
-      <p className="text-[14px] leading-none">© 2026 경북대학교 대동제. copyright</p>
-      <p className="text-[14px] leading-none">멋쟁이 사자처럼 X 경북대학교 디자인학과</p>
-    </footer>
   );
 }
