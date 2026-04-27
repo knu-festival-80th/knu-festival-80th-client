@@ -20,8 +20,20 @@ test('tavern map page renders and opens waiting modal', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'E태원 클라쓰' })).toBeVisible();
 
   await page.getByRole('button', { name: '대기 등록하기' }).first().click();
+  const waitingDialog = page.getByRole('dialog', { name: '대기 등록하기' });
+
+  await expect(waitingDialog).toBeVisible();
+  await expect(waitingDialog.getByText('예약 주막')).toBeVisible();
+  await expect(waitingDialog.getByRole('button', { name: '대기 등록하기' })).toBeDisabled();
+
+  await waitingDialog.getByPlaceholder('이름을 입력해주세요').fill('홍길동');
+  await waitingDialog.getByPlaceholder('예약 인원을 입력해주세요 (숫자만)').fill('2');
+  await waitingDialog.getByPlaceholder("번호를 입력해주세요 ('-' 없이 번호만)").fill('01012345678');
+  await waitingDialog.getByRole('button', { name: '대기 등록하기' }).click();
+
   await expect(page.getByRole('heading', { name: '웨이팅 등록 완료!' })).toBeVisible();
   await expect(page.getByText('예약자명')).toBeVisible();
+  await expect(page.getByText('01012345678')).toBeVisible();
 });
 
 test('reservation lookup page renders input form', async ({ page }) => {
@@ -41,4 +53,18 @@ test('reservation lookup page renders input form', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Start-up' })).toBeVisible();
   await expect(page.getByText('현재 내 앞에')).toBeVisible();
   await expect(page.getByText('01012345678')).toBeVisible();
+});
+
+test('tavern list card opens detail view', async ({ page }) => {
+  await page.goto('/map');
+
+  await page.getByRole('button', { name: '주막 목록' }).click();
+  await page
+    .getByRole('button', { name: /Start-up/ })
+    .first()
+    .click();
+
+  await expect(page.getByText('떡볶이와 튀김, 간단한 안주를 빠르게 즐길 수 있어요.')).toBeVisible();
+  await expect(page.getByAltText('Start-up 메뉴 임시 이미지')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '위치' })).toBeVisible();
 });
