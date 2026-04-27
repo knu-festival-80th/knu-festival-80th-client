@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { FiChevronDown, FiChevronRight, FiMapPin, FiMenu, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiChevronDown, FiChevronRight, FiMapPin, FiMenu, FiX } from 'react-icons/fi';
 
 import tavernMapTempImage from '@/assets/images/tavern-map-temp.svg';
 import tavernMenuTempImage from '@/assets/images/tavern-menu-temp.svg';
@@ -36,6 +36,9 @@ const topTabs: Array<{ key: TopTab; label: string }> = [
   { key: 'reservation', label: '예약 조회' },
 ];
 
+const MAX_WAITING_RESERVATION_COUNT = 3;
+const INITIAL_MOCK_WAITING_RESERVATION_COUNT = 2;
+
 const sortTaverns = (sortKey: TavernSortKey) => {
   const list = [...taverns];
 
@@ -44,7 +47,7 @@ const sortTaverns = (sortKey: TavernSortKey) => {
   }
 
   if (sortKey === 'simple') {
-    return list.filter((tavern) => tavern.waitTeams <= 1 || tavern.availableSeats > 0);
+    return list;
   }
 
   return list.sort((first, second) => second.popularity - first.popularity);
@@ -88,12 +91,28 @@ export default function TavernMapExperience() {
   const [expandedMenuId, setExpandedMenuId] = useState<string | null>(null);
   const [registrationTarget, setRegistrationTarget] = useState<Tavern | null>(null);
   const [waitingReservation, setWaitingReservation] = useState<WaitingReservation | null>(null);
+  const [waitingReservationCount, setWaitingReservationCount] = useState(
+    INITIAL_MOCK_WAITING_RESERVATION_COUNT,
+  );
+  const [showReservationLimitModal, setShowReservationLimitModal] = useState(false);
 
   const sortedTaverns = useMemo(() => sortTaverns(sortKey), [sortKey]);
 
   const handleRegister = (tavern: Tavern) => {
     setSelectedTavern(tavern);
+
+    if (waitingReservationCount >= MAX_WAITING_RESERVATION_COUNT) {
+      setShowReservationLimitModal(true);
+      return;
+    }
+
     setRegistrationTarget(tavern);
+  };
+
+  const handleOpenTavernDetail = (tavern: Tavern) => {
+    setSelectedTavern(tavern);
+    setDetailTavern(tavern);
+    setActiveTab('list');
   };
 
   const handleTabChange = (tab: TopTab) => {
@@ -117,7 +136,7 @@ export default function TavernMapExperience() {
             taverns={sortedTaverns}
             onMenuToggle={setExpandedMenuId}
             onRegister={handleRegister}
-            onSelectTavern={setDetailTavern}
+            onSelectTavern={handleOpenTavernDetail}
             onSortChange={setSortKey}
           />
         )
@@ -128,6 +147,7 @@ export default function TavernMapExperience() {
           expandedMenuId={expandedMenuId}
           selectedTavern={selectedTavern}
           onMenuToggle={setExpandedMenuId}
+          onOpenDetail={handleOpenTavernDetail}
           onRegister={handleRegister}
           onSelectTavern={setSelectedTavern}
         />
@@ -139,6 +159,9 @@ export default function TavernMapExperience() {
           onClose={() => setRegistrationTarget(null)}
           onSubmit={(reservation) => {
             setRegistrationTarget(null);
+            setWaitingReservationCount((count) =>
+              Math.min(count + 1, MAX_WAITING_RESERVATION_COUNT),
+            );
             setWaitingReservation(reservation);
           }}
         />
@@ -148,6 +171,16 @@ export default function TavernMapExperience() {
         <WaitingCompleteModal
           reservation={waitingReservation}
           onClose={() => setWaitingReservation(null)}
+        />
+      )}
+
+      {showReservationLimitModal && (
+        <ReservationLimitModal
+          onClose={() => setShowReservationLimitModal(false)}
+          onGoToReservationList={() => {
+            setShowReservationLimitModal(false);
+            handleTabChange('reservation');
+          }}
         />
       )}
     </div>
@@ -181,12 +214,6 @@ function TavernHeader({
         </button>
       </div>
       <nav className="flex gap-7 border-b border-[#e5e5e5] px-5" aria-label="주막 지도 메뉴">
-        <a
-          href="/"
-          className="flex h-8 shrink-0 items-start text-[16px] font-normal leading-6 tracking-[-0.32px] text-[#808080]"
-        >
-          홈
-        </a>
         {topTabs.map((tab) => {
           const selected = activeTab === tab.key;
 
@@ -195,12 +222,12 @@ function TavernHeader({
               key={tab.key}
               type="button"
               className={`flex h-8 shrink-0 flex-col items-center justify-start text-[16px] leading-6 tracking-[-0.32px] ${
-                selected ? 'font-semibold text-black' : 'font-normal text-[#808080]'
+                selected ? 'font-semibold text-[#ff3d3d]' : 'font-normal text-[#808080]'
               }`}
               onClick={() => onTabChange(tab.key)}
             >
               <span>{tab.label}</span>
-              {selected && <span className="mt-[7px] h-px w-full bg-black" />}
+              {selected && <span className="mt-[7px] h-px w-full bg-[#ff3d3d]" />}
             </button>
           );
         })}
@@ -284,12 +311,14 @@ function MapOverview({
   expandedMenuId,
   selectedTavern,
   onMenuToggle,
+  onOpenDetail,
   onRegister,
   onSelectTavern,
 }: {
   expandedMenuId: string | null;
   selectedTavern: Tavern | null;
   onMenuToggle: (id: string | null) => void;
+  onOpenDetail: (tavern: Tavern) => void;
   onRegister: (tavern: Tavern) => void;
   onSelectTavern: (tavern: Tavern) => void;
 }) {
@@ -312,6 +341,7 @@ function MapOverview({
             onMenuToggle(expandedMenuId === selectedTavern.id ? null : selectedTavern.id)
           }
           onRegister={() => onRegister(selectedTavern)}
+          onSelect={() => onOpenDetail(selectedTavern)}
         />
       )}
     </section>
@@ -335,20 +365,27 @@ function TavernListView({
   onSelectTavern: (tavern: Tavern) => void;
   onSortChange: (key: TavernSortKey) => void;
 }) {
+  const isSimpleView = sortKey === 'simple';
+
   return (
     <section className="flex flex-col gap-3 px-5 py-6">
       <h1 className="text-[24px] font-bold leading-[1.6] tracking-[-0.48px]">주막 목록</h1>
       <TavernSortTabs sortKey={sortKey} onSortChange={onSortChange} />
-      <div className="flex flex-col gap-3">
+      <div className={`flex flex-col ${isSimpleView ? 'gap-2' : 'gap-3'}`}>
         {taverns.map((tavern) => (
-          <TavernCard
-            key={tavern.id}
-            expanded={expandedMenuId === tavern.id}
-            tavern={tavern}
-            onMenuToggle={() => onMenuToggle(expandedMenuId === tavern.id ? null : tavern.id)}
-            onRegister={() => onRegister(tavern)}
-            onSelect={() => onSelectTavern(tavern)}
-          />
+          <div key={tavern.id}>
+            {isSimpleView ? (
+              <TavernSimpleCard tavern={tavern} onSelect={() => onSelectTavern(tavern)} />
+            ) : (
+              <TavernCard
+                expanded={expandedMenuId === tavern.id}
+                tavern={tavern}
+                onMenuToggle={() => onMenuToggle(expandedMenuId === tavern.id ? null : tavern.id)}
+                onRegister={() => onRegister(tavern)}
+                onSelect={() => onSelectTavern(tavern)}
+              />
+            )}
+          </div>
         ))}
       </div>
     </section>
@@ -789,6 +826,34 @@ function TavernCard({
   );
 }
 
+function TavernSimpleCard({ tavern, onSelect }: { tavern: Tavern; onSelect: () => void }) {
+  return (
+    <button
+      type="button"
+      className="flex w-full flex-col gap-1 rounded-[12px] border border-[#e5e5e5] bg-white px-5 py-4 text-left"
+      onClick={onSelect}
+    >
+      <div className="flex w-full items-start justify-between">
+        <span className="flex items-center text-[14px] font-medium leading-[1.6] tracking-[-0.28px] text-[#808080]">
+          자세히 보기
+          <FiChevronRight size={24} />
+        </span>
+        <span className="text-[14px] font-medium leading-[1.6] tracking-[-0.28px] text-[#808080]">
+          웨이팅
+        </span>
+      </div>
+      <div className="flex w-full items-start justify-between gap-4 text-[16px] tracking-[-0.32px]">
+        <strong className="min-w-0 truncate font-bold leading-[1.4] text-black">
+          {tavern.name}
+        </strong>
+        <span className="shrink-0 font-medium leading-[1.6] text-[#808080]">
+          <span className="text-[#ff3d3d]">{tavern.waitTeams}</span>팀
+        </span>
+      </div>
+    </button>
+  );
+}
+
 function TavernMetric({ label, value, suffix }: { label: string; value: number; suffix: string }) {
   return (
     <div className="rounded-[8px] bg-[#f9f9f9] p-4">
@@ -990,6 +1055,72 @@ function WaitingCompleteModal({
               <br />
               전화를 받지 않을 시 예약이 취소될 수 있습니다.
             </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function ReservationLimitModal({
+  onClose,
+  onGoToReservationList,
+}: {
+  onClose: () => void;
+  onGoToReservationList: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex justify-center bg-black/30">
+      <div className="relative min-h-dvh w-full max-w-[375px]">
+        <section
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reservation-limit-title"
+          className="absolute left-5 right-5 top-1/2 -translate-y-1/2 overflow-hidden rounded-[12px] bg-white pb-6 pt-4"
+        >
+          <div className="flex items-center justify-between px-4">
+            <button
+              type="button"
+              className="flex size-6 items-center justify-center"
+              aria-label="이전으로"
+              onClick={onClose}
+            >
+              <FiArrowLeft size={22} />
+            </button>
+            <h2
+              id="reservation-limit-title"
+              className="w-full text-center text-[18px] font-semibold leading-none tracking-[-0.36px]"
+            >
+              예약 실패
+            </h2>
+            <button
+              type="button"
+              className="flex size-6 items-center justify-center"
+              aria-label="예약 실패 모달 닫기"
+              onClick={onClose}
+            >
+              <FiX size={24} />
+            </button>
+          </div>
+
+          <div className="mt-5 px-6">
+            <div className="flex flex-col items-center gap-4 py-2.5 text-center">
+              <h3 className="text-[24px] font-bold leading-none tracking-[-0.48px]">
+                예약 가능 개수 초과!
+              </h3>
+              <div className="text-[14px] font-medium leading-[1.5] tracking-[-0.28px] text-[#f49800]">
+                <p>주막 예약은 총 3곳까지만 가능해요.</p>
+                <p>현재 예약 내역을 취소한다면 예약 가능해요.</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="mt-[18px] h-[50px] w-full rounded-[8px] border-[1.4px] border-[#ff3d3d] bg-white text-[16px] font-medium tracking-[-0.32px] text-[#ff3d3d]"
+              onClick={onGoToReservationList}
+            >
+              예약 목록으로
+            </button>
           </div>
         </section>
       </div>

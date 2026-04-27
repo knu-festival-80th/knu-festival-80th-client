@@ -34,6 +34,18 @@ test('tavern map page renders and opens waiting modal', async ({ page }) => {
   await expect(page.getByRole('heading', { name: '웨이팅 등록 완료!' })).toBeVisible();
   await expect(page.getByText('예약자명')).toBeVisible();
   await expect(page.getByText('01012345678')).toBeVisible();
+
+  await page.getByRole('button', { name: '웨이팅 등록 완료 모달 닫기' }).click();
+  await page.getByRole('button', { name: '대기 등록하기' }).first().click();
+
+  const limitDialog = page.getByRole('dialog', { name: '예약 실패' });
+
+  await expect(limitDialog).toBeVisible();
+  await expect(limitDialog.getByText('예약 가능 개수 초과!')).toBeVisible();
+  await expect(limitDialog.getByText('주막 예약은 총 3곳까지만 가능해요.')).toBeVisible();
+
+  await limitDialog.getByRole('button', { name: '예약 목록으로' }).click();
+  await expect(page.getByRole('heading', { name: '예약 조회' })).toBeVisible();
 });
 
 test('reservation lookup page renders input form', async ({ page }) => {
@@ -79,5 +91,38 @@ test('tavern list card opens detail view', async ({ page }) => {
 
   await expect(page.getByText('떡볶이와 튀김, 간단한 안주를 빠르게 즐길 수 있어요.')).toBeVisible();
   await expect(page.getByAltText('Start-up 메뉴 임시 이미지')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '위치' })).toBeVisible();
+});
+
+test('tavern list simple view opens detail view', async ({ page }) => {
+  await page.goto('/map');
+
+  await page.getByRole('button', { name: '주막 목록' }).click();
+  await page.getByRole('button', { name: '간단히' }).click();
+
+  await expect(page.getByRole('button', { name: '대기 등록하기' })).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: /자세히 보기.*웨이팅.*E태원 클라쓰/s }),
+  ).toBeVisible();
+
+  await page.getByRole('button', { name: /자세히 보기.*웨이팅.*E태원 클라쓰/s }).click();
+
+  await expect(page.getByText('바삭한 야키소바와 시원한 하이볼을 준비했어요.')).toBeVisible();
+  await expect(page.getByAltText('E태원 클라쓰 메뉴 임시 이미지')).toBeVisible();
+});
+
+test('map tavern card opens detail view', async ({ page }) => {
+  await page.goto('/map');
+
+  await expect(
+    page.getByRole('navigation', { name: '주막 지도 메뉴' }).getByRole('link', { name: '홈' }),
+  ).toHaveCount(0);
+
+  await page.getByRole('button', { name: '지도' }).click();
+  await page.getByRole('button', { name: 'E태원 클라쓰 지도 위치' }).click();
+  await page.getByRole('button', { name: /전자 E반.*E태원 클라쓰/ }).click();
+
+  await expect(page.getByText('바삭한 야키소바와 시원한 하이볼을 준비했어요.')).toBeVisible();
+  await expect(page.getByAltText('E태원 클라쓰 메뉴 임시 이미지')).toBeVisible();
   await expect(page.getByRole('heading', { name: '위치' })).toBeVisible();
 });
