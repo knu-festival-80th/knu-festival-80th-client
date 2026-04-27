@@ -49,10 +49,23 @@ test('reservation lookup page renders input form', async ({ page }) => {
   await page.getByPlaceholder("번호를 입력해주세요 ('-' 없이 번호만)").fill('01012345678');
   await page.getByRole('button', { name: '조회하기' }).click();
 
-  await expect(page.getByRole('dialog', { name: '예약 조회' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Start-up' })).toBeVisible();
-  await expect(page.getByText('현재 내 앞에')).toBeVisible();
-  await expect(page.getByText('01012345678')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '예약 조회 결과' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Start-up/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /컴스토랑/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /E태원 클라쓰/ })).toBeVisible();
+  await expect(page.getByText('주막은 총 3곳까지만 예약 가능합니다.')).toBeVisible();
+
+  await page.getByRole('button', { name: /Start-up/ }).click();
+
+  const reservationDialog = page.getByRole('dialog', { name: '예약 조회' });
+
+  await expect(reservationDialog).toBeVisible();
+  await expect(reservationDialog.getByRole('heading', { name: 'Start-up' })).toBeVisible();
+  await expect(reservationDialog.getByText('번째로 대기 중')).toBeVisible();
+  await expect(reservationDialog.getByText('01012345678')).toBeVisible();
+
+  await reservationDialog.getByRole('button', { name: '예약 취소하기' }).click();
+  await expect(page.getByRole('button', { name: /Start-up/ })).toHaveCount(0);
 });
 
 test('tavern list card opens detail view', async ({ page }) => {
