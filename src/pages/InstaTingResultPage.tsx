@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-
 import ScratchCard from '@/components/instating/ScratchCard';
 
 const TITLE = '매칭 결과 | 경북대학교 80주년 대동제';

@@ -12,7 +12,7 @@ const HeroSection = () => {
               'linear-gradient(180deg, rgba(255, 67, 67, 0.2) 0%, rgba(255, 255, 255, 0) 100%), linear-gradient(180deg, #FF3EBB 0%, #FF6ECC 48%, #FFB4FE 60.58%, #FF6ECC 78%, #FF465F 100%)',
           }}
         />
-        {/* TODO: Add background texture */}
+        {/* TODO: Add background texture  */}
         {/* <div className="absolute inset-0 overflow-hidden mix-blend-lighten">
           <img
             alt=""
