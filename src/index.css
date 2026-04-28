@@ -18,6 +18,7 @@
   --color-text: #1d2038;
   --color-text-muted: #737373;
   --color-ink: #1a1a1a;
+  --color-gray: #808080;
 
   /* Typography */
   --font-sans:
@@ -38,6 +39,10 @@
   --text-heading1: 1.75rem;
   --text-heading1--line-height: 2.25rem;
   --text-heading1--font-weight: 700;
+
+  --text-subheading: 1.25rem;
+  --text-subheading--line-height: 1.75rem;
+  --text-subheading--font-weight: 600;
 
   --text-heading2: 1.5rem;
   --text-heading2--line-height: 2rem;

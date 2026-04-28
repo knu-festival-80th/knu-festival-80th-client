@@ -5,11 +5,18 @@ import GlassCircleButton from './GlassCircleButton';
 type ContentCardProps = {
   category: string;
   title: string;
+  description?: string;
   imageSrc?: string;
   to: string;
 };
 
-export default function ContentCard({ category, title, imageSrc, to }: ContentCardProps) {
+export default function ContentCard({
+  category,
+  title,
+  description,
+  imageSrc,
+  to,
+}: ContentCardProps) {
   return (
     <Link
       to={to}
@@ -32,7 +39,10 @@ export default function ContentCard({ category, title, imageSrc, to }: ContentCa
 
       <div className="relative flex flex-col gap-1.5">
         <p className="text-body1 font-bold tracking-tight text-text">{category}</p>
-        <p className="text-heading2 font-bold tracking-tight text-text">{title}</p>
+        <p className="text-subheading font-bold tracking-tight text-text whitespace-pre-line">
+          {title}
+        </p>
+        {description && <p className="text-body1 text-gray whitespace-pre-line">{description}</p>}
       </div>
 
       <div className="relative flex justify-end">
