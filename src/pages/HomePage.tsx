@@ -1,30 +1,140 @@
+import { ArrowDown } from 'lucide-react';
+import CountdownTimer from '@/components/home/CountdownTimer';
+import ContentCard from '@/components/home/ContentCard';
+import GlassCircleButton from '@/components/home/GlassCircleButton';
+import SectionBlock from '@/components/home/SectionBlock';
+import TodayLineup from '@/components/home/TodayLineup';
+import type { DayLineup } from '@/types/home';
+
+const MOCK_LINEUP: DayLineup[] = [
+  {
+    day: 20,
+    artists: [
+      { src: 'https://picsum.photos/seed/artist1/312/312', alt: '아티스트 1' },
+      { src: 'https://picsum.photos/seed/artist2/312/312', alt: '아티스트 2' },
+      { src: 'https://picsum.photos/seed/artist3/312/312', alt: '아티스트 3' },
+    ],
+    schedules: [
+      { name: '무대 관객 입장', startTime: '18:00', endTime: '18:30' },
+      { name: '오프닝 공연', startTime: '18:30', endTime: '19:30' },
+      { name: '메인 공연', startTime: '19:30', endTime: '22:00' },
+    ],
+  },
+  {
+    day: 21,
+    artists: [
+      { src: 'https://picsum.photos/seed/artist4/312/312', alt: '아티스트 4' },
+      { src: 'https://picsum.photos/seed/artist5/312/312', alt: '아티스트 5' },
+    ],
+    schedules: [
+      { name: '무대 관객 입장', startTime: '17:00', endTime: '17:30' },
+      { name: '메인 공연', startTime: '18:00', endTime: '22:00' },
+    ],
+  },
+  {
+    day: 22,
+    artists: [{ src: 'https://picsum.photos/seed/artist6/312/312', alt: '아티스트 6' }],
+    schedules: [
+      { name: '무대 관객 입장', startTime: '17:00', endTime: '17:30' },
+      { name: '클로징 공연', startTime: '18:00', endTime: '21:00' },
+    ],
+  },
+];
+
 export default function HomePage() {
   return (
-    <section className="flex min-h-dvh items-center justify-center px-5 py-10">
-      <div className="w-full max-w-[720px]">
-        <p className="m-0 mb-3 text-body2 font-bold text-primary">2026 KNU Festival</p>
-        <h1 className="m-0 text-[clamp(2.25rem,7vw,4.5rem)] font-extrabold leading-[1.08] text-base-deep">
-          경북대학교 80주년 대동제
-        </h1>
-        <p className="mt-6 max-w-[560px] text-body1 text-text-muted">
-          대동제 프론트엔드 개발을 위한 초기 프로젝트 환경입니다. 라우팅, API 레이어, Tailwind CSS
-          스타일 토큰, 테스트 설정을 기준 구조에 맞춰 준비했습니다.
-        </p>
-        <ul className="m-0 mt-7 flex list-none flex-wrap gap-2 p-0" aria-label="프로젝트 기본 구성">
-          <li className="rounded-md border border-border bg-white/72 px-3 py-2 text-body2 text-text shadow-sm">
-            Vite
-          </li>
-          <li className="rounded-md border border-border bg-white/72 px-3 py-2 text-body2 text-text shadow-sm">
-            React
-          </li>
-          <li className="rounded-md border border-border bg-white/72 px-3 py-2 text-body2 text-text shadow-sm">
-            TypeScript
-          </li>
-          <li className="rounded-md border border-border bg-white/72 px-3 py-2 text-body2 text-text shadow-sm">
-            Tailwind CSS
-          </li>
-        </ul>
+    <div className="flex flex-col pb-16">
+      <section
+        className="flex min-h-dvh flex-col pb-10 pt-20"
+        style={{
+          background: 'linear-gradient(160deg, #ff4242 0%, #ffaf55 22%, #ff4242 45%)',
+        }}
+      >
+        <div className="flex flex-1 flex-col justify-end px-5">
+          <h1 className="text-hero text-hero-text">
+            THE
+            <br />
+            GRAND
+            <br />
+            MOMENT
+            <br />
+            80TH
+          </h1>
+          <p className="mt-4 text-body1 font-bold text-hero-text">위대한 순간, 경북대 80주년</p>
+          <p className="mt-1 text-body2 text-hero-text opacity-50">
+            2026 경북대학교 대동제 하푸르나를 함께하세요.
+          </p>
+        </div>
+        <div className="mt-10 flex justify-center">
+          <GlassCircleButton icon={<ArrowDown className="size-6 text-hero-text" />} />
+        </div>
+      </section>
+
+      <div className="mt-16 flex flex-col gap-32">
+        <SectionBlock label="Count Down" title="축제까지 남은 시간">
+          <div className="px-5">
+            <CountdownTimer />
+          </div>
+        </SectionBlock>
+
+        <SectionBlock
+          label="Festival Start"
+          title="대동제의 주요 콘텐츠 확인하기"
+          viewAllTo="/popular"
+        >
+          <div className="px-5">
+            <ContentCard
+              category="Map"
+              title="캠퍼스 지도에서 이벤트 부스와 주막 위치를 확인하기"
+              to="/popular"
+            />
+          </div>
+          <div className="px-5">
+            <ContentCard
+              category="Festival booth"
+              title="원하는 주막에 실시간 대기 등록하기"
+              to="/popular"
+            />
+          </div>
+        </SectionBlock>
+
+        <SectionBlock
+          label="Time Table"
+          title="올해 대동제를 빛내줄 축제 라인업 확인하기"
+          viewAllTo="/timetable"
+        >
+          <TodayLineup data={MOCK_LINEUP} />
+        </SectionBlock>
+
+        <SectionBlock
+          label="Popular"
+          title="주막의 열기를 실시간으로 느껴보기"
+          description={`축제를 즐기는 누구나\n인기 투표할 수 있는 실시간 주막 랭킹`}
+          viewAllTo="/popular"
+        >
+          <div className="px-5">
+            <ContentCard category="인기 주막" title="실시간 주막 랭킹 확인하기" to="/popular" />
+          </div>
+        </SectionBlock>
+
+        <SectionBlock
+          label="Event"
+          title="올해만 진행되는 2026 하푸르나만의 혜택"
+          viewAllTo="/popular"
+        >
+          <div className="px-5">
+            <ContentCard category="Memory Board" title="80주년 롤링페이퍼" to="/popular" />
+          </div>
+
+          <div className="px-5">
+            <ContentCard category="Insta date" title="두근두근 인스타팅" to="/popular" />
+          </div>
+
+          <div className="px-5">
+            <ContentCard category="Photo Booth" title="포토부스" to="/popular" />
+          </div>
+        </SectionBlock>
       </div>
-    </section>
+    </div>
   );
 }

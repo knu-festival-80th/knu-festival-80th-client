@@ -17,10 +17,15 @@
   --color-border: #e5e5e5;
   --color-text: #1d2038;
   --color-text-muted: #737373;
+  --color-hero-text: #1a1a1a;
 
   /* Typography */
   --font-sans:
     'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Segoe UI', system-ui, sans-serif;
+
+  --text-hero: 4.625rem;
+  --text-hero--line-height: 1;
+  --text-hero--font-weight: 800;
 
   --text-countdown: 4.375rem;
   --text-countdown--line-height: 1;
