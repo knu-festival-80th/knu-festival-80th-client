@@ -6,6 +6,7 @@ type SectionBlockProps = {
   title: string;
   description?: string;
   viewAllTo?: string;
+  viewAllLabel?: string;
   children: ReactNode;
 };
 
@@ -14,6 +15,7 @@ export default function SectionBlock({
   title,
   description,
   viewAllTo,
+  viewAllLabel,
   children,
 }: SectionBlockProps) {
   return (
@@ -24,7 +26,7 @@ export default function SectionBlock({
         {description && <p className="mt-1.5 text-body2 text-text-muted">{description}</p>}
         {viewAllTo && (
           <div className="mt-4">
-            <ViewAllButton to={viewAllTo} />
+            <ViewAllButton to={viewAllTo} label={viewAllLabel} />
           </div>
         )}
       </div>

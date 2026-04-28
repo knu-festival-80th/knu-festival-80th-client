@@ -77,11 +77,7 @@ export default function HomePage() {
           </div>
         </SectionBlock>
 
-        <SectionBlock
-          label="Festival Start"
-          title="대동제의 주요 콘텐츠 확인하기"
-          viewAllTo="/popular"
-        >
+        <SectionBlock label="Festival Start" title="대동제의 주요 콘텐츠 확인하기">
           <div className="px-5">
             <ContentCard
               category="Map"
@@ -111,17 +107,14 @@ export default function HomePage() {
           title="주막의 열기를 실시간으로 느껴보기"
           description={`축제를 즐기는 누구나\n인기 투표할 수 있는 실시간 주막 랭킹`}
           viewAllTo="/popular"
+          viewAllLabel="인기 주막 투표하기"
         >
           <div className="px-5">
             <ContentCard category="인기 주막" title="실시간 주막 랭킹 확인하기" to="/popular" />
           </div>
         </SectionBlock>
 
-        <SectionBlock
-          label="Event"
-          title="올해만 진행되는 2026 하푸르나만의 혜택"
-          viewAllTo="/popular"
-        >
+        <SectionBlock label="Event" title="올해만 진행되는 2026 하푸르나만의 혜택">
           <div className="px-5">
             <ContentCard category="Memory Board" title="80주년 롤링페이퍼" to="/popular" />
           </div>
