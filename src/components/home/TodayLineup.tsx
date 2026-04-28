@@ -25,7 +25,7 @@ export default function TodayLineup({ data }: TodayLineupProps) {
     <div className="flex flex-col gap-12 px-5">
       <LineupImageCarousel artists={dayData.artists} />
       <div className="flex items-start gap-7.5">
-        <span className="text-display1 text-base-deep">{dayData.day}</span>
+        <span className="text-display1 text-ink">{dayData.day}</span>
         <div className="flex flex-col py-1.5 gap-5">
           {dayData.schedules.map((entry) => (
             <ScheduleItem

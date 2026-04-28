@@ -38,7 +38,7 @@ export default function CountdownTimer() {
     <div className="flex flex-col">
       {items.map(({ value, unit }) => (
         <div key={unit} className="flex items-baseline tracking-[-0.02em]">
-          <span className="text-countdown text-base-deep">{value}</span>
+          <span className="text-countdown text-ink">{value}</span>
           <span className="text-countdown text-border">{unit}</span>
         </div>
       ))}

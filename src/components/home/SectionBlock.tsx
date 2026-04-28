@@ -19,8 +19,8 @@ export default function SectionBlock({
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col px-5">
-        <p className="text-body1 font-bold text-base-deep">{label}</p>
-        <h2 className="mt-1.5 text-heading3 text-base-deep">{title}</h2>
+        <p className="text-body1 font-bold text-ink">{label}</p>
+        <h2 className="mt-1.5 text-heading3 text-ink">{title}</h2>
         {description && <p className="mt-1.5 text-body2 text-text-muted">{description}</p>}
         {viewAllTo && (
           <div className="mt-4">

@@ -51,7 +51,7 @@ export default function HomePage() {
         }}
       >
         <div className="flex flex-1 flex-col justify-end px-5">
-          <h1 className="text-hero text-hero-text">
+          <h1 className="text-hero text-ink">
             THE
             <br />
             GRAND
@@ -60,17 +60,17 @@ export default function HomePage() {
             <br />
             80TH
           </h1>
-          <p className="mt-4 text-body1 font-bold text-hero-text">위대한 순간, 경북대 80주년</p>
-          <p className="mt-1 text-body2 text-hero-text opacity-50">
+          <p className="mt-4 text-body1 font-bold text-ink">위대한 순간, 경북대 80주년</p>
+          <p className="mt-1 text-body2 text-ink opacity-50">
             2026 경북대학교 대동제 하푸르나를 함께하세요.
           </p>
         </div>
         <div className="mt-10 flex justify-center">
-          <GlassCircleButton icon={<ArrowDown className="size-6 text-hero-text" />} />
+          <GlassCircleButton icon={<ArrowDown className="size-6 text-ink" />} />
         </div>
       </section>
 
-      <div className="mt-16 flex flex-col gap-32">
+      <div className="pt-16 flex flex-col gap-32 bg-background">
         <SectionBlock label="Count Down" title="축제까지 남은 시간">
           <div className="px-5">
             <CountdownTimer />
