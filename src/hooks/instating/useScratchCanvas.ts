@@ -30,8 +30,9 @@ export function useScratchCanvas({ onRevealed }: UseScratchCanvasOptions = {}) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const w = canvas.width;
-    const h = canvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.width / dpr;
+    const h = canvas.height / dpr;
 
     ctx.clearRect(0, 0, w, h);
 
@@ -71,8 +72,11 @@ export function useScratchCanvas({ onRevealed }: UseScratchCanvasOptions = {}) {
 
     const init = () => {
       const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.floor(rect.width);
-      canvas.height = Math.floor(rect.height);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      const ctx = canvas.getContext('2d')!;
+      ctx.scale(dpr, dpr);
       drawOverlay(canvas);
     };
 
