@@ -40,14 +40,18 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      <div className="pt-16 flex flex-col gap-32 bg-background">
-        <SectionBlock label="Count Down" title="축제까지 남은 시간">
+      <div className="pt-16 flex flex-col gap-32 bg-background overflow-x-hidden">
+        <SectionBlock label="Count Down" title="축제까지 남은 시간" direction="left">
           <div className="px-5">
             <CountdownTimer />
           </div>
         </SectionBlock>
 
-        <SectionBlock label="Festival Start" title="대동제의 주요 콘텐츠 확인하기">
+        <SectionBlock
+          label="Festival Start"
+          title="대동제의 주요 콘텐츠 확인하기"
+          direction="right"
+        >
           <div className="px-5">
             <ContentCard
               category="Map"
@@ -68,6 +72,7 @@ export default function HomePage() {
           label="Time Table"
           title="올해 대동제를 빛내줄 축제 라인업 확인하기"
           viewAllTo="/timetable"
+          direction="left"
         >
           <TodayLineup data={MOCK_LINEUP} />
         </SectionBlock>
@@ -78,13 +83,14 @@ export default function HomePage() {
           description={`축제를 즐기는 누구나\n인기 투표할 수 있는 실시간 주막 랭킹`}
           viewAllTo="/popular"
           viewAllLabel="인기 주막 둘러보기"
+          direction="right"
         >
           <div className="px-5">
             <ContentCard category="인기 주막" title="실시간 주막 랭킹 확인하기" to="/popular" />
           </div>
         </SectionBlock>
 
-        <SectionBlock label="Event" title="올해만 진행되는 2026 하푸르나만의 혜택">
+        <SectionBlock label="Event" title="올해만 진행되는 2026 하푸르나만의 혜택" direction="left">
           <div className="px-5">
             <ContentCard
               category="Memory Board"

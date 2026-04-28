@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import ViewAllButton from '@/components/home/ViewAllButton';
 
@@ -7,6 +8,7 @@ type SectionBlockProps = {
   description?: string;
   viewAllTo?: string;
   viewAllLabel?: string;
+  direction?: 'left' | 'right';
   children: ReactNode;
 };
 
@@ -16,10 +18,17 @@ export default function SectionBlock({
   description,
   viewAllTo,
   viewAllLabel,
+  direction = 'left',
   children,
 }: SectionBlockProps) {
   return (
-    <div className="flex flex-col gap-12">
+    <motion.div
+      className="flex flex-col gap-12"
+      initial={{ opacity: 0, x: direction === 'left' ? -40 : 40 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
       <div className="flex flex-col px-5">
         <p className="text-body1 font-bold text-ink">{label}</p>
         <h2 className="mt-1.5 text-heading3 text-ink">{title}</h2>
@@ -33,6 +42,6 @@ export default function SectionBlock({
         )}
       </div>
       {children}
-    </div>
+    </motion.div>
   );
 }
