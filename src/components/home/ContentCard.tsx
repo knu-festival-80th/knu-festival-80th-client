@@ -38,15 +38,15 @@ export default function ContentCard({
       </div>
 
       <div className="relative flex flex-col gap-1.5">
-        <p className="text-body1 font-bold tracking-tight text-text">{category}</p>
-        <p className="text-subheading font-bold tracking-tight text-text whitespace-pre-line">
+        <p className="text-body1 font-bold tracking-tight text-ink">{category}</p>
+        <p className="text-subheading font-bold tracking-tight text-ink whitespace-pre-line">
           {title}
         </p>
         {description && <p className="text-body1 text-gray whitespace-pre-line">{description}</p>}
       </div>
 
       <div className="relative flex justify-end">
-        <GlassCircleButton icon={<ArrowRight className="size-6 text-text" />} />
+        <GlassCircleButton icon={<ArrowRight className="size-6 text-ink" />} />
       </div>
     </Link>
   );
