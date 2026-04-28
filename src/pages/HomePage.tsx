@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 import CountdownTimer from '@/components/home/CountdownTimer';
 import ContentCard from '@/components/home/ContentCard';
@@ -65,9 +66,13 @@ export default function HomePage() {
             2026 경북대학교 대동제 하푸르나를 함께하세요.
           </p>
         </div>
-        <div className="mt-10 flex justify-center">
+        <motion.div
+          className="mt-10 flex justify-center"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+        >
           <GlassCircleButton icon={<ArrowDown className="size-6 text-ink" />} />
-        </div>
+        </motion.div>
       </section>
 
       <div className="pt-16 flex flex-col gap-32 bg-background">
