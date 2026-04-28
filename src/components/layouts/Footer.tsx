@@ -1,14 +1,12 @@
 import { Link } from 'react-router-dom';
 import { FOOTER_LINKS, NAV_LINKS } from '../../constants/footer';
+import knu80thLogo from '@/assets/logo/knu80th_logo_white.png';
+import designLogo from '@/assets/logo/designdepartment_logo.svg';
 
 export const Footer = () => {
   return (
     <footer className="flex w-full max-w-[80rem] flex-col items-start gap-12 bg-[#1A1A1A] px-5 pt-16 pb-31">
-      <img
-        src="/figma-assets/knu80th_logo_white.png"
-        alt="KNU 80주년 대동제"
-        className="h-4.5 w-47.5 object-contain"
-      />
+      <img src={knu80thLogo} alt="KNU 80주년 대동제" className="h-4.5 w-47.5 object-contain" />
       <nav className="flex w-full flex-col gap-5">
         {NAV_LINKS.map(({ label, to }) => (
           <Link
@@ -39,11 +37,7 @@ export const Footer = () => {
           <span className="font-wanted-sans text-body2 font-normal leading-none text-white">
             멋쟁이 사자처럼 X 경북대학교 디자인학과
           </span>
-          <img
-            src="/figma-assets/designdepartment_logo.svg"
-            alt="경북대학교 디자인학과 로고"
-            className="h-5 w-5"
-          />
+          <img src={designLogo} alt="경북대학교 디자인학과 로고" className="h-5 w-5" />
         </div>
       </div>
     </footer>

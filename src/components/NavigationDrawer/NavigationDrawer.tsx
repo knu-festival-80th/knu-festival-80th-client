@@ -5,6 +5,7 @@ import type { NavigationDrawerProps } from '../../types/navigationDrawer';
 import { useDrawerState } from '../../hooks/useDrawerState';
 import { NavSectionItem } from './NavSectionItem';
 import { NavLeafItem } from './NavLeafItem';
+import knu80thLogo from '@/assets/logo/knu80th_logo_dark.png';
 
 export const NavigationDrawer = ({ isOpen, onClose }: NavigationDrawerProps) => {
   const { openSections, activeSection, toggleSection } = useDrawerState(FIRST_SECTION_ID);
@@ -48,11 +49,7 @@ export const NavigationDrawer = ({ isOpen, onClose }: NavigationDrawerProps) => 
           className="flex shrink-0 items-center justify-between px-5"
           style={{ paddingTop: '3.125rem', paddingBottom: '0.75rem' }}
         >
-          <img
-            src="/figma-assets/knu80th_logo_dark.png"
-            alt="KNU 80주년 대동제"
-            className="h-4.5 w-47.5 object-contain"
-          />
+          <img src={knu80thLogo} alt="KNU 80주년 대동제" className="h-4.5 w-47.5 object-contain" />
           <button type="button" aria-label="메뉴 닫기" className="text-text" onClick={onClose}>
             <LuX size={24} />
           </button>
