@@ -1,4 +1,4 @@
-import type { NavItem, NavSection } from '../types/navigationDrawer';
+import type { NavItem, NavSection } from '@/types/navigationDrawer';
 
 // TODO: 페이지 확정 후 각 경로 연결
 export const NAV_ITEMS: NavItem[] = [

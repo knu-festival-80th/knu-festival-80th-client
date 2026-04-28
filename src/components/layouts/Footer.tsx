@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FOOTER_LINKS, NAV_LINKS } from '../../constants/footer';
+import { FOOTER_LINKS, NAV_LINKS } from '@/constants/footer';
 import knu80thLogo from '@/assets/logo/knu80th_logo_white.png';
 import designLogo from '@/assets/logo/designdepartment_logo.svg';
 

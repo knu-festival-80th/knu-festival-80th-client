@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import type { NavLeaf } from '../../types/navigationDrawer';
+import type { NavLeaf } from '@/types/navigationDrawer';
 
 export interface NavLeafItemProps {
   item: NavLeaf;

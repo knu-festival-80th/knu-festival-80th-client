@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { LuChevronDown } from 'react-icons/lu';
-import type { NavSection } from '../../types/navigationDrawer';
+import type { NavSection } from '@/types/navigationDrawer';
 
 export interface NavSectionItemProps {
   item: NavSection;
