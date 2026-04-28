@@ -90,6 +90,7 @@ export function useScratchCanvas({ onRevealed }: UseScratchCanvasOptions = {}) {
       ro.disconnect();
       canvas.removeEventListener('touchstart', blockScroll);
       canvas.removeEventListener('touchmove', blockScroll);
+      cancelAnimationFrame(rafRef.current);
     };
   }, [drawOverlay]);
 
