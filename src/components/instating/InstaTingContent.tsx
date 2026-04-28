@@ -10,21 +10,21 @@ const wantedSans = { fontFamily: '"Wanted Sans", sans-serif' };
 
 const InstaTingContent = () => {
   return (
-    <div className="flex w-full flex-col bg-white">
+    <section className="flex w-full flex-col bg-white">
       {/* Process section */}
       <div className="flex flex-col items-center gap-12 px-5 py-16">
         {/* Section header */}
         <div className="flex w-full flex-col gap-4 pt-8">
           <div className="flex flex-col gap-2.5">
-            <p
+            <span
               className="text-[16px] font-bold leading-none tracking-[-0.032px] text-black"
               style={wantedSans}
             >
               Process
-            </p>
-            <p className="text-[20px] leading-none tracking-[-0.4px] text-black" style={wantedSans}>
+            </span>
+            <h2 className="text-[20px] leading-none tracking-[-0.4px] text-black" style={wantedSans}>
               축제로 시작된 두근두근 인연
-            </p>
+            </h2>
             <p
               className="text-[16px] leading-none tracking-[-0.032px] text-[#808080]"
               style={wantedSans}
@@ -38,24 +38,32 @@ const InstaTingContent = () => {
         </div>
 
         {/* Step cards */}
-        <div className="flex flex-col gap-5">
-          <ProcessCard
-            imgSrc={step_1}
-            imgAlt="1단계 매칭 신청하기 - 프로필을 작성하고 매칭을 신청합니다"
-          />
-          <ProcessCard
-            imgSrc={step_2}
-            imgAlt="2단계 지정 시간 공개 기다리기 - Time Drop으로 정해진 시간에 결과가 공개됩니다"
-          />
-          <ProcessCard
-            imgSrc={step_3}
-            imgAlt="3단계 매칭 결과 확인하기 - 스크래치 UI로 설렘을 느끼며 결과를 확인합니다"
-          />
-          <ProcessCard
-            imgSrc={step_4}
-            imgAlt="4단계 인스타그램으로 연결하기 - 딥링크로 바로 메시지를 보낼 수 있습니다"
-          />
-        </div>
+        <ol className="flex flex-col gap-5">
+          <li>
+            <ProcessCard
+              imgSrc={step_1}
+              imgAlt="1단계 매칭 신청하기 - 프로필을 작성하고 매칭을 신청합니다"
+            />
+          </li>
+          <li>
+            <ProcessCard
+              imgSrc={step_2}
+              imgAlt="2단계 지정 시간 공개 기다리기 - Time Drop으로 정해진 시간에 결과가 공개됩니다"
+            />
+          </li>
+          <li>
+            <ProcessCard
+              imgSrc={step_3}
+              imgAlt="3단계 매칭 결과 확인하기 - 스크래치 UI로 설렘을 느끼며 결과를 확인합니다"
+            />
+          </li>
+          <li>
+            <ProcessCard
+              imgSrc={step_4}
+              imgAlt="4단계 인스타그램으로 연결하기 - 딥링크로 바로 메시지를 보낼 수 있습니다"
+            />
+          </li>
+        </ol>
 
         {/* CTA banner */}
         <div className="flex w-full flex-col gap-5 px-4 py-8">
@@ -81,7 +89,7 @@ const InstaTingContent = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
