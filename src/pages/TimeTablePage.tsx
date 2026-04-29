@@ -17,7 +17,7 @@ export default function TimeTablePage() {
 
   return (
     <div className="bg-surface flex flex-col min-h-dvh pb-16">
-      <div className="px-5 pt-16 pb-10">
+      <div className="px-5 pt-5 pb-10">
         <h1 className="text-body1 font-bold text-ink">Time Table</h1>
         <div className="mt-3">
           <DateTabBar days={DAYS} selectedDay={selectedDay} onSelect={setSelectedDay} />
