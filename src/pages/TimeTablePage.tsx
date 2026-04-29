@@ -23,7 +23,11 @@ export default function TimeTablePage() {
           <DateTabBar days={DAYS} selectedDay={selectedDay} onSelect={setSelectedDay} />
         </div>
       </div>
-      <DayScheduleBlock data={dayData} description={DAY_DESCRIPTIONS[selectedDay]} />
+      <DayScheduleBlock
+        key={selectedDay}
+        data={dayData}
+        description={DAY_DESCRIPTIONS[selectedDay]}
+      />
     </div>
   );
 }
