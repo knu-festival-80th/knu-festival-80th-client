@@ -10,9 +10,9 @@ const wantedSans = { fontFamily: '"Wanted Sans", sans-serif' };
 
 const InstaTingContent = () => {
   return (
-    <section className="flex w-full flex-col bg-white">
+    <section className="w-full bg-white">
       {/* Process section */}
-      <div className="flex flex-col items-center gap-12 px-5 py-16">
+      <div className="mx-auto flex w-full max-w-[375px] flex-col items-center gap-12 px-5 py-16">
         {/* Section header */}
         <div className="flex w-full flex-col gap-4 pt-8">
           <div className="flex flex-col gap-2.5">
@@ -22,7 +22,10 @@ const InstaTingContent = () => {
             >
               Process
             </span>
-            <h2 className="text-[20px] leading-none tracking-[-0.4px] text-black" style={wantedSans}>
+            <h2
+              className="text-[20px] leading-none tracking-[-0.4px] text-black"
+              style={wantedSans}
+            >
               축제로 시작된 두근두근 인연
             </h2>
             <p
