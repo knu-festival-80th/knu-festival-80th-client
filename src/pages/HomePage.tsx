@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col pb-16">
       <section
-        className="flex min-h-dvh flex-col pb-10 pt-20"
+        className="flex min-h-dvh flex-col pb-25 pt-20"
         style={{
           background: 'linear-gradient(160deg, #ff4242 0%, #ffaf55 22%, #ff4242 45%)',
         }}

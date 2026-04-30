@@ -1,5 +1,5 @@
 import type { DayLineup } from '@/types/home';
-import { toMinutes } from '@/utils/time';
+import { isScheduleActive } from '@/utils/time';
 import LineupImageCarousel from './LineupImageCarousel';
 import ScheduleItem from './ScheduleItem';
 
@@ -12,14 +12,11 @@ type TodayLineupProps = {
 
 export default function TodayLineup({ data }: TodayLineupProps) {
   const now = new Date();
-  const isFestivalMonth = now.getMonth() + 1 === FESTIVAL_MONTH;
   const today = now.getDate();
-  const isFestivalDay = isFestivalMonth && FESTIVAL_DAYS.includes(today);
+  const isFestivalDay = now.getMonth() + 1 === FESTIVAL_MONTH && FESTIVAL_DAYS.includes(today);
   const activeDay = isFestivalDay ? today : 20;
   const dayData = data.find((d) => d.day === activeDay) ?? data[0];
   if (!dayData) return null;
-
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   return (
     <div className="flex flex-col gap-12 px-5">
@@ -32,10 +29,7 @@ export default function TodayLineup({ data }: TodayLineupProps) {
               key={entry.name}
               entry={{
                 ...entry,
-                isActive:
-                  isFestivalDay &&
-                  currentMinutes >= toMinutes(entry.startTime) &&
-                  currentMinutes < toMinutes(entry.endTime),
+                isActive: isScheduleActive(entry.startTime, entry.endTime),
               }}
             />
           ))}
