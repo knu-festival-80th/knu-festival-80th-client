@@ -35,3 +35,7 @@ blob-report
 
 # Coverage
 coverage
+
+# Claude Code
+CLAUDE.md
+.claude

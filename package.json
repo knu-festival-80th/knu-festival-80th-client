@@ -28,6 +28,7 @@
     "axios": "^1.13.6",
     "axios-retry": "^4.5.0",
     "framer-motion": "^12.34.0",
+    "lucide-react": "^1.11.0",
     "posthog-js": "^1.360.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
