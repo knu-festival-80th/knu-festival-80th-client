@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LuMenu } from 'react-icons/lu';
-import { NavigationDrawer } from '@/components/NavigationDrawer/NavigationDrawer';
+import { NavigationDrawer } from '@/components/navigationDrawer/NavigationDrawer';
 import knu80thLogo from '@/assets/logo/knu80th_logo_dark.png';
 
 export const Header = () => {
