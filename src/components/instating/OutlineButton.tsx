@@ -4,8 +4,6 @@ interface OutlineButtonProps {
   dark?: boolean;
 }
 
-const wantedSans = { fontFamily: '"Wanted Sans", sans-serif' };
-
 const OutlineButton = ({ label, icon, dark = false }: OutlineButtonProps) => {
   return (
     <button
@@ -14,9 +12,7 @@ const OutlineButton = ({ label, icon, dark = false }: OutlineButtonProps) => {
         dark ? 'border-white bg-[#1a1a1a] text-white' : 'border-black bg-transparent text-[#111]'
       }`}
     >
-      <span className="text-sm leading-relaxed whitespace-nowrap" style={wantedSans}>
-        {label}
-      </span>
+      <span className="font-wanted-sans text-sm leading-relaxed whitespace-nowrap">{label}</span>
       {icon && <img alt="" className="size-6" src={icon} />}
     </button>
   );

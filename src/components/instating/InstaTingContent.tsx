@@ -6,8 +6,6 @@ import step_4 from '@/assets/instating/processCard/step_4.svg';
 import forwardArrowIcon from '@/assets/instating/arrowIcon/forwardArrowIcon.svg';
 import OutlineButton from './OutlineButton';
 
-const wantedSans = { fontFamily: '"Wanted Sans", sans-serif' };
-
 const InstaTingContent = () => {
   return (
     <section className="w-full bg-white">
@@ -16,22 +14,13 @@ const InstaTingContent = () => {
         {/* Section header */}
         <div className="flex w-full flex-col gap-4 pt-8">
           <div className="flex flex-col gap-2.5">
-            <span
-              className="text-[16px] font-bold leading-none tracking-[-0.032px] text-black"
-              style={wantedSans}
-            >
+            <span className="font-wanted-sans text-[16px] font-bold leading-none tracking-[-0.032px] text-black">
               Process
             </span>
-            <h2
-              className="text-[20px] leading-none tracking-[-0.4px] text-black"
-              style={wantedSans}
-            >
+            <h2 className="font-wanted-sans text-[20px] leading-none tracking-[-0.4px] text-black">
               축제로 시작된 두근두근 인연
             </h2>
-            <p
-              className="text-[16px] leading-none tracking-[-0.032px] text-[#808080]"
-              style={wantedSans}
-            >
+            <p className="font-wanted-sans text-[16px] leading-none tracking-[-0.032px] text-[#808080]">
               올해의 새로운 인연과 만나보세요!
             </p>
           </div>
@@ -71,16 +60,10 @@ const InstaTingContent = () => {
         {/* CTA banner */}
         <div className="flex w-full flex-col gap-5 px-4 py-8">
           <div className="flex w-full flex-col gap-2.5">
-            <p
-              className="text-[20px] font-bold leading-[1.4] tracking-[-0.04px] text-black"
-              style={wantedSans}
-            >
+            <p className="font-wanted-sans text-[20px] font-bold leading-[1.4] tracking-[-0.04px] text-black">
               지금 바로 인연을 찾아보세요
             </p>
-            <p
-              className="text-[16px] leading-none tracking-[-0.032px] text-[#808080]"
-              style={wantedSans}
-            >
+            <p className="font-wanted-sans text-[16px] leading-none tracking-[-0.032px] text-[#808080]">
               대동제에서 만난 사람들과 더 깊은 연결을
               <br />
               만들어보세요
