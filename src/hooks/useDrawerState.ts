@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
-export const useDrawerState = (initialActiveSection: string) => {
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set([initialActiveSection]));
+export const useDrawerState = (initialOpenSections: string[]) => {
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set(initialOpenSections));
+  const initialActiveSection = initialOpenSections[0] ?? '';
   const [activeSection, setActiveSection] = useState<string | null>(initialActiveSection);
 
   const toggleSection = (id: string) => {
