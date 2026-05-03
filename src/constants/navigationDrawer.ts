@@ -8,8 +8,6 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       { label: '경북대학교 80주년', to: '/' },
       { label: '80주년 롤링페이퍼', to: '/' },
-      { label: '호반우스타그램', to: '/' },
-      { label: '축제의 스탬프 투어', to: '/' },
     ],
   },
   {
@@ -30,10 +28,20 @@ export const NAV_ITEMS: NavItem[] = [
       { label: '예약 조회', to: '/' },
     ],
   },
-  { id: 'goods', label: '축제 굿즈', to: '/' },
-  { id: 'faq', label: '자주 묻는 질문', to: '/' },
+  {
+    id: 'event',
+    label: '이벤트',
+    children: [
+      { label: '호반우스타그램', to: '/' },
+      { label: '축제의 스탬프 투어', to: '/' },
+    ],
+  },
 ];
 
 export const FIRST_SECTION_ID = (
   NAV_ITEMS.find((item): item is NavSection => 'children' in item) ?? { id: '' }
 ).id;
+
+export const ALL_SECTION_IDS = NAV_ITEMS.filter(
+  (item): item is NavSection => 'children' in item,
+).map((item) => item.id);

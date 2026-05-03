@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { LuX } from 'react-icons/lu';
-import { FIRST_SECTION_ID, NAV_ITEMS } from '@/constants/navigationDrawer';
+import { ALL_SECTION_IDS, NAV_ITEMS } from '@/constants/navigationDrawer';
 import type { NavigationDrawerProps } from '@/types/navigationDrawer';
 import { useDrawerState } from '@/hooks/useDrawerState';
 import { NavSectionItem } from './NavSectionItem';
@@ -8,7 +8,7 @@ import { NavLeafItem } from './NavLeafItem';
 import knu80thLogo from '@/assets/logo/knu80th_logo_dark.png';
 
 export const NavigationDrawer = ({ isOpen, onClose }: NavigationDrawerProps) => {
-  const { openSections, activeSection, toggleSection } = useDrawerState(FIRST_SECTION_ID);
+  const { openSections, activeSection, toggleSection } = useDrawerState(ALL_SECTION_IDS);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
