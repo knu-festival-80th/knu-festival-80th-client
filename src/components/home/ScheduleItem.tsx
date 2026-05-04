@@ -5,15 +5,15 @@ type ScheduleItemProps = {
 };
 
 export default function ScheduleItem({ entry }: ScheduleItemProps) {
-  const colorClass = entry.isActive ? 'text-primary' : 'text-text-muted';
+  const colorClass = entry.isActive ? 'text-sub-red' : 'text-gray';
 
   return (
-    <div className={`flex w-[235px] shrink-0 h-9.5 items-start justify-between ${colorClass}`}>
-      <span className="text-body2">{entry.name}</span>
-      <span className="flex flex-col text-right text-body2 font-bold">
-        <span className="pr-3">{entry.startTime}</span>
-        <span>~ {entry.endTime}</span>
-      </span>
+    <div className={`flex items-start gap-3 ml-10 ${colorClass}`}>
+      <div className="flex w-[60px] shrink-0 flex-col text-body2 font-bold">
+        <span>{entry.startTime} ~ </span>
+        <span>{entry.endTime}</span>
+      </div>
+      <span className="flex-1 text-body2">{entry.name}</span>
     </div>
   );
 }

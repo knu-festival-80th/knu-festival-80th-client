@@ -14,7 +14,7 @@ export default function TodayLineup({ data }: TodayLineupProps) {
   const now = new Date();
   const today = now.getDate();
   const isFestivalDay = now.getMonth() + 1 === FESTIVAL_MONTH && FESTIVAL_DAYS.includes(today);
-  const activeDay = isFestivalDay ? today : 20;
+  const activeDay = isFestivalDay ? today : 21;
   const dayData = data.find((d) => d.day === activeDay) ?? data[0];
   if (!dayData) return null;
 
@@ -22,8 +22,8 @@ export default function TodayLineup({ data }: TodayLineupProps) {
     <div className="flex flex-col gap-12 px-5">
       <LineupImageCarousel artists={dayData.artists} />
       <div className="flex items-start gap-7.5">
-        <span className="text-display1 text-ink">{dayData.day}</span>
-        <div className="flex flex-col py-1.5 gap-5">
+        <span className="text-display2 text-ink">{dayData.day}</span>
+        <div className="flex flex-1 flex-col gap-5 py-1.5">
           {dayData.schedules.map((entry) => (
             <ScheduleItem
               key={entry.name}
