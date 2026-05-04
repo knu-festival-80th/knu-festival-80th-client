@@ -23,7 +23,7 @@ export const MainHeader = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-transparent">
+      <header className="fixed top-0 z-50 w-full bg-transparent">
         <div className="mx-auto flex h-16 w-full max-w-93.75 items-center justify-between px-5">
           <div ref={langRef} className="relative">
             <button
