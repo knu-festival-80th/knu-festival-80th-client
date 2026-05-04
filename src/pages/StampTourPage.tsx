@@ -1,4 +1,5 @@
 import PageHero from '@/components/common/PageHero';
+import StampTourContext from '@/components/stampTour/StampTourContext';
 
 const StampTourPage = () => {
   return (
@@ -6,12 +7,11 @@ const StampTourPage = () => {
       <PageHero
         title={
           <>
-            축제의
-            <br />
-            스탬프 투어
+            대동제 <br /> 스탬프 투어
           </>
         }
       />
+      <StampTourContext />
     </div>
   );
 };
