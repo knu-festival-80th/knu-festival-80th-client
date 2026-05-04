@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 import heroBg from '@/assets/home/hero-bg.png';
@@ -19,6 +20,8 @@ import TodayLineup from '@/components/home/TodayLineup';
 import { MOCK_LINEUP } from '@/mocks/home';
 
 export default function HomePage() {
+  const countdownRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="flex flex-col pb-16">
       <section className="relative flex min-h-dvh flex-col pb-25 pt-20">
@@ -48,7 +51,7 @@ export default function HomePage() {
             80TH
           </h1>
           <p className="mt-4 text-body1 font-bold text-ink">위대한 순간, 경북대 80주년</p>
-          <p className="mt-1 text-body2 text-ink opacity-50">
+          <p className="mt-1 text-body2 text-ink opacity-60">
             2026 경북대학교 대동제 하푸르나를 함께하세요.
           </p>
         </div>
@@ -57,16 +60,21 @@ export default function HomePage() {
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <GlassCircleButton icon={<ArrowDown className="size-6 text-ink" />} />
+          <GlassCircleButton
+            icon={<ArrowDown className="size-6 text-ink" />}
+            onClick={() => countdownRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          />
         </motion.div>
       </section>
 
       <div className="pt-16 flex flex-col gap-32 bg-background overflow-x-hidden">
-        <SectionBlock label="Count Down" title="축제까지 남은 시간" direction="left">
-          <div className="px-5">
-            <CountdownTimer />
-          </div>
-        </SectionBlock>
+        <div ref={countdownRef}>
+          <SectionBlock label="Count Down" title="축제까지 남은 시간" direction="left">
+            <div className="px-5">
+              <CountdownTimer />
+            </div>
+          </SectionBlock>
+        </div>
 
         <SectionBlock
           label="Festival Start"
