@@ -6,6 +6,7 @@ import GlassCircleButton from '@/components/home/GlassCircleButton';
 import SectionBlock from '@/components/home/SectionBlock';
 import TodayLineup from '@/components/home/TodayLineup';
 import { FaqAccordion } from '@/components/common/FaqAccordion';
+import { ContactSection } from '@/components/common/ContactSection';
 import { MOCK_LINEUP } from '@/mocks/home';
 import { MOCK_FAQ } from '@/mocks/faq';
 
@@ -132,6 +133,7 @@ export default function HomePage() {
         </SectionBlock>
 
         <FaqAccordion items={MOCK_FAQ} />
+        <ContactSection />
       </div>
     </div>
   );
