@@ -1,30 +1,18 @@
-export type ApiResult = 'SUCCESS' | 'FAIL';
+export interface ApiErrorBody {
+  code: string;
+  message: string;
+}
 
 export interface ApiResponse<T> {
-  result: ApiResult;
-  data: T;
-  code?: string;
-  message?: string;
-}
-
-export interface BackendErrorPayload {
-  state?: number;
-  code?: string;
-  message?: string;
-}
-
-export interface BackendErrorEnvelope {
-  error?: BackendErrorPayload;
-  code?: string;
-  message?: string;
-  result?: ApiResult;
+  success: boolean;
+  data: T | null;
+  error: ApiErrorBody | null;
 }
 
 export interface ApiErrorInfo {
   status: number;
   code?: string;
   message: string;
-  result?: ApiResult;
 }
 
 export interface CursorPaginationParams {

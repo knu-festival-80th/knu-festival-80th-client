@@ -4,8 +4,17 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 
+import { setUnauthorizedHandler } from '@/apis';
 import App from './App.tsx';
 import AppProviders from './providers/AppProviders.tsx';
+import { useAuthStore } from '@/stores/authStore.ts';
+
+setUnauthorizedHandler(() => {
+  useAuthStore.getState().clearSession();
+  if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin/login')) {
+    window.location.assign('/admin/login');
+  }
+});
 
 const isProd = import.meta.env.MODE === 'production';
 
