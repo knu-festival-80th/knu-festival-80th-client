@@ -1,8 +1,3 @@
-// 모든 path 는 root(/) 기준으로 작성한다.
-// 환경별 host/prefix 는 axios baseURL(=VITE_API_BASE_URL)이 결정한다.
-// - dev:  http://localhost:8080
-// - prod: https://chcse.knu.ac.kr/festival/api  (학교 ingress 가 /festival/api 를 strip 후 백엔드 root 로 전달)
-
 export const ENDPOINTS = {
   health: '/health',
 
@@ -11,7 +6,6 @@ export const ENDPOINTS = {
     logout: '/auth/logout',
   },
 
-  // 공개 API (인증 불필요)
   booths: {
     list: '/booths',
     detail: (boothId: number) => `/booths/${boothId}`,
@@ -24,7 +18,6 @@ export const ENDPOINTS = {
     detail: (waitingId: number) => `/waitings/${waitingId}`,
   },
 
-  // 관리자 API (세션 쿠키 필요)
   admin: {
     booths: '/admin/booths',
     boothById: (boothId: number) => `/admin/booths/${boothId}`,

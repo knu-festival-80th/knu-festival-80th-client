@@ -1,7 +1,6 @@
-import axios, { AxiosHeaders } from 'axios';
+import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
-import { clearAccessToken, getAccessToken } from './auth';
 import { toApiClientError } from './error';
 
 const FALLBACK_API_BASE_URL = 'http://localhost:8080';
@@ -34,26 +33,12 @@ export function setUnauthorizedHandler(handler: ((status: number) => void) | nul
   unauthorizedHandler = handler;
 }
 
-http.interceptors.request.use((config) => {
-  const headers = AxiosHeaders.from(config.headers);
-
-  const accessToken = getAccessToken();
-  if (accessToken) {
-    headers.set('Authorization', `Bearer ${accessToken}`);
-  }
-
-  config.headers = headers;
-
-  return config;
-});
-
 http.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
     const parsedError = toApiClientError(error);
 
     if (parsedError.status === 401) {
-      clearAccessToken();
       unauthorizedHandler?.(parsedError.status);
     }
 

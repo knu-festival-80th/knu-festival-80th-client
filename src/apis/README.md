@@ -17,7 +17,6 @@
 
 ```txt
 src/apis
-├─ auth.ts              # localStorage Bearer 토큰 유틸 (현재 미사용, 호환용)
 ├─ http.ts              # axios 공통 인스턴스/인터셉터 (withCredentials)
 ├─ endpoints.ts         # API 경로 상수 (auth / booths / waitings / admin)
 ├─ types.ts             # 공통 응답/에러 타입
@@ -31,7 +30,6 @@ src/apis
 
 - 관리자 인증은 **세션 쿠키(`JSESSIONID`)** 기반.
 - axios 인스턴스에 `withCredentials: true` — 브라우저가 자동으로 쿠키 보관·전송.
-- `apis/auth.ts` 의 localStorage Bearer 토큰 유틸은 **현재 사용하지 않는다** (이전 JWT 흐름 잔재).
 
 ## Response Handling
 
@@ -39,7 +37,7 @@ src/apis
 - `unwrapApiResponse(payload)` → 성공 시 `data` 반환, 실패 시 `ApiClientError` throw.
 - `unwrapVoidApiResponse(payload)` → 응답 본문이 없는 mutation 검사 (호출/입장 처리 등).
 - `ApiClientError.code` 로 서버 에러 코드(`B001` 등) 분기 가능.
-- 401 응답은 axios interceptor 가 토큰 정리 + `setUnauthorizedHandler` 콜백을 호출 (현재 `/admin/login` redirect 등록).
+- 401 응답은 axios interceptor 가 `setUnauthorizedHandler` 콜백을 호출 (현재 `/admin/login` redirect 등록).
 
 ## API 그룹
 
