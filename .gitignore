@@ -37,7 +37,7 @@ blob-report
 coverage
 
 # Lighthouse reports
-lighthouse-reports
+.lighthouseci
 
 # Claude Code
 CLAUDE.md
