@@ -24,6 +24,7 @@ import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
+import StampTourPage from './pages/StampTourPage';
 
 export default function App() {
   return (
@@ -69,6 +70,7 @@ export default function App() {
         <Route element={<DefaultLayout />}>
           <Route path="/timetable" element={<TimeTablePage />} />
           <Route path="/goods" element={<GoodsPage />} />
+          <Route path="/stamptour" element={<StampTourPage />} />
           <Route path="/congrat-video" element={<CongratVideoPage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
