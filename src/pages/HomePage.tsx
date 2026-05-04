@@ -57,7 +57,7 @@ export default function HomePage() {
               category="Map"
               title={`캠퍼스 지도에서\n 이벤트 부스와 주막 위치를 확인하기`}
               imageSrc="https://picsum.photos/200/300"
-              to="/popular"
+              to="/"
             />
           </div>
           <div className="px-5">
@@ -65,7 +65,7 @@ export default function HomePage() {
               category="Festival booth"
               title="원하는 주막에 실시간 대기 등록하기"
               imageSrc="https://picsum.photos/200/300"
-              to="/popular"
+              to="/"
             />
           </div>
         </SectionBlock>
@@ -83,7 +83,7 @@ export default function HomePage() {
           label="Popular"
           title="주막의 열기를 실시간으로 느껴보기"
           description={`축제를 즐기는 누구나\n인기 투표할 수 있는 실시간 주막 랭킹`}
-          viewAllTo="/popular"
+          viewAllTo="/"
           viewAllLabel="인기 주막 둘러보기"
           direction="right"
         >
@@ -92,7 +92,7 @@ export default function HomePage() {
               category="인기 주막"
               title="실시간 주막 랭킹 확인하기"
               imageSrc="https://picsum.photos/200/300"
-              to="/popular"
+              to="/"
             />
           </div>
         </SectionBlock>
@@ -104,7 +104,7 @@ export default function HomePage() {
               title="80주년 롤링페이퍼"
               description={`수천 명의 축제 참여자들과 함께\n 추억 기록하기`}
               imageSrc="https://picsum.photos/200/300"
-              to="/popular"
+              to="/"
             />
           </div>
 
@@ -114,7 +114,7 @@ export default function HomePage() {
               title="두근두근 인스타팅"
               description="축제에서 만날 특별한 사람 매칭하기"
               imageSrc="https://picsum.photos/200/300"
-              to="/popular"
+              to="/"
             />
           </div>
 
@@ -124,7 +124,7 @@ export default function HomePage() {
               title="포토부스"
               description="80주년 카메라 필터로 특별한 추억 만들기"
               imageSrc="https://picsum.photos/200/300"
-              to="/popular"
+              to="/"
             />
           </div>
         </SectionBlock>
