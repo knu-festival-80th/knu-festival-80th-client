@@ -1,5 +1,16 @@
 import { motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
+import heroBg from '@/assets/home/hero-bg.png';
+import cardBg1 from '@/assets/home/card-bg-1.png';
+import cardBg2 from '@/assets/home/card-bg-2.png';
+import cardBg3 from '@/assets/home/card-bg-3.png';
+import illustStemp from '@/assets/home/illust-stemp.png';
+import illustGoods from '@/assets/home/illust-goods.png';
+import illustMap from '@/assets/home/illust-map.png';
+import illustBooth from '@/assets/home/illust-booth.png';
+import illustRolling from '@/assets/home/illust-rolling.png';
+import illustInstaing from '@/assets/home/illust-instaing.png';
+import illustPhotobooth from '@/assets/home/illust-photobooth.png';
 import CountdownTimer from '@/components/home/CountdownTimer';
 import ContentCard from '@/components/home/ContentCard';
 import GlassCircleButton from '@/components/home/GlassCircleButton';
@@ -10,13 +21,23 @@ import { MOCK_LINEUP } from '@/mocks/home';
 export default function HomePage() {
   return (
     <div className="flex flex-col pb-16">
-      <section
-        className="flex min-h-dvh flex-col pb-25 pt-20"
-        style={{
-          background: 'linear-gradient(160deg, #ff4242 0%, #ffaf55 22%, #ff4242 45%)',
-        }}
-      >
-        <div className="flex flex-1 flex-col justify-end px-5">
+      <section className="relative flex min-h-dvh flex-col pb-25 pt-20">
+        <div aria-hidden className="absolute inset-0 pointer-events-none">
+          <img
+            src={heroBg}
+            alt=""
+            className="absolute inset-0 size-full max-w-none object-bottom"
+          />
+          <div
+            className="absolute inset-0 mix-blend-lighten"
+            style={{
+              backgroundImage:
+                'linear-gradient(180deg, #ff4242 0%, #ffaf55 22.115%, #ff4242 44.712%, #ff4242 100%)',
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-transparent mix-blend-soft-light" />
+        </div>
+        <div className="relative flex flex-1 flex-col justify-end px-5">
           <h1 className="text-hero text-ink">
             THE
             <br />
@@ -32,7 +53,7 @@ export default function HomePage() {
           </p>
         </div>
         <motion.div
-          className="mt-10 flex justify-center"
+          className="relative mt-10 flex justify-center"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
         >
@@ -54,17 +75,19 @@ export default function HomePage() {
         >
           <div className="px-5">
             <ContentCard
-              category="Map"
-              title={`캠퍼스 지도에서\n 이벤트 부스와 주막 위치를 확인하기`}
-              imageSrc="https://picsum.photos/200/300"
+              category="Stemp"
+              title={`부스를 방문하고 스탬프를 모아\n상품을 응모하세요`}
+              imageSrc={cardBg1}
+              illustrationSrc={illustStemp}
               to="/"
             />
           </div>
           <div className="px-5">
             <ContentCard
-              category="Festival booth"
-              title="원하는 주막에 실시간 대기 등록하기"
-              imageSrc="https://picsum.photos/200/300"
+              category="Goods"
+              title={`2026 대동제만의\n특별한 굿즈를 만나보세요`}
+              imageSrc={cardBg1}
+              illustrationSrc={illustGoods}
               to="/"
             />
           </div>
@@ -72,7 +95,7 @@ export default function HomePage() {
 
         <SectionBlock
           label="Time Table"
-          title="올해 대동제를 빛내줄 축제 라인업 확인하기"
+          title="올해 대동제를 빛내줄 축제 공연"
           viewAllTo="/timetable"
           direction="left"
         >
@@ -80,30 +103,38 @@ export default function HomePage() {
         </SectionBlock>
 
         <SectionBlock
-          label="Popular"
-          title="주막의 열기를 실시간으로 느껴보기"
-          description={`축제를 즐기는 누구나\n인기 투표할 수 있는 실시간 주막 랭킹`}
-          viewAllTo="/"
-          viewAllLabel="인기 주막 둘러보기"
+          label="Festival Start"
+          title="대동제의 주요 콘텐츠 확인하기"
           direction="right"
         >
           <div className="px-5">
             <ContentCard
-              category="인기 주막"
-              title="실시간 주막 랭킹 확인하기"
-              imageSrc="https://picsum.photos/200/300"
+              category="Map"
+              title={`캠퍼스 지도에서\n이벤트 부스와 주막 위치를 확인하기`}
+              imageSrc={cardBg2}
+              illustrationSrc={illustMap}
+              to="/"
+            />
+          </div>
+          <div className="px-5">
+            <ContentCard
+              category="Festival booth"
+              title="원하는 주막에 실시간 대기 등록하기"
+              imageSrc={cardBg1}
+              illustrationSrc={illustBooth}
               to="/"
             />
           </div>
         </SectionBlock>
 
-        <SectionBlock label="Event" title="올해만 진행되는 2026 하푸르나만의 혜택" direction="left">
+        <SectionBlock label="Event" title="올해만 진행되는 2026 하푸르나 이벤트" direction="left">
           <div className="px-5">
             <ContentCard
               category="Memory Board"
               title="80주년 롤링페이퍼"
-              description={`수천 명의 축제 참여자들과 함께\n 추억 기록하기`}
-              imageSrc="https://picsum.photos/200/300"
+              description={`수천 명의 축제 참여자들과 함께\n추억 기록하기`}
+              imageSrc={cardBg2}
+              illustrationSrc={illustRolling}
               to="/"
             />
           </div>
@@ -113,7 +144,8 @@ export default function HomePage() {
               category="Insta date"
               title="두근두근 인스타팅"
               description="축제에서 만날 특별한 사람 매칭하기"
-              imageSrc="https://picsum.photos/200/300"
+              imageSrc={cardBg1}
+              illustrationSrc={illustInstaing}
               to="/"
             />
           </div>
@@ -123,7 +155,8 @@ export default function HomePage() {
               category="Photo Booth"
               title="포토부스"
               description="80주년 카메라 필터로 특별한 추억 만들기"
-              imageSrc="https://picsum.photos/200/300"
+              imageSrc={cardBg3}
+              illustrationSrc={illustPhotobooth}
               to="/"
             />
           </div>
