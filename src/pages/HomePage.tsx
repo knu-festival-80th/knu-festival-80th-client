@@ -5,7 +5,9 @@ import ContentCard from '@/components/home/ContentCard';
 import GlassCircleButton from '@/components/home/GlassCircleButton';
 import SectionBlock from '@/components/home/SectionBlock';
 import TodayLineup from '@/components/home/TodayLineup';
+import { FaqAccordion } from '@/components/common/FaqAccordion';
 import { MOCK_LINEUP } from '@/mocks/home';
+import { MOCK_FAQ } from '@/mocks/faq';
 
 export default function HomePage() {
   return (
@@ -128,6 +130,8 @@ export default function HomePage() {
             />
           </div>
         </SectionBlock>
+
+        <FaqAccordion items={MOCK_FAQ} />
       </div>
     </div>
   );
