@@ -18,7 +18,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lighthouse:local": "lighthouse http://localhost:4173 --output html --output-path ./lighthouse-reports/local.html --chrome-flags='--headless' --view",
+    "lighthouse:prod": "lighthouse https://knu-festival-80th-client.vercel.app --output html --output-path ./lighthouse-reports/prod.html --chrome-flags='--headless' --view"
   },
   "dependencies": {
     "@posthog/react": "^1.8.2",
@@ -53,6 +55,7 @@
     "happy-dom": "^20.8.3",
     "husky": "^9.1.7",
     "jiti": "^2.6.1",
+    "lighthouse": "^13.2.0",
     "lightningcss": "^1.32.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.2.4",
