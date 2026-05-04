@@ -45,29 +45,29 @@ export async function listWaitings(
   boothId: number,
   status?: WaitingStatus,
 ): Promise<WaitingItem[]> {
-  const response = await http.get<ApiResponse<WaitingItem[]>>(ENDPOINTS.booth.waitings(boothId), {
+  const response = await http.get<ApiResponse<WaitingItem[]>>(ENDPOINTS.admin.waitings(boothId), {
     params: status ? { status } : undefined,
   });
   return unwrapApiResponse(response.data);
 }
 
 export async function callWaiting(waitingId: number): Promise<void> {
-  const response = await http.patch<ApiResponse<null>>(ENDPOINTS.booth.waitingCall(waitingId));
+  const response = await http.patch<ApiResponse<null>>(ENDPOINTS.admin.waitingCall(waitingId));
   unwrapVoidApiResponse(response.data);
 }
 
 export async function enterWaiting(waitingId: number): Promise<void> {
-  const response = await http.patch<ApiResponse<null>>(ENDPOINTS.booth.waitingEnter(waitingId));
+  const response = await http.patch<ApiResponse<null>>(ENDPOINTS.admin.waitingEnter(waitingId));
   unwrapVoidApiResponse(response.data);
 }
 
 export async function cancelWaiting(waitingId: number): Promise<void> {
-  const response = await http.patch<ApiResponse<null>>(ENDPOINTS.booth.waitingCancel(waitingId));
+  const response = await http.patch<ApiResponse<null>>(ENDPOINTS.admin.waitingCancel(waitingId));
   unwrapVoidApiResponse(response.data);
 }
 
 export async function skipWaiting(waitingId: number): Promise<void> {
-  const response = await http.patch<ApiResponse<null>>(ENDPOINTS.booth.waitingSkip(waitingId));
+  const response = await http.patch<ApiResponse<null>>(ENDPOINTS.admin.waitingSkip(waitingId));
   unwrapVoidApiResponse(response.data);
 }
 
@@ -76,14 +76,14 @@ export async function reorderWaiting(
   payload: WaitingReorderRequest,
 ): Promise<void> {
   const response = await http.patch<ApiResponse<null>>(
-    ENDPOINTS.booth.waitingReorder(waitingId),
+    ENDPOINTS.admin.waitingReorder(waitingId),
     payload,
   );
   unwrapVoidApiResponse(response.data);
 }
 
 export async function resendWaitingSms(waitingId: number): Promise<void> {
-  const response = await http.post<ApiResponse<null>>(ENDPOINTS.booth.waitingResendSms(waitingId));
+  const response = await http.post<ApiResponse<null>>(ENDPOINTS.admin.waitingResendSms(waitingId));
   unwrapVoidApiResponse(response.data);
 }
 
@@ -92,7 +92,7 @@ export async function insertWaiting(
   payload: WaitingInsertRequest,
 ): Promise<WaitingRegisterResponse> {
   const response = await http.post<ApiResponse<WaitingRegisterResponse>>(
-    ENDPOINTS.booth.waitingInsert(boothId),
+    ENDPOINTS.admin.waitingInsert(boothId),
     payload,
   );
   return unwrapApiResponse(response.data);
@@ -103,7 +103,7 @@ export async function toggleBoothWaiting(
   payload: WaitingToggleRequest,
 ): Promise<void> {
   const response = await http.patch<ApiResponse<null>>(
-    ENDPOINTS.booth.waitingToggle(boothId),
+    ENDPOINTS.admin.waitingToggle(boothId),
     payload,
   );
   unwrapVoidApiResponse(response.data);

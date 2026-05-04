@@ -48,7 +48,7 @@ export interface BoothPasswordChangeRequest {
 }
 
 export async function listAdminBooths(sort: BoothSort = 'likes'): Promise<BoothListItem[]> {
-  const response = await http.get<ApiResponse<BoothListItem[]>>(ENDPOINTS.booth.booths, {
+  const response = await http.get<ApiResponse<BoothListItem[]>>(ENDPOINTS.admin.booths, {
     params: { sort },
   });
   return unwrapApiResponse(response.data);
@@ -56,7 +56,7 @@ export async function listAdminBooths(sort: BoothSort = 'likes'): Promise<BoothL
 
 export async function createBooth(payload: BoothCreateRequest): Promise<BoothSummary> {
   const response = await http.post<ApiResponse<BoothSummary>>(
-    ENDPOINTS.super.booths,
+    ENDPOINTS.admin.booths,
     omitUndefined(payload as unknown as Record<string, unknown>),
   );
   return unwrapApiResponse(response.data);
@@ -67,14 +67,14 @@ export async function updateBooth(
   payload: BoothUpdateRequest,
 ): Promise<BoothSummary> {
   const response = await http.put<ApiResponse<BoothSummary>>(
-    ENDPOINTS.booth.boothById(boothId),
+    ENDPOINTS.admin.boothById(boothId),
     omitUndefined(payload as Record<string, unknown>),
   );
   return unwrapApiResponse(response.data);
 }
 
 export async function deleteBooth(boothId: number): Promise<void> {
-  const response = await http.delete<ApiResponse<null>>(ENDPOINTS.super.boothById(boothId));
+  const response = await http.delete<ApiResponse<null>>(ENDPOINTS.admin.boothById(boothId));
   unwrapVoidApiResponse(response.data);
 }
 
@@ -83,7 +83,7 @@ export async function changeBoothPassword(
   payload: BoothPasswordChangeRequest,
 ): Promise<void> {
   const response = await http.patch<ApiResponse<null>>(
-    ENDPOINTS.super.boothPassword(boothId),
+    ENDPOINTS.admin.boothPassword(boothId),
     payload,
   );
   unwrapVoidApiResponse(response.data);

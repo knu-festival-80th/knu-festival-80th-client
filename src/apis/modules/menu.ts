@@ -25,13 +25,13 @@ export interface MenuUpdateRequest {
 }
 
 export async function listMenus(boothId: number): Promise<MenuItem[]> {
-  const response = await http.get<ApiResponse<MenuItem[]>>(ENDPOINTS.booth.menus(boothId));
+  const response = await http.get<ApiResponse<MenuItem[]>>(ENDPOINTS.admin.menus(boothId));
   return unwrapApiResponse(response.data);
 }
 
 export async function createMenu(boothId: number, payload: MenuCreateRequest): Promise<MenuItem> {
   const response = await http.post<ApiResponse<MenuItem>>(
-    ENDPOINTS.booth.menus(boothId),
+    ENDPOINTS.admin.menus(boothId),
     omitUndefined(payload as unknown as Record<string, unknown>),
   );
   return unwrapApiResponse(response.data);
@@ -43,7 +43,7 @@ export async function updateMenu(
   payload: MenuUpdateRequest,
 ): Promise<MenuItem> {
   const response = await http.put<ApiResponse<MenuItem>>(
-    ENDPOINTS.booth.menuById(boothId, menuId),
+    ENDPOINTS.admin.menuById(boothId, menuId),
     omitUndefined(payload as Record<string, unknown>),
   );
   return unwrapApiResponse(response.data);
@@ -51,12 +51,12 @@ export async function updateMenu(
 
 export async function toggleMenuSoldOut(boothId: number, menuId: number): Promise<MenuItem> {
   const response = await http.patch<ApiResponse<MenuItem>>(
-    ENDPOINTS.booth.menuSoldOut(boothId, menuId),
+    ENDPOINTS.admin.menuSoldOut(boothId, menuId),
   );
   return unwrapApiResponse(response.data);
 }
 
 export async function deleteMenu(boothId: number, menuId: number): Promise<void> {
-  const response = await http.delete<ApiResponse<null>>(ENDPOINTS.booth.menuById(boothId, menuId));
+  const response = await http.delete<ApiResponse<null>>(ENDPOINTS.admin.menuById(boothId, menuId));
   unwrapVoidApiResponse(response.data);
 }
