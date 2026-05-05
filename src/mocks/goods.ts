@@ -1,13 +1,13 @@
-import sloganBack from '@/assets/goods/slogan_back.png';
-import sloganFront from '@/assets/goods/slogan_front.png';
-import tattoo1 from '@/assets/goods/tattoosticker_1.png';
-import tattoo2 from '@/assets/goods/tattoosticker_2.png';
-import uniform1Back from '@/assets/goods/uniform1_back.png';
-import uniform1Front from '@/assets/goods/uniform1_front.png';
-import uniform2Back from '@/assets/goods/uniform2_back.png';
-import uniform2Front from '@/assets/goods/uniform2_front.png';
-import uniform3Back from '@/assets/goods/uniform3_back.png';
-import uniform3Front from '@/assets/goods/uniform3_front.png';
+import sloganBack from '@/assets/goods/slogan_back.webp';
+import sloganFront from '@/assets/goods/slogan_front.webp';
+import tattoo1 from '@/assets/goods/tattoosticker_1.webp';
+import tattoo2 from '@/assets/goods/tattoosticker_2.webp';
+import uniform1Back from '@/assets/goods/uniform1_back.webp';
+import uniform1Front from '@/assets/goods/uniform1_front.webp';
+import uniform2Back from '@/assets/goods/uniform2_back.webp';
+import uniform2Front from '@/assets/goods/uniform2_front.webp';
+import uniform3Back from '@/assets/goods/uniform3_back.webp';
+import uniform3Front from '@/assets/goods/uniform3_front.webp';
 
 import type { GoodsItem } from '@/types/goods';
 

@@ -1,4 +1,4 @@
-import goodsbox from '@/assets/goods/goodsbox.png';
+import goodsbox from '@/assets/goods/goodsbox.webp';
 import { GradientBanner } from '@/components/common/GradientBanner';
 import { SectionTitle } from '@/components/common/SectionTitle';
 import { GoodsModal } from '@/components/goods/GoodsModal';
@@ -45,6 +45,8 @@ export default function GoodsPage() {
                     <img
                       src={item.images[0]}
                       alt={item.name}
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-contain p-2"
                     />
                   </div>
@@ -78,6 +80,8 @@ export default function GoodsPage() {
                   <img
                     src={item.images[0]}
                     alt={item.name}
+                    loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-contain p-2"
                   />
                 </div>
