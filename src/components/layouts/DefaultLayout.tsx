@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Footer } from './Footer';
-import { MainHeader } from './MainHeader';
+import { Header } from './Header';
 
-export default function MainLayout() {
+export default function DefaultLayout() {
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -12,7 +12,7 @@ export default function MainLayout() {
 
   return (
     <div className="page-frame flex min-h-dvh flex-col">
-      <MainHeader />
+      <Header />
       <main className="flex-1">
         <Outlet />
       </main>
