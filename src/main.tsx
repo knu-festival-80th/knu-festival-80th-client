@@ -11,8 +11,12 @@ import { useAuthStore } from '@/stores/authStore.ts';
 
 setUnauthorizedHandler(() => {
   useAuthStore.getState().clearSession();
-  if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin/login')) {
-    window.location.assign('/admin/login');
+  if (typeof window === 'undefined') return;
+  const path = window.location.pathname;
+  if (path.startsWith('/console') && !path.startsWith('/console/login')) {
+    window.location.assign('/console/login');
+  } else if (path.startsWith('/booth/manage') && !path.startsWith('/booth/manage/login')) {
+    window.location.assign('/booth/manage/login');
   }
 });
 
