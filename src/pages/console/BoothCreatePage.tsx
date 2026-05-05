@@ -9,20 +9,31 @@ import { Button, Card, Field, Input, Textarea } from '@/components/admin/ui';
 interface FormState {
   name: string;
   description: string;
-  locationLat: string;
-  locationLng: string;
+  xRatio: string;
+  yRatio: string;
   imageUrl: string;
+  menuBoardImageUrl: string;
   adminPassword: string;
 }
 
 const INITIAL_STATE: FormState = {
   name: '',
   description: '',
-  locationLat: '',
-  locationLng: '',
+  xRatio: '',
+  yRatio: '',
   imageUrl: '',
+  menuBoardImageUrl: '',
   adminPassword: '',
 };
+
+function parseRatio(raw: string): { value: number | undefined; error: string | null } {
+  const trimmed = raw.trim();
+  if (!trimmed) return { value: undefined, error: null };
+  const num = Number(trimmed);
+  if (!Number.isFinite(num)) return { value: undefined, error: '숫자만 입력해 주세요.' };
+  if (num < 0 || num > 1) return { value: undefined, error: '0과 1 사이의 값이어야 합니다.' };
+  return { value: num, error: null };
+}
 
 export default function BoothCreatePage() {
   const navigate = useNavigate();
@@ -62,23 +73,24 @@ export default function BoothCreatePage() {
       return;
     }
 
-    const lat = form.locationLat.trim() ? Number(form.locationLat) : undefined;
-    const lng = form.locationLng.trim() ? Number(form.locationLng) : undefined;
-    if (lat !== undefined && Number.isNaN(lat)) {
-      setErrorMessage('위도 형식이 올바르지 않습니다.');
+    const x = parseRatio(form.xRatio);
+    const y = parseRatio(form.yRatio);
+    if (x.error) {
+      setErrorMessage(`X 좌표: ${x.error}`);
       return;
     }
-    if (lng !== undefined && Number.isNaN(lng)) {
-      setErrorMessage('경도 형식이 올바르지 않습니다.');
+    if (y.error) {
+      setErrorMessage(`Y 좌표: ${y.error}`);
       return;
     }
 
     createMutation.mutate({
       name: form.name.trim(),
       description: form.description.trim() || undefined,
-      locationLat: lat,
-      locationLng: lng,
+      xRatio: x.value,
+      yRatio: y.value,
       imageUrl: form.imageUrl.trim() || undefined,
+      menuBoardImageUrl: form.menuBoardImageUrl.trim() || undefined,
       adminPassword: form.adminPassword,
     });
   };
@@ -126,29 +138,33 @@ export default function BoothCreatePage() {
               </Field>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="위도" hint="locationLat" htmlFor="booth-lat">
+                <Field label="X 좌표" hint="0 ~ 1 (지도 가로 비율)" htmlFor="booth-x-ratio">
                   <Input
-                    id="booth-lat"
+                    id="booth-x-ratio"
                     type="text"
                     inputMode="decimal"
                     numericMono
-                    value={form.locationLat}
-                    onChange={handleChange('locationLat')}
-                    placeholder="35.8889"
+                    value={form.xRatio}
+                    onChange={handleChange('xRatio')}
+                    placeholder="0.42"
                   />
                 </Field>
-                <Field label="경도" hint="locationLng" htmlFor="booth-lng">
+                <Field label="Y 좌표" hint="0 ~ 1 (지도 세로 비율)" htmlFor="booth-y-ratio">
                   <Input
-                    id="booth-lng"
+                    id="booth-y-ratio"
                     type="text"
                     inputMode="decimal"
                     numericMono
-                    value={form.locationLng}
-                    onChange={handleChange('locationLng')}
-                    placeholder="128.6105"
+                    value={form.yRatio}
+                    onChange={handleChange('yRatio')}
+                    placeholder="0.18"
                   />
                 </Field>
               </div>
+              <p className="-mt-2 text-caption text-[var(--admin-text-faint)]">
+                축제 지도 이미지에서의 비율 좌표입니다. 추후 지도 컴포넌트가 완성되면 클릭으로
+                선택할 수 있도록 교체될 예정입니다.
+              </p>
 
               <Field label="대표 이미지 URL" htmlFor="booth-image">
                 <Input
@@ -156,6 +172,17 @@ export default function BoothCreatePage() {
                   type="text"
                   value={form.imageUrl}
                   onChange={handleChange('imageUrl')}
+                  maxLength={500}
+                  placeholder="https://..."
+                />
+              </Field>
+
+              <Field label="메뉴판 이미지 URL" hint="부스당 1장" htmlFor="booth-menu-board">
+                <Input
+                  id="booth-menu-board"
+                  type="text"
+                  value={form.menuBoardImageUrl}
+                  onChange={handleChange('menuBoardImageUrl')}
                   maxLength={500}
                   placeholder="https://..."
                 />

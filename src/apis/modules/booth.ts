@@ -7,10 +7,11 @@ export interface BoothListItem {
   boothId: number;
   name: string;
   description: string;
-  locationLat: number;
-  locationLng: number;
+  xRatio: number | null;
+  yRatio: number | null;
   likeCount: number;
   imageUrl: string | null;
+  menuBoardImageUrl: string | null;
   waitingOpen: boolean;
   currentWaitingTeams: number;
 }
@@ -19,28 +20,31 @@ export interface BoothSummary {
   boothId: number;
   name: string;
   description: string;
-  locationLat: number;
-  locationLng: number;
+  xRatio: number | null;
+  yRatio: number | null;
   likeCount: number;
   imageUrl: string | null;
+  menuBoardImageUrl: string | null;
   waitingOpen: boolean;
 }
 
 export interface BoothCreateRequest {
   name: string;
   description?: string;
-  locationLat?: number;
-  locationLng?: number;
+  xRatio?: number;
+  yRatio?: number;
   imageUrl?: string;
+  menuBoardImageUrl?: string;
   adminPassword: string;
 }
 
 export interface BoothUpdateRequest {
   name?: string;
   description?: string;
-  locationLat?: number;
-  locationLng?: number;
+  xRatio?: number;
+  yRatio?: number;
   imageUrl?: string;
+  menuBoardImageUrl?: string;
 }
 
 export interface BoothPasswordChangeRequest {

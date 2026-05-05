@@ -10,19 +10,30 @@ import { useAuthStore } from '@/stores/authStore';
 interface FormState {
   name: string;
   description: string;
-  locationLat: string;
-  locationLng: string;
+  xRatio: string;
+  yRatio: string;
   imageUrl: string;
+  menuBoardImageUrl: string;
 }
 
 function toFormState(booth: BoothListItem): FormState {
   return {
     name: booth.name,
     description: booth.description ?? '',
-    locationLat: booth.locationLat?.toString() ?? '',
-    locationLng: booth.locationLng?.toString() ?? '',
+    xRatio: booth.xRatio?.toString() ?? '',
+    yRatio: booth.yRatio?.toString() ?? '',
     imageUrl: booth.imageUrl ?? '',
+    menuBoardImageUrl: booth.menuBoardImageUrl ?? '',
   };
+}
+
+function parseRatio(raw: string): { value: number | undefined; error: string | null } {
+  const trimmed = raw.trim();
+  if (!trimmed) return { value: undefined, error: null };
+  const num = Number(trimmed);
+  if (!Number.isFinite(num)) return { value: undefined, error: '숫자만 입력해 주세요.' };
+  if (num < 0 || num > 1) return { value: undefined, error: '0과 1 사이의 값이어야 합니다.' };
+  return { value: num, error: null };
 }
 
 export default function BoothProfilePage() {
@@ -99,23 +110,24 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    const lat = form.locationLat.trim() ? Number(form.locationLat) : undefined;
-    const lng = form.locationLng.trim() ? Number(form.locationLng) : undefined;
-    if (lat !== undefined && Number.isNaN(lat)) {
-      setErrorMessage('위도 형식이 올바르지 않습니다.');
+    const x = parseRatio(form.xRatio);
+    const y = parseRatio(form.yRatio);
+    if (x.error) {
+      setErrorMessage(`X 좌표: ${x.error}`);
       return;
     }
-    if (lng !== undefined && Number.isNaN(lng)) {
-      setErrorMessage('경도 형식이 올바르지 않습니다.');
+    if (y.error) {
+      setErrorMessage(`Y 좌표: ${y.error}`);
       return;
     }
 
     updateMutation.mutate({
       name: form.name.trim() || undefined,
       description: form.description.trim() || undefined,
-      locationLat: lat,
-      locationLng: lng,
+      xRatio: x.value,
+      yRatio: y.value,
       imageUrl: form.imageUrl.trim() || undefined,
+      menuBoardImageUrl: form.menuBoardImageUrl.trim() || undefined,
     });
   };
 
@@ -124,7 +136,7 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
       <Card
         eyebrow="내 주막"
         title="부스 정보"
-        description="손님에게 노출되는 주막 이름·설명·위치를 관리합니다."
+        description="손님에게 노출되는 주막 이름·설명·위치·메뉴판을 관리합니다."
         padding="lg"
       >
         <div className="flex flex-col gap-5">
@@ -167,40 +179,40 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
           </Field>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="위도" hint="latitude" htmlFor="booth-lat">
+            <Field label="X 좌표" hint="0 ~ 1 (가로 비율)" htmlFor="booth-x-ratio">
               <Input
-                id="booth-lat"
+                id="booth-x-ratio"
                 type="text"
                 inputMode="decimal"
                 numericMono
-                value={form.locationLat}
-                onChange={handleChange('locationLat')}
-                placeholder="35.8888"
+                value={form.xRatio}
+                onChange={handleChange('xRatio')}
+                placeholder="0.42"
               />
             </Field>
-            <Field label="경도" hint="longitude" htmlFor="booth-lng">
+            <Field label="Y 좌표" hint="0 ~ 1 (세로 비율)" htmlFor="booth-y-ratio">
               <Input
-                id="booth-lng"
+                id="booth-y-ratio"
                 type="text"
                 inputMode="decimal"
                 numericMono
-                value={form.locationLng}
-                onChange={handleChange('locationLng')}
-                placeholder="128.6111"
+                value={form.yRatio}
+                onChange={handleChange('yRatio')}
+                placeholder="0.18"
               />
             </Field>
           </div>
           <p className="-mt-2 inline-flex items-center gap-1 text-caption text-[var(--admin-text-faint)]">
             <MapPin size={12} />
-            지도 핀 위치는 두 값이 모두 채워졌을 때만 표시됩니다.
+            축제 지도 이미지에서의 비율 좌표. 두 값이 모두 채워져야 지도에 핀이 표시됩니다.
           </p>
 
           {form.imageUrl.trim() ? (
             <div className="flex flex-col gap-2">
-              <span className="eyebrow">이미지 미리보기</span>
+              <span className="eyebrow">대표 이미지 미리보기</span>
               <img
                 src={form.imageUrl}
-                alt={`${form.name || '부스'} 미리보기`}
+                alt={`${form.name || '부스'} 대표 이미지`}
                 className="h-32 w-full max-w-sm rounded-md border border-[var(--admin-border)] object-cover"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).style.display = 'none';
@@ -210,7 +222,9 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
           ) : (
             <div className="flex h-32 w-full max-w-sm flex-col items-center justify-center gap-2 rounded-md border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-hover)] text-[var(--admin-text-faint)]">
               <ImageIcon size={28} />
-              <span className="text-caption">이미지 URL을 입력하면 미리보기가 표시됩니다.</span>
+              <span className="text-caption">
+                대표 이미지 URL을 입력하면 미리보기가 표시됩니다.
+              </span>
             </div>
           )}
 
@@ -220,6 +234,38 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
               type="text"
               value={form.imageUrl}
               onChange={handleChange('imageUrl')}
+              maxLength={500}
+              placeholder="https://"
+            />
+          </Field>
+
+          {form.menuBoardImageUrl.trim() ? (
+            <div className="flex flex-col gap-2">
+              <span className="eyebrow">메뉴판 미리보기</span>
+              <img
+                src={form.menuBoardImageUrl}
+                alt={`${form.name || '부스'} 메뉴판`}
+                className="max-h-80 w-full max-w-sm rounded-md border border-[var(--admin-border)] object-contain bg-[var(--admin-surface-hover)]"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+          ) : (
+            <div className="flex h-32 w-full max-w-sm flex-col items-center justify-center gap-2 rounded-md border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-hover)] text-[var(--admin-text-faint)]">
+              <ImageIcon size={28} />
+              <span className="text-caption">
+                메뉴판 이미지 URL을 입력하면 미리보기가 표시됩니다.
+              </span>
+            </div>
+          )}
+
+          <Field label="메뉴판 이미지 URL" hint="부스당 1장" htmlFor="booth-menu-board">
+            <Input
+              id="booth-menu-board"
+              type="text"
+              value={form.menuBoardImageUrl}
+              onChange={handleChange('menuBoardImageUrl')}
               maxLength={500}
               placeholder="https://"
             />
