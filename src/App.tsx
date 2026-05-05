@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import DefaultLayout from '@/components/layouts/DefaultLayout';
 import MainLayout from '@/components/layouts/MainLayout';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
@@ -12,12 +13,14 @@ export default function App() {
     <>
       <GoogleAnalytics />
       <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="timetable" element={<TimeTablePage />} />
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<HomePage />} />
         </Route>
-        <Route path="/404" element={<NotFoundPage />} />
-        <Route path="*" element={<Navigate to="/404" replace />} />
+        <Route element={<DefaultLayout />}>
+          <Route path="/timetable" element={<TimeTablePage />} />
+          <Route path="/404" element={<NotFoundPage />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Route>
       </Routes>
       <Analytics />
     </>
