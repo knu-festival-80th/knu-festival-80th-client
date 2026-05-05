@@ -25,6 +25,7 @@ import NotFoundPage from '@/pages/NotFoundPage';
 import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import StampTourPage from './pages/StampTourPage';
+import BoothListPage from './pages/BoothListPage';
 
 export default function App() {
   return (
