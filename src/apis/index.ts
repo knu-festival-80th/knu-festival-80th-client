@@ -19,7 +19,10 @@ export type {
 export * as authApi from '@/apis/modules/auth';
 export * as boothApi from '@/apis/modules/booth';
 export * as menuApi from '@/apis/modules/menu';
+export * as uploadApi from '@/apis/modules/upload';
 export * as waitingApi from '@/apis/modules/waiting';
+export { imagePathToSrc, imageUrlToPath } from '@/apis/modules/upload';
+export type { ImageUploadResponse } from '@/apis/modules/upload';
 export type { AdminRole, LoginRequest, LoginResponse } from '@/apis/modules/auth';
 export type {
   BoothCreateRequest,

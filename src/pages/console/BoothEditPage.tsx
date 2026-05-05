@@ -3,9 +3,9 @@ import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { ApiClientError, boothApi } from '@/apis';
+import { ApiClientError, boothApi, imageUrlToPath } from '@/apis';
 import type { BoothListItem, BoothUpdateRequest } from '@/apis';
-import { Button, Card, Field, Input, Textarea } from '@/components/admin/ui';
+import { Button, Card, Field, ImageUploadField, Input, Textarea } from '@/components/admin/ui';
 
 interface FormState {
   name: string;
@@ -22,8 +22,8 @@ function toFormState(booth: BoothListItem): FormState {
     description: booth.description ?? '',
     xRatio: booth.xRatio?.toString() ?? '',
     yRatio: booth.yRatio?.toString() ?? '',
-    imageUrl: booth.imageUrl ?? '',
-    menuBoardImageUrl: booth.menuBoardImageUrl ?? '',
+    imageUrl: imageUrlToPath(booth.imageUrl),
+    menuBoardImageUrl: imageUrlToPath(booth.menuBoardImageUrl),
   };
 }
 
@@ -215,25 +215,21 @@ function BoothEditForm({ boothId, boothName, initial }: BoothEditFormProps) {
               축제 지도 이미지에서의 비율 좌표. 지도 컴포넌트 완성 시 클릭 입력으로 교체됩니다.
             </p>
 
-            <Field label="대표 이미지 URL" htmlFor="booth-image">
-              <Input
-                id="booth-image"
-                type="text"
-                value={form.imageUrl}
-                onChange={handleChange('imageUrl')}
-                maxLength={500}
-              />
-            </Field>
+            <ImageUploadField
+              label="대표 이미지"
+              value={form.imageUrl}
+              onChange={(next) => setForm((prev) => ({ ...prev, imageUrl: next }))}
+              emptyMessage="부스 대표 이미지를 업로드하세요."
+            />
 
-            <Field label="메뉴판 이미지 URL" hint="부스당 1장" htmlFor="booth-menu-board">
-              <Input
-                id="booth-menu-board"
-                type="text"
-                value={form.menuBoardImageUrl}
-                onChange={handleChange('menuBoardImageUrl')}
-                maxLength={500}
-              />
-            </Field>
+            <ImageUploadField
+              label="메뉴판 이미지"
+              hint="부스당 1장"
+              value={form.menuBoardImageUrl}
+              onChange={(next) => setForm((prev) => ({ ...prev, menuBoardImageUrl: next }))}
+              emptyMessage="메뉴판 사진을 업로드하세요."
+              previewClassName="max-h-72 w-full max-w-sm object-contain"
+            />
           </section>
 
           {errorMessage && (

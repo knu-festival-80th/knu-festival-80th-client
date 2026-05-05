@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ImageIcon, Save } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { ApiClientError, menuApi } from '@/apis';
+import { ApiClientError, imageUrlToPath, menuApi } from '@/apis';
 import type { MenuCreateRequest, MenuItem, MenuUpdateRequest } from '@/apis';
-import { Button, Card, Field, Input, Textarea } from '@/components/admin/ui';
+import { Button, Card, Field, ImageUploadField, Input, Textarea } from '@/components/admin/ui';
 import { useAuthStore } from '@/stores/authStore';
 
 interface FormState {
@@ -21,7 +21,7 @@ function toFormState(menu: MenuItem): FormState {
   return {
     name: menu.name,
     price: String(menu.price),
-    imageUrl: menu.imageUrl ?? '',
+    imageUrl: imageUrlToPath(menu.imageUrl),
     description: menu.description ?? '',
   };
 }
@@ -216,35 +216,12 @@ function MenuForm({ boothId, menuId, initial }: MenuFormProps) {
               </div>
             </Field>
 
-            {form.imageUrl.trim() ? (
-              <div className="flex flex-col gap-2">
-                <span className="eyebrow">이미지 미리보기</span>
-                <img
-                  src={form.imageUrl}
-                  alt={`${form.name || '메뉴'} 미리보기`}
-                  className="h-32 w-full max-w-sm rounded-md border border-[var(--admin-border)] object-cover"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="flex h-32 w-full max-w-sm flex-col items-center justify-center gap-2 rounded-md border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-hover)] text-[var(--admin-text-faint)]">
-                <ImageIcon size={28} />
-                <span className="text-caption">이미지 URL을 입력하면 미리보기가 표시됩니다.</span>
-              </div>
-            )}
-
-            <Field label="이미지 URL" htmlFor="menu-image">
-              <Input
-                id="menu-image"
-                type="text"
-                value={form.imageUrl}
-                onChange={handleChange('imageUrl')}
-                maxLength={500}
-                placeholder="https://"
-              />
-            </Field>
+            <ImageUploadField
+              label="메뉴 이미지"
+              value={form.imageUrl}
+              onChange={(next) => setForm((prev) => ({ ...prev, imageUrl: next }))}
+              emptyMessage="메뉴 사진을 업로드하세요."
+            />
 
             <Field label="설명" htmlFor="menu-description">
               <Textarea

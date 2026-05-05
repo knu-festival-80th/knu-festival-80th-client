@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, ImageIcon, MapPin, Save } from 'lucide-react';
+import { Check, MapPin, Save } from 'lucide-react';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 
-import { ApiClientError, boothApi } from '@/apis';
+import { ApiClientError, boothApi, imageUrlToPath } from '@/apis';
 import type { BoothListItem, BoothUpdateRequest } from '@/apis';
-import { Button, Card, Field, Input, Textarea } from '@/components/admin/ui';
+import { Button, Card, Field, ImageUploadField, Input, Textarea } from '@/components/admin/ui';
 import { useAuthStore } from '@/stores/authStore';
 
 interface FormState {
@@ -22,8 +22,8 @@ function toFormState(booth: BoothListItem): FormState {
     description: booth.description ?? '',
     xRatio: booth.xRatio?.toString() ?? '',
     yRatio: booth.yRatio?.toString() ?? '',
-    imageUrl: booth.imageUrl ?? '',
-    menuBoardImageUrl: booth.menuBoardImageUrl ?? '',
+    imageUrl: imageUrlToPath(booth.imageUrl),
+    menuBoardImageUrl: imageUrlToPath(booth.menuBoardImageUrl),
   };
 }
 
@@ -104,6 +104,11 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
       setForm((prev) => ({ ...prev, [key]: event.target.value }));
       if (successMessage) setSuccessMessage(null);
     };
+
+  const setField = (key: keyof FormState) => (next: string) => {
+    setForm((prev) => ({ ...prev, [key]: next }));
+    if (successMessage) setSuccessMessage(null);
+  };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -207,69 +212,21 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
             축제 지도 이미지에서의 비율 좌표. 두 값이 모두 채워져야 지도에 핀이 표시됩니다.
           </p>
 
-          {form.imageUrl.trim() ? (
-            <div className="flex flex-col gap-2">
-              <span className="eyebrow">대표 이미지 미리보기</span>
-              <img
-                src={form.imageUrl}
-                alt={`${form.name || '부스'} 대표 이미지`}
-                className="h-32 w-full max-w-sm rounded-md border border-[var(--admin-border)] object-cover"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
-          ) : (
-            <div className="flex h-32 w-full max-w-sm flex-col items-center justify-center gap-2 rounded-md border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-hover)] text-[var(--admin-text-faint)]">
-              <ImageIcon size={28} />
-              <span className="text-caption">
-                대표 이미지 URL을 입력하면 미리보기가 표시됩니다.
-              </span>
-            </div>
-          )}
+          <ImageUploadField
+            label="대표 이미지"
+            value={form.imageUrl}
+            onChange={setField('imageUrl')}
+            emptyMessage="부스 대표 이미지를 업로드하세요."
+          />
 
-          <Field label="대표 이미지 URL" htmlFor="booth-image">
-            <Input
-              id="booth-image"
-              type="text"
-              value={form.imageUrl}
-              onChange={handleChange('imageUrl')}
-              maxLength={500}
-              placeholder="https://"
-            />
-          </Field>
-
-          {form.menuBoardImageUrl.trim() ? (
-            <div className="flex flex-col gap-2">
-              <span className="eyebrow">메뉴판 미리보기</span>
-              <img
-                src={form.menuBoardImageUrl}
-                alt={`${form.name || '부스'} 메뉴판`}
-                className="max-h-80 w-full max-w-sm rounded-md border border-[var(--admin-border)] object-contain bg-[var(--admin-surface-hover)]"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
-          ) : (
-            <div className="flex h-32 w-full max-w-sm flex-col items-center justify-center gap-2 rounded-md border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-hover)] text-[var(--admin-text-faint)]">
-              <ImageIcon size={28} />
-              <span className="text-caption">
-                메뉴판 이미지 URL을 입력하면 미리보기가 표시됩니다.
-              </span>
-            </div>
-          )}
-
-          <Field label="메뉴판 이미지 URL" hint="부스당 1장" htmlFor="booth-menu-board">
-            <Input
-              id="booth-menu-board"
-              type="text"
-              value={form.menuBoardImageUrl}
-              onChange={handleChange('menuBoardImageUrl')}
-              maxLength={500}
-              placeholder="https://"
-            />
-          </Field>
+          <ImageUploadField
+            label="메뉴판 이미지"
+            hint="부스당 1장"
+            value={form.menuBoardImageUrl}
+            onChange={setField('menuBoardImageUrl')}
+            emptyMessage="메뉴판 사진을 업로드하세요."
+            previewClassName="max-h-80 w-full max-w-sm object-contain"
+          />
 
           <div className="pt-1">
             <Button

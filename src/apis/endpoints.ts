@@ -19,6 +19,7 @@ export const ENDPOINTS = {
   },
 
   admin: {
+    uploadImage: '/admin/uploads/images',
     booths: '/admin/booths',
     boothById: (boothId: number) => `/admin/booths/${boothId}`,
     boothPassword: (boothId: number) => `/admin/booths/${boothId}/password`,
