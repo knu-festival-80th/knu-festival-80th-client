@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import DefaultLayout from '@/components/layouts/DefaultLayout';
 import MainLayout from '@/components/layouts/MainLayout';
+import CongratVideoPage from '@/pages/CongratVideoPage';
 import GoodsPage from '@/pages/GoodsPage';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
@@ -20,6 +21,7 @@ export default function App() {
         <Route element={<DefaultLayout />}>
           <Route path="/timetable" element={<TimeTablePage />} />
           <Route path="/goods" element={<GoodsPage />} />
+          <Route path="/congrat-video" element={<CongratVideoPage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Route>
