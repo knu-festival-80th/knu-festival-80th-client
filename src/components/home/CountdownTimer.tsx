@@ -28,17 +28,17 @@ export default function CountdownTimer() {
   }, []);
 
   const items = [
-    { value: timeLeft.days, unit: '일' },
-    { value: timeLeft.hours, unit: '시간' },
-    { value: timeLeft.minutes, unit: '분' },
-    { value: timeLeft.seconds, unit: '초' },
+    { value: String(timeLeft.days).padStart(2, '0'), unit: '일' },
+    { value: String(timeLeft.hours).padStart(2, '0'), unit: '시간' },
+    { value: String(timeLeft.minutes).padStart(2, '0'), unit: '분' },
+    { value: String(timeLeft.seconds).padStart(2, '0'), unit: '초' },
   ];
 
   return (
     <div className="flex flex-col">
       {items.map(({ value, unit }) => (
         <div key={unit} className="flex items-baseline tracking-[-0.02em]">
-          <span className="text-countdown text-ink">{value}</span>
+          <span className="text-countdown text-ink tabular-nums">{value}</span>
           <span className="text-countdown text-border">{unit}</span>
         </div>
       ))}

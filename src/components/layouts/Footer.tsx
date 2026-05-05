@@ -6,7 +6,7 @@ import designLogo from '@/assets/logo/designdepartment_logo.svg';
 export const Footer = () => {
   return (
     <footer className="w-full bg-[#1A1A1A]">
-      <div className="mx-auto flex max-w-93.75 flex-col items-start gap-12 px-5 pt-16 pb-31">
+      <div className="mx-auto flex max-w-[600px] flex-col items-start gap-12 px-5 pt-16 pb-31">
         <img src={knu80thLogo} alt="KNU 80주년 대동제" className="h-4.5 w-47.5 object-contain" />
         <nav className="flex w-full flex-col gap-5">
           {NAV_LINKS.map(({ label, to }) => (

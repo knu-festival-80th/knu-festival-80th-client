@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import BoothManageShell from '@/components/layouts/BoothManageShell';
 import ConsoleShell from '@/components/layouts/ConsoleShell';
+import DefaultLayout from '@/components/layouts/DefaultLayout';
 import MainLayout from '@/components/layouts/MainLayout';
 import BoothManageGuard from '@/components/guards/BoothManageGuard';
 import ConsoleGuard from '@/components/guards/ConsoleGuard';
@@ -17,6 +18,8 @@ import BoothEditPage from '@/pages/console/BoothEditPage';
 import BoothListPage from '@/pages/console/BoothListPage';
 import BoothPasswordPage from '@/pages/console/BoothPasswordPage';
 import ConsoleLoginPage from '@/pages/console/ConsoleLoginPage';
+import CongratVideoPage from '@/pages/CongratVideoPage';
+import GoodsPage from '@/pages/GoodsPage';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import TimeTablePage from '@/pages/TimeTablePage';
@@ -27,9 +30,8 @@ export default function App() {
     <>
       <GoogleAnalytics />
       <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="timetable" element={<TimeTablePage />} />
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<HomePage />} />
         </Route>
 
         <Route path="/console/login" element={<ConsoleLoginPage />} />
@@ -64,8 +66,13 @@ export default function App() {
           <Route path="waitings/insert" element={<WaitingInsertPage />} />
         </Route>
 
-        <Route path="/404" element={<NotFoundPage />} />
-        <Route path="*" element={<Navigate to="/404" replace />} />
+        <Route element={<DefaultLayout />}>
+          <Route path="/timetable" element={<TimeTablePage />} />
+          <Route path="/goods" element={<GoodsPage />} />
+          <Route path="/congrat-video" element={<CongratVideoPage />} />
+          <Route path="/404" element={<NotFoundPage />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Route>
       </Routes>
       <Analytics />
     </>

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Footer } from './Footer';
-import { Header } from './Header';
+import { MainHeader } from './MainHeader';
 
 export default function MainLayout() {
   const { pathname } = useLocation();
@@ -11,12 +11,14 @@ export default function MainLayout() {
   }, [pathname]);
 
   return (
-    <div className="page-frame flex min-h-dvh flex-col">
-      <Header />
-      <main className="flex-1">
-        <Outlet />
-      </main>
-      <Footer />
+    <div className="min-h-dvh bg-background md:bg-[#eceef3]">
+      <div className="page-frame mx-auto flex min-h-dvh w-full max-w-[600px] flex-col overflow-x-hidden bg-background md:shadow-[0_0_20px_rgba(29,32,56,0.14)]">
+        <MainHeader />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }

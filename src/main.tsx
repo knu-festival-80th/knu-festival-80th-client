@@ -7,7 +7,10 @@ import * as Sentry from '@sentry/react';
 import { setUnauthorizedHandler } from '@/apis';
 import App from './App.tsx';
 import AppProviders from './providers/AppProviders.tsx';
+import { initGA } from './lib/googleAnalytics.ts';
 import { useAuthStore } from '@/stores/authStore.ts';
+
+initGA();
 
 setUnauthorizedHandler(() => {
   useAuthStore.getState().clearSession();
