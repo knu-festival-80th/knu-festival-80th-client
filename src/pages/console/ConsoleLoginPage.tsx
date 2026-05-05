@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { ArrowRight, Lock } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { ApiClientError, authApi } from '@/apis';
 import { Button, Field, Input } from '@/components/admin/ui';
@@ -18,9 +18,7 @@ export default function ConsoleLoginPage() {
     mutationFn: authApi.login,
     onSuccess: (response) => {
       if (response.role !== 'SUPER_ADMIN') {
-        setErrorMessage(
-          '이 페이지는 최고 관리자 전용입니다. 주막 운영진은 부스 운영 페이지로 이동해 주세요.',
-        );
+        setErrorMessage('해당 계정에는 콘솔 권한이 없습니다.');
         return;
       }
       setSession(response.role, response.boothId);
@@ -48,14 +46,8 @@ export default function ConsoleLoginPage() {
   return (
     <div data-admin-theme="console" className="admin-frame admin-grain">
       <div className="mx-auto flex min-h-dvh max-w-6xl flex-col px-6 py-8 sm:px-10 sm:py-12">
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-baseline">
           <span className="eyebrow text-[var(--admin-primary)]">KNU·80</span>
-          <Link
-            to="/booth/manage/login"
-            className="text-caption text-[var(--admin-text-muted)] underline-offset-4 transition hover:text-[var(--admin-text)] hover:underline"
-          >
-            주막 운영진은 여기 →
-          </Link>
         </div>
 
         <div className="grid flex-1 items-center gap-12 py-12 lg:grid-cols-[1.1fr_1fr]">

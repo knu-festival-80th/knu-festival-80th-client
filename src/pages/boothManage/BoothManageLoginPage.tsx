@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { ArrowRight, Hash, KeyRound } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { ApiClientError, authApi } from '@/apis';
 import { Button, Field, Input } from '@/components/admin/ui';
@@ -18,11 +18,6 @@ export default function BoothManageLoginPage() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (response) => {
-      if (response.role === 'SUPER_ADMIN') {
-        setSession(response.role, response.boothId);
-        navigate('/console', { replace: true });
-        return;
-      }
       if (response.role === 'BOOTH_ADMIN' && response.boothId !== null) {
         setSession(response.role, response.boothId);
         navigate('/booth/manage', { replace: true });
@@ -59,14 +54,8 @@ export default function BoothManageLoginPage() {
   return (
     <div data-admin-theme="booth" className="admin-frame">
       <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-between px-5 pt-10 pb-8 sm:max-w-lg sm:pt-14">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <span className="eyebrow text-[var(--admin-primary)]">KNU·80 · 주막</span>
-          <Link
-            to="/console/login"
-            className="text-caption text-[var(--admin-text-muted)] underline-offset-4 transition hover:text-[var(--admin-text)] hover:underline"
-          >
-            최고 관리자 →
-          </Link>
         </div>
 
         <div className="flex flex-col gap-7">
