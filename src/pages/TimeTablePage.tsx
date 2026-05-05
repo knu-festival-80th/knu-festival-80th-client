@@ -12,7 +12,7 @@ const DAY_DESCRIPTIONS: Record<number, string> = {
 };
 
 export default function TimeTablePage() {
-  const [selectedDay, setSelectedDay] = useState(DAYS[0]);
+  const [selectedDay, setSelectedDay] = useState(21);
   const dayData = MOCK_LINEUP.find((d) => d.day === selectedDay) ?? MOCK_LINEUP[0];
 
   return (
@@ -20,7 +20,12 @@ export default function TimeTablePage() {
       <div className="px-5 pt-5 pb-10">
         <h1 className="text-body1 font-bold text-ink">Time Table</h1>
         <div className="mt-3">
-          <DateTabBar days={DAYS} selectedDay={selectedDay} onSelect={setSelectedDay} />
+          <DateTabBar
+            days={DAYS}
+            selectedDay={selectedDay}
+            onSelect={setSelectedDay}
+            disabledDays={[20]}
+          />
         </div>
       </div>
       <DayScheduleBlock
