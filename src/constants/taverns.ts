@@ -1,5 +1,20 @@
 export type TavernSortKey = 'popular' | 'shortWait' | 'simple';
 
+export const festivalMap = {
+  id: 'knu-festival-2026-final-map',
+  version: 1,
+  width: 1364,
+  height: 1179,
+} as const;
+
+export type TavernMapPosition = {
+  mapId: string;
+  mapVersion: number;
+  xRatio: number;
+  yRatio: number;
+  label: string;
+};
+
 export type Tavern = {
   id: string;
   department: string;
@@ -12,10 +27,7 @@ export type Tavern = {
   totalSeats: number;
   popularity: number;
   menu: string[];
-  mapPosition: {
-    left: string;
-    top: string;
-  };
+  mapPosition: TavernMapPosition;
 };
 
 export const tavernSortOptions: Array<{ key: TavernSortKey; label: string }> = [
@@ -37,7 +49,13 @@ export const taverns: Tavern[] = [
     totalSeats: 25,
     popularity: 86,
     menu: ['야키소바', '오코노미야끼', '치킨 가라아게'],
-    mapPosition: { left: '38%', top: '18%' },
+    mapPosition: {
+      mapId: festivalMap.id,
+      mapVersion: festivalMap.version,
+      xRatio: 0.38,
+      yRatio: 0.18,
+      label: '공대 9호관 앞',
+    },
   },
   {
     id: 'startup',
@@ -51,7 +69,13 @@ export const taverns: Tavern[] = [
     totalSeats: 25,
     popularity: 93,
     menu: ['국물 떡볶이', '모둠 튀김', '어묵탕'],
-    mapPosition: { left: '24%', top: '24%' },
+    mapPosition: {
+      mapId: festivalMap.id,
+      mapVersion: festivalMap.version,
+      xRatio: 0.24,
+      yRatio: 0.24,
+      label: 'IT대학 2호관 앞',
+    },
   },
   {
     id: 'stationery',
@@ -65,7 +89,13 @@ export const taverns: Tavern[] = [
     totalSeats: 25,
     popularity: 71,
     menu: ['순대볶음', '컵밥', '라면'],
-    mapPosition: { left: '62%', top: '39%' },
+    mapPosition: {
+      mapId: festivalMap.id,
+      mapVersion: festivalMap.version,
+      xRatio: 0.62,
+      yRatio: 0.39,
+      label: '복현회관 잔디광장',
+    },
   },
   {
     id: 'sim-mong',
@@ -79,7 +109,13 @@ export const taverns: Tavern[] = [
     totalSeats: 25,
     popularity: 64,
     menu: ['마라샹궈', '꿔바로우', '짬뽕탕'],
-    mapPosition: { left: '76%', top: '50%' },
+    mapPosition: {
+      mapId: festivalMap.id,
+      mapVersion: festivalMap.version,
+      xRatio: 0.76,
+      yRatio: 0.5,
+      label: '사회과학대학 앞',
+    },
   },
   {
     id: 'nursing-pub',
@@ -93,7 +129,13 @@ export const taverns: Tavern[] = [
     totalSeats: 25,
     popularity: 78,
     menu: ['치즈 떡볶이', '김말이', '주먹밥'],
-    mapPosition: { left: '34%', top: '33%' },
+    mapPosition: {
+      mapId: festivalMap.id,
+      mapVersion: festivalMap.version,
+      xRatio: 0.34,
+      yRatio: 0.33,
+      label: '간호대학 입구',
+    },
   },
   {
     id: 'gosu-restaurant',
@@ -107,7 +149,13 @@ export const taverns: Tavern[] = [
     totalSeats: 25,
     popularity: 82,
     menu: ['닭꼬치', '오뎅탕', '감자전'],
-    mapPosition: { left: '49%', top: '28%' },
+    mapPosition: {
+      mapId: festivalMap.id,
+      mapVersion: festivalMap.version,
+      xRatio: 0.49,
+      yRatio: 0.28,
+      label: '글로벌플라자 앞',
+    },
   },
   {
     id: 'hobanu-pocha',
@@ -121,7 +169,13 @@ export const taverns: Tavern[] = [
     totalSeats: 25,
     popularity: 76,
     menu: ['파전', '두부김치', '소시지 야채볶음'],
-    mapPosition: { left: '47%', top: '49%' },
+    mapPosition: {
+      mapId: festivalMap.id,
+      mapVersion: festivalMap.version,
+      xRatio: 0.47,
+      yRatio: 0.49,
+      label: '농대 운동장 앞',
+    },
   },
   {
     id: 'come-eat',
@@ -135,7 +189,13 @@ export const taverns: Tavern[] = [
     totalSeats: 25,
     popularity: 69,
     menu: ['필라프', '치즈스틱', '버터갈릭 감자튀김'],
-    mapPosition: { left: '62%', top: '60%' },
+    mapPosition: {
+      mapId: festivalMap.id,
+      mapVersion: festivalMap.version,
+      xRatio: 0.62,
+      yRatio: 0.6,
+      label: '학생주차장 옆',
+    },
   },
 ];
 
