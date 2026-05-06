@@ -40,15 +40,15 @@ const steps = [
 ];
 
 const prizes = [
-  { rank: '1위', name: '애플워치', imgSrc: prize1, nameClass: 'text-heading2' },
-  { rank: '2위', name: '신세계 상품권\n10만원', imgSrc: prize2, nameClass: 'text-subheading' },
-  { rank: '3위', name: '배달의 민족\n3만원', imgSrc: prize3, nameClass: 'text-heading2' },
+  { rank: '1위', name: '애플워치', imgSrc: prize1 },
+  { rank: '2위', name: '신세계 상품권\n10만원', imgSrc: prize2 },
+  { rank: '3위', name: '배달의 민족\n3만원', imgSrc: prize3 },
 ];
 
 const StampTourContext = () => {
   return (
     <section className="w-full bg-white">
-      <div className="mx-auto flex w-full max-w-[375px] flex-col items-center gap-12 px-5 pb-[200px] pt-16">
+      <div className="mx-auto flex w-full flex-col items-center gap-12 px-5 pb-[200px] pt-16">
         {/* Section header */}
         <div className="flex w-full flex-col gap-4 pt-8">
           <div className="flex flex-col gap-2.5">
@@ -76,7 +76,7 @@ const StampTourContext = () => {
         </div>
 
         {/* Prizes */}
-        <div className="flex w-full flex-col gap-[30px]">
+        <div className="flex w-full flex-col gap-12">
           <div className="flex flex-col gap-2.5">
             <p className="font-wanted-sans text-body1 font-bold tracking-tight text-ink">
               Stamp Prizes
@@ -85,41 +85,37 @@ const StampTourContext = () => {
               2026 대동제가 준비한 상품
             </p>
           </div>
-          <div className="flex flex-col gap-2.5">
-            {prizes.map(({ rank, name, imgSrc, nameClass }) => (
+          <div className="flex flex-col gap-8">
+            {prizes.map(({ rank, name, imgSrc }) => (
               <div
                 key={rank}
-                className="flex items-end justify-center gap-[30px] rounded-[8px] bg-[rgba(255,61,61,0.03)] px-[30px] py-[20px]"
+                className="flex h-[196px] items-end justify-center gap-[30px] rounded-lg bg-[rgba(255,61,61,0.03)] px-[30px] py-5"
               >
-                <div className="flex items-end self-stretch">
-                  <div className="flex h-full w-[89px] flex-col items-center justify-between py-[10px]">
-                    <div className="flex flex-col items-center pb-[5px]">
+                <div className="flex shrink-0 flex-col items-center justify-between self-stretch py-2.5">
+                  <div className="flex w-full flex-col items-center">
+                    <div className="-mb-[5px] h-[37px] w-[80px] shrink-0">
                       <img
                         src={prizeStars}
                         alt=""
                         aria-hidden
-                        className="-mb-[5px] h-[37px] w-[80px] object-bottom"
+                        className="pointer-events-none size-full object-bottom"
                       />
-                      <p className="-mb-[5px] font-wanted-sans text-body1 font-bold tracking-tight text-[#da131c] whitespace-nowrap">
-                        {rank}
-                      </p>
                     </div>
-                    <div className="flex flex-1 flex-col justify-center min-h-0 w-[117px]">
-                      <p
-                        className={`${nameClass} text-center font-wanted-sans font-bold leading-[1.4] tracking-tight text-ink whitespace-pre-line`}
-                      >
-                        {name}
-                      </p>
-                    </div>
+                    <p className="font-wanted-sans text-[16px] font-bold leading-none tracking-tight text-[#da131c] whitespace-nowrap">
+                      {rank}
+                    </p>
+                  </div>
+                  <div className="flex flex-[1_0_0] flex-col justify-center">
+                    <p className="text-center font-wanted-sans text-[24px] font-bold leading-none tracking-tight text-ink whitespace-pre-line">
+                      {name}
+                    </p>
                   </div>
                 </div>
-                <div className="aspect-square flex-1 min-w-0">
-                  <img
-                    src={imgSrc}
-                    alt={name.replace('\n', ' ')}
-                    className="size-full object-contain"
-                  />
-                </div>
+                <img
+                  src={imgSrc}
+                  alt={name.replace('\n', ' ')}
+                  className="shrink-0 size-[156px] object-contain"
+                />
               </div>
             ))}
           </div>

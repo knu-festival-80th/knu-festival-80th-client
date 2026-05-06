@@ -1,7 +1,7 @@
 import BoothCard from '@/components/stampTour/BoothCard';
 import mapImage from '@/assets/stampTour/mapImage.svg';
 
-const BoothListPage = () => {
+const StampBoothListPage = () => {
   return (
     <div
       className="min-h-screen w-full"
@@ -41,4 +41,4 @@ const BoothListPage = () => {
   );
 };
 
-export default BoothListPage;
+export default StampBoothListPage;

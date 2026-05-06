@@ -9,7 +9,7 @@ interface ProcessCardProps {
 }
 
 const ProcessCard = ({ step, title, description, bgSrc, imgSrc }: ProcessCardProps) => (
-  <div className="relative flex h-[470px] w-full flex-col justify-between overflow-hidden rounded-[6px] p-6">
+  <div className="relative flex aspect-4/5 w-full flex-col overflow-hidden rounded-md p-6">
     <div aria-hidden className="pointer-events-none absolute inset-0">
       <img src={bgSrc} alt="" className="absolute inset-0 size-full object-cover" />
       <div
@@ -31,12 +31,14 @@ const ProcessCard = ({ step, title, description, bgSrc, imgSrc }: ProcessCardPro
       </p>
     </div>
 
-    <img
-      aria-hidden
-      src={imgSrc}
-      alt=""
-      className="pointer-events-none absolute left-6 top-[159px] w-[287px] object-contain"
-    />
+    <div className="relative min-h-0 flex-1 overflow-hidden">
+      <img
+        aria-hidden
+        src={imgSrc}
+        alt=""
+        className="pointer-events-none absolute inset-0 size-full object-contain object-bottom"
+      />
+    </div>
 
     <div className="relative flex justify-end">
       <OutlineButton label="지도 보기" showArrow variant="glass" />

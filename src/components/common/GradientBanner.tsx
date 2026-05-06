@@ -4,7 +4,7 @@ export interface GradientBannerProps {
 
 export const GradientBanner = ({ title }: GradientBannerProps) => {
   return (
-    <div className="relative flex w-full flex-col items-start justify-end gap-2.5 overflow-hidden px-5 py-10.5 min-h-51">
+    <div className="relative flex min-h-[270px] w-full flex-col items-start justify-end gap-2.5 overflow-hidden px-5 py-10.5 min-h-51">
       <div
         className="absolute inset-0"
         style={{
