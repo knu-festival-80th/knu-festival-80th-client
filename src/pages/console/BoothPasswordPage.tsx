@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { AlertCircle, AlertTriangle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { AlertCircle, AlertTriangle, ArrowLeft, CheckCircle2, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
@@ -74,16 +74,11 @@ export default function BoothPasswordPage() {
           <span className="text-[var(--admin-text-faint)]">/</span>
           <span className="truncate text-[var(--admin-text-muted)]">비밀번호 변경</span>
         </div>
-        <h1 className="mt-1 text-2xl font-semibold text-[var(--admin-text)]">비밀번호 변경</h1>
+        <div className="mt-1 flex items-center gap-2">
+          <Lock size={20} className="text-[var(--admin-text-muted)]" />
+          <h1 className="text-2xl font-bold text-[var(--admin-text)]">비밀번호 변경</h1>
+        </div>
         <p className="text-sm text-[var(--admin-text-muted)]">{boothName}</p>
-      </div>
-
-      <div
-        role="alert"
-        className="flex items-start gap-2 rounded-md border border-[var(--admin-warn)]/30 bg-[var(--admin-warn-soft)] px-3 py-2 text-sm text-[var(--admin-warn)]"
-      >
-        <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-        <span>비밀번호를 변경하면 기존 부스 운영진 로그인은 즉시 차단됩니다.</span>
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
@@ -99,6 +94,14 @@ export default function BoothPasswordPage() {
 
         <Card padding="md">
           <div className="flex flex-col gap-4">
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-md border border-[var(--admin-warn)]/30 bg-[var(--admin-warn-soft)] px-3 py-2 text-sm text-[var(--admin-warn)]"
+            >
+              <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+              <span>비밀번호를 변경하면 기존 부스 운영진 로그인은 즉시 차단됩니다.</span>
+            </div>
+
             <Field label="새 비밀번호" required htmlFor="new-password">
               <Input
                 id="new-password"
@@ -133,7 +136,7 @@ export default function BoothPasswordPage() {
           </div>
         )}
 
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button type="submit" variant="primary" disabled={passwordMutation.isPending}>
             {passwordMutation.isPending ? '변경 중...' : '비밀번호 변경'}
           </Button>

@@ -156,47 +156,61 @@
 }
 
 [data-admin-theme='console'] {
-  --admin-bg: #f8fafc;
+  --admin-bg: #f7f8fb;
   --admin-surface: #ffffff;
-  --admin-surface-hover: #f1f5f9;
-  --admin-border: #e2e8f0;
-  --admin-border-strong: #cbd5e1;
-  --admin-text: #0f172a;
-  --admin-text-muted: #475569;
-  --admin-text-faint: #94a3b8;
-  --admin-primary: #1d2038;
-  --admin-primary-strong: #0f1120;
-  --admin-primary-soft: rgba(29, 32, 56, 0.06);
-  --admin-primary-fg: #ffffff;
-  --admin-danger: #b91c1c;
-  --admin-danger-soft: rgba(185, 28, 28, 0.08);
-  --admin-success: #15803d;
-  --admin-success-soft: rgba(21, 128, 61, 0.08);
-  --admin-warn: #b45309;
-  --admin-warn-soft: rgba(180, 83, 9, 0.08);
-}
-
-[data-admin-theme='booth'] {
-  --admin-bg: #fafaf7;
-  --admin-surface: #ffffff;
-  --admin-surface-hover: #f5f4ef;
-  --admin-border: #e8e4dc;
-  --admin-border-strong: #d3cdbf;
+  --admin-surface-hover: #f0f1f5;
+  --admin-border: #e5e5e5;
+  --admin-border-strong: #d1d5db;
   --admin-text: #1d2038;
-  --admin-text-muted: #5e5b56;
-  --admin-text-faint: #9b968c;
+  --admin-text-muted: #4b5563;
+  --admin-text-faint: #9ca3af;
   --admin-primary: #ea5147;
   --admin-primary-strong: #d3382e;
   --admin-primary-soft: rgba(234, 81, 71, 0.08);
   --admin-primary-fg: #ffffff;
-  --admin-danger: #b91c1c;
-  --admin-danger-soft: rgba(185, 28, 28, 0.08);
-  --admin-success: #15803d;
-  --admin-success-soft: rgba(21, 128, 61, 0.08);
-  --admin-warn: #b45309;
-  --admin-warn-soft: rgba(180, 83, 9, 0.08);
+  --admin-danger: #dc2626;
+  --admin-danger-soft: rgba(220, 38, 38, 0.08);
+  --admin-success: #16a34a;
+  --admin-success-soft: rgba(22, 163, 74, 0.08);
+  --admin-warn: #d97706;
+  --admin-warn-soft: rgba(217, 119, 6, 0.08);
+}
+
+[data-admin-theme='booth'] {
+  --admin-bg: #f7f8fa;
+  --admin-surface: #ffffff;
+  --admin-surface-hover: #f2f4f6;
+  --admin-border: #e5e8eb;
+  --admin-border-strong: #d1d6db;
+  --admin-text: #191f28;
+  --admin-text-muted: #6b7684;
+  --admin-text-faint: #b0b8c1;
+  --admin-primary: #3182f6;
+  --admin-primary-strong: #1b64da;
+  --admin-primary-soft: rgba(49, 130, 246, 0.08);
+  --admin-primary-fg: #ffffff;
+  --admin-danger: #f04452;
+  --admin-danger-soft: rgba(240, 68, 82, 0.08);
+  --admin-success: #30b06e;
+  --admin-success-soft: rgba(48, 176, 110, 0.08);
+  --admin-warn: #f59e0b;
+  --admin-warn-soft: rgba(245, 158, 11, 0.08);
+  --admin-accent-waiting: #6b7684;
+  --admin-accent-called: #3182f6;
+  --admin-accent-entered: #30b06e;
+  --admin-accent-skipped: #b0b8c1;
+  --admin-accent-cancelled: #f04452;
 }
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }

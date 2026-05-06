@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Store } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ApiClientError, authApi } from '@/apis';
-import { Button, Card, Field, Input } from '@/components/admin/ui';
+import { Button, Field, Input } from '@/components/admin/ui';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function BoothManageLoginPage() {
@@ -52,60 +52,68 @@ export default function BoothManageLoginPage() {
   };
 
   return (
-    <div data-admin-theme="booth" className="flex min-h-dvh items-center justify-center px-4 py-8">
+    <div
+      data-admin-theme="booth"
+      className="flex min-h-dvh items-center justify-center bg-[var(--admin-bg)] px-5 py-8"
+    >
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col gap-1.5 text-center">
-          <h1 className="text-2xl font-semibold text-[var(--admin-text)]">주막 운영</h1>
-          <p className="text-sm text-[var(--admin-text-muted)]">
-            부스 번호와 운영진 비밀번호로 로그인합니다.
-          </p>
+        <div className="mb-10 flex flex-col items-center gap-3 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--admin-primary-soft)]">
+            <Store size={28} className="text-[var(--admin-primary)]" />
+          </div>
+          <div>
+            <h1 className="font-wanted-sans text-[22px] font-bold text-[var(--admin-text)]">
+              주막 운영
+            </h1>
+            <p className="mt-1 text-sm text-[var(--admin-text-muted)]">
+              부스 번호와 비밀번호로 로그인
+            </p>
+          </div>
         </div>
 
-        <Card padding="lg">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <Field label="부스 번호" htmlFor="booth-id">
-              <Input
-                id="booth-id"
-                type="number"
-                inputMode="numeric"
-                min={1}
-                value={boothId}
-                onChange={(e) => setBoothId(e.target.value)}
-                placeholder="예: 12"
-                disabled={loginMutation.isPending}
-                invalid={Boolean(errorMessage)}
-                autoFocus
-                numericMono
-              />
-            </Field>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Field label="부스 번호" htmlFor="booth-id">
+            <Input
+              id="booth-id"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              value={boothId}
+              onChange={(e) => setBoothId(e.target.value)}
+              placeholder="예: 12"
+              disabled={loginMutation.isPending}
+              invalid={Boolean(errorMessage)}
+              autoFocus
+              numericMono
+            />
+          </Field>
 
-            <Field label="비밀번호" htmlFor="booth-password">
-              <Input
-                id="booth-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                disabled={loginMutation.isPending}
-                invalid={Boolean(errorMessage)}
-              />
-            </Field>
+          <Field label="비밀번호" htmlFor="booth-password">
+            <Input
+              id="booth-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              disabled={loginMutation.isPending}
+              invalid={Boolean(errorMessage)}
+            />
+          </Field>
 
-            {errorMessage && (
-              <div
-                role="alert"
-                className="flex items-start gap-2 rounded-md border border-[var(--admin-danger)]/30 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
-              >
-                <AlertCircle size={14} className="mt-0.5 shrink-0" />
-                <span>{errorMessage}</span>
-              </div>
-            )}
+          {errorMessage && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-xl bg-[var(--admin-danger-soft)] px-3.5 py-2.5 text-sm text-[var(--admin-danger)]"
+            >
+              <AlertCircle size={14} className="mt-0.5 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
-            <Button type="submit" size="lg" block disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? '입장 중…' : '로그인'}
-            </Button>
-          </form>
-        </Card>
+          <Button type="submit" size="lg" block disabled={loginMutation.isPending}>
+            {loginMutation.isPending ? '로그인 중...' : '로그인'}
+          </Button>
+        </form>
       </div>
     </div>
   );

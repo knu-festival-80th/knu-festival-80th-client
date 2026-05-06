@@ -47,16 +47,20 @@ export default function ConsoleLoginPage() {
     <div
       data-admin-theme="console"
       className="flex min-h-dvh items-center justify-center px-4 py-8"
+      style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%)' }}
     >
       <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col gap-1.5 text-center">
-          <h1 className="text-2xl font-semibold text-[var(--admin-text)]">KNU 운영 콘솔</h1>
-          <p className="text-sm text-[var(--admin-text-muted)]">
-            최고 관리자 마스터 비밀번호로 로그인합니다.
-          </p>
+        <div className="mb-8 flex flex-col items-center gap-2 text-center">
+          <span className="text-xs font-semibold tracking-widest uppercase text-[var(--admin-text-faint)]">
+            KNU 80th Festival
+          </span>
+          <h1 className="font-wanted-sans text-2xl font-bold text-[var(--admin-text)]">
+            운영 콘솔
+          </h1>
+          <p className="text-sm text-[var(--admin-text-muted)]">최고 관리자 전용</p>
         </div>
 
-        <Card padding="lg">
+        <Card padding="lg" className="shadow-md">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Field label="마스터 비밀번호" htmlFor="console-password">
               <Input
@@ -82,7 +86,7 @@ export default function ConsoleLoginPage() {
             )}
 
             <Button type="submit" size="lg" block disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? '인증 중…' : '로그인'}
+              {loginMutation.isPending ? '인증 중...' : '로그인'}
             </Button>
           </form>
         </Card>

@@ -1,3 +1,4 @@
+export { default as BottomSheet } from './BottomSheet';
 export { default as Button } from './Button';
 export { default as Field } from './Field';
 export { default as Input } from './Input';
@@ -5,3 +6,5 @@ export { default as Textarea } from './Textarea';
 export { default as Card } from './Card';
 export { default as StatusBadge } from './StatusBadge';
 export { default as ImageUploadField } from './ImageUploadField';
+export { default as StatTile } from './StatTile';
+export { default as OverflowMenu } from './OverflowMenu';

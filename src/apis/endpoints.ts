@@ -23,10 +23,6 @@ export const ENDPOINTS = {
     booths: '/admin/booths',
     boothById: (boothId: number) => `/admin/booths/${boothId}`,
     boothPassword: (boothId: number) => `/admin/booths/${boothId}/password`,
-    menus: (boothId: number) => `/admin/booths/${boothId}/menus`,
-    menuById: (boothId: number, menuId: number) => `/admin/booths/${boothId}/menus/${menuId}`,
-    menuSoldOut: (boothId: number, menuId: number) =>
-      `/admin/booths/${boothId}/menus/${menuId}/sold-out`,
     waitings: (boothId: number) => `/admin/booths/${boothId}/waitings`,
     waitingInsert: (boothId: number) => `/admin/booths/${boothId}/waitings/insert`,
     waitingToggle: (boothId: number) => `/admin/booths/${boothId}/waitings/toggle`,
