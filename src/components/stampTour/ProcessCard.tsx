@@ -9,7 +9,14 @@ interface ProcessCardProps {
   onButtonClick?: () => void;
 }
 
-const ProcessCard = ({ step, title, description, bgSrc, imgSrc, onButtonClick }: ProcessCardProps) => (
+const ProcessCard = ({
+  step,
+  title,
+  description,
+  bgSrc,
+  imgSrc,
+  onButtonClick,
+}: ProcessCardProps) => (
   <div className="relative flex aspect-4/5 w-full flex-col overflow-hidden rounded-md p-6">
     <div aria-hidden className="pointer-events-none absolute inset-0">
       <img src={bgSrc} alt="" className="absolute inset-0 size-full object-cover" />

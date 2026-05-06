@@ -1,3 +1,4 @@
+import arrowDown from '@/assets/stampTour/arrow_down.svg';
 import ZoneBadge from './ZoneBadge';
 
 type BoothCardBase = {
@@ -21,18 +22,6 @@ type CompactBoothCard = BoothCardBase & {
 };
 
 type BoothCardProps = ExpandedBoothCard | CompactBoothCard;
-
-const ChevronRight = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path
-      d="M9 18l6-6-6-6"
-      stroke="#808080"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 const BoothCard = (props: BoothCardProps) => {
   const { zone, name, description } = props;
@@ -79,12 +68,12 @@ const BoothCard = (props: BoothCardProps) => {
       <button
         type="button"
         onClick={props.onDetailClick}
-        className="flex w-full items-center justify-center gap-0.5"
+        className="flex h-6 w-[72px] items-center justify-center self-center gap-1"
       >
-        <span className="font-wanted-sans text-body2 font-medium tracking-tight text-gray">
+        <span className="font-wanted-sans text-[14px] font-medium leading-none tracking-[-0.02em] text-right text-gray whitespace-nowrap">
           상세정보
         </span>
-        <ChevronRight />
+        <img src={arrowDown} alt="" aria-hidden className="size-4" />
       </button>
     </div>
   );

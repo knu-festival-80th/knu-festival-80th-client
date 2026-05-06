@@ -30,7 +30,12 @@ const variantStyles: Record<Variant, { container: string; text: string; arrow: s
   },
 };
 
-const OutlineButton = ({ label, showArrow = false, variant = 'default', onClick }: OutlineButtonProps) => {
+const OutlineButton = ({
+  label,
+  showArrow = false,
+  variant = 'default',
+  onClick,
+}: OutlineButtonProps) => {
   const styles = variantStyles[variant];
   return (
     <button
