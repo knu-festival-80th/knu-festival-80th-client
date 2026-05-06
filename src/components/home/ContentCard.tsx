@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import GlassCircleButton from './GlassCircleButton';
 
 type ContentCardProps = {
   category: string;
@@ -8,7 +7,14 @@ type ContentCardProps = {
   description?: string;
   imageSrc?: string;
   illustrationSrc?: string;
-  to: string;
+  to?: string;
+  onClick?: () => void;
+  className?: string;
+  contentClassName?: string;
+  categoryClassName?: string;
+  titleClassName?: string;
+  descriptionClassName?: string;
+  showAction?: boolean;
 };
 
 export default function ContentCard({
@@ -18,12 +24,16 @@ export default function ContentCard({
   imageSrc,
   illustrationSrc,
   to,
+  onClick,
+  className,
+  contentClassName = 'relative flex flex-col gap-1.5',
+  categoryClassName = 'text-body1 font-medium tracking-tight text-ink',
+  titleClassName = 'text-subheading font-bold tracking-tight text-ink whitespace-pre-line',
+  descriptionClassName = 'text-body1 text-gray whitespace-pre-line',
+  showAction = true,
 }: ContentCardProps) {
-  return (
-    <Link
-      to={to}
-      className="relative flex aspect-4/5 w-full flex-col overflow-hidden rounded-md p-6"
-    >
+  const content = (
+    <>
       <div aria-hidden className="absolute inset-0">
         {imageSrc ? (
           <img src={imageSrc} alt="" className="size-full object-cover" />
@@ -39,12 +49,10 @@ export default function ContentCard({
         />
       </div>
 
-      <div className="relative flex flex-col gap-1.5">
-        <p className="text-body1 font-medium tracking-tight text-ink">{category}</p>
-        <p className="text-subheading font-bold tracking-tight text-ink whitespace-pre-line">
-          {title}
-        </p>
-        {description && <p className="text-body1 text-gray whitespace-pre-line">{description}</p>}
+      <div className={contentClassName}>
+        <p className={categoryClassName}>{category}</p>
+        <p className={titleClassName}>{title}</p>
+        {description && <p className={descriptionClassName}>{description}</p>}
       </div>
 
       <div className="relative min-h-0 flex-1 overflow-hidden">
@@ -57,9 +65,35 @@ export default function ContentCard({
         )}
       </div>
 
-      <div className="relative flex justify-end">
-        <GlassCircleButton icon={<ArrowRight className="size-6 text-ink" />} />
-      </div>
-    </Link>
+      {showAction && (
+        <div className="relative flex justify-end">
+          <span className="flex size-12 items-center justify-center rounded-full border border-white/50 bg-white/30">
+            <ArrowRight className="size-6 text-ink" />
+          </span>
+        </div>
+      )}
+    </>
+  );
+
+  const cardClassName = `relative flex w-full flex-col overflow-hidden rounded-md p-6 text-left ${
+    className ?? 'aspect-4/5'
+  }`;
+
+  if (to) {
+    return (
+      <Link to={to} className={cardClassName}>
+        {content}
+      </Link>
+    );
+  }
+
+  if (!onClick) {
+    return <article className={cardClassName}>{content}</article>;
+  }
+
+  return (
+    <button type="button" className={cardClassName} onClick={onClick}>
+      {content}
+    </button>
   );
 }
