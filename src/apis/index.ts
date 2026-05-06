@@ -18,7 +18,6 @@ export type {
 
 export * as authApi from '@/apis/modules/auth';
 export * as boothApi from '@/apis/modules/booth';
-export * as menuApi from '@/apis/modules/menu';
 export * as uploadApi from '@/apis/modules/upload';
 export * as waitingApi from '@/apis/modules/waiting';
 export { imagePathToSrc, imageUrlToPath } from '@/apis/modules/upload';
@@ -32,7 +31,6 @@ export type {
   BoothUpdateRequest,
   BoothSort,
 } from '@/apis/modules/booth';
-export type { MenuCreateRequest, MenuItem, MenuUpdateRequest } from '@/apis/modules/menu';
 export type {
   WaitingInsertRequest,
   WaitingItem,

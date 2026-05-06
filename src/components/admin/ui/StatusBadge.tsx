@@ -20,21 +20,36 @@ const FROM_WAITING_STATUS: Record<WaitingStatus, { tone: Tone; label: string }> 
   CANCELLED: { tone: 'danger', label: '취소' },
 };
 
+type Size = 'sm' | 'lg';
+
+const SIZE: Record<Size, string> = {
+  sm: 'px-2 py-0.5 text-xs',
+  lg: 'px-2.5 py-1 text-sm',
+};
+
 interface StatusBadgeProps {
   status?: WaitingStatus;
   tone?: Tone;
+  size?: Size;
   children?: ReactNode;
   className?: string;
 }
 
-export default function StatusBadge({ status, tone, children, className = '' }: StatusBadgeProps) {
+export default function StatusBadge({
+  status,
+  tone,
+  size = 'sm',
+  children,
+  className = '',
+}: StatusBadgeProps) {
   const resolvedTone: Tone = tone ?? (status ? FROM_WAITING_STATUS[status].tone : 'neutral');
   const label = children ?? (status ? FROM_WAITING_STATUS[status].label : null);
 
   return (
     <span
       className={[
-        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap',
+        'inline-flex items-center rounded-full font-medium whitespace-nowrap',
+        SIZE[size],
         TONE[resolvedTone],
         className,
       ].join(' ')}

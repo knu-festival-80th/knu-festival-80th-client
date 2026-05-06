@@ -40,7 +40,7 @@ export const MainHeader = () => {
               </div>
             </button>
             {isLangOpen && (
-              <div className="absolute left-0 top-full mt-1 min-w-full overflow-hidden rounded-lg border border-black/30 backdrop-blur-sm bg-white/5">
+              <div className="absolute left-0 top-full mt-1 min-w-full overflow-hidden rounded-lg border border-black/30 bg-transparent">
                 {(['KR', 'EN'] as Language[]).map((l) => (
                   <button
                     key={l}

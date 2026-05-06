@@ -36,18 +36,12 @@ export default function BoothListPage() {
 
   const booths = boothsQuery.data ?? [];
   const activeCount = booths.filter((b) => b.waitingOpen).length;
+  const totalWaiting = booths.reduce((sum, b) => sum + b.currentWaitingTeams, 0);
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-semibold text-[var(--admin-text)]">부스</h1>
-          {boothsQuery.data && (
-            <p className="mt-1 text-sm text-[var(--admin-text-muted)]">
-              총 {booths.length}개 · 접수중 {activeCount}개
-            </p>
-          )}
-        </div>
+        <h1 className="text-2xl font-bold text-[var(--admin-text)]">부스</h1>
         <Button
           type="button"
           variant="primary"
@@ -57,6 +51,35 @@ export default function BoothListPage() {
           신규 등록
         </Button>
       </div>
+
+      {boothsQuery.data && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3">
+            <p className="text-xs text-[var(--admin-text-muted)]">총 부스</p>
+            <p className="tabular mt-0.5 text-xl font-bold text-[var(--admin-text)]">
+              {booths.length}
+            </p>
+          </div>
+          <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3">
+            <p className="text-xs text-[var(--admin-text-muted)]">접수중</p>
+            <p className="tabular mt-0.5 text-xl font-bold text-[var(--admin-success)]">
+              {activeCount}
+            </p>
+          </div>
+          <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3">
+            <p className="text-xs text-[var(--admin-text-muted)]">총 대기</p>
+            <p className="tabular mt-0.5 text-xl font-bold text-[var(--admin-text)]">
+              {totalWaiting}
+            </p>
+          </div>
+          <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3">
+            <p className="text-xs text-[var(--admin-text-muted)]">접수중단</p>
+            <p className="tabular mt-0.5 text-xl font-bold text-[var(--admin-text-muted)]">
+              {booths.length - activeCount}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-end gap-2">
         <label htmlFor="booth-sort" className="text-xs text-[var(--admin-text-muted)]">
@@ -93,7 +116,7 @@ export default function BoothListPage() {
 
       {boothsQuery.data && booths.length > 0 && (
         <Card padding="none">
-          <div className="hidden border-b border-[var(--admin-border)] px-4 py-2.5 text-xs text-[var(--admin-text-muted)] sm:grid sm:grid-cols-[3rem_1fr_5rem_5rem_6rem_auto] sm:items-center sm:gap-4">
+          <div className="hidden border-b border-[var(--admin-border)] px-5 py-2.5 text-xs font-medium text-[var(--admin-text-muted)] sm:grid sm:grid-cols-[3rem_1fr_5rem_5rem_5rem_11rem] sm:items-center sm:gap-4">
             <div>ID</div>
             <div>이름</div>
             <div className="text-right tabular">좋아요</div>
@@ -102,10 +125,11 @@ export default function BoothListPage() {
             <div className="text-right">액션</div>
           </div>
           <ul>
-            {booths.map((booth) => (
+            {booths.map((booth, idx) => (
               <BoothRow
                 key={booth.boothId}
                 booth={booth}
+                even={idx % 2 === 1}
                 isPending={deleteMutation.isPending}
                 onEdit={() => navigate(`/console/booths/${booth.boothId}/edit`)}
                 onChangePassword={() => navigate(`/console/booths/${booth.boothId}/password`)}
@@ -121,22 +145,29 @@ export default function BoothListPage() {
 
 interface BoothRowProps {
   booth: BoothListItem;
+  even: boolean;
   isPending: boolean;
   onEdit: () => void;
   onChangePassword: () => void;
   onDelete: () => void;
 }
 
-function BoothRow({ booth, isPending, onEdit, onChangePassword, onDelete }: BoothRowProps) {
+function BoothRow({ booth, even, isPending, onEdit, onChangePassword, onDelete }: BoothRowProps) {
   const idLabel = `#${booth.boothId.toString().padStart(2, '0')}`;
   const open = booth.waitingOpen;
 
   return (
-    <li className="border-b border-[var(--admin-border)] last:border-b-0 hover:bg-[var(--admin-surface-hover)]">
-      <div className="hidden px-4 py-3 sm:grid sm:grid-cols-[3rem_1fr_5rem_5rem_6rem_auto] sm:items-center sm:gap-4 sm:text-sm">
+    <li
+      className={[
+        'group border-b border-[var(--admin-border)] last:border-b-0',
+        even ? 'bg-[var(--admin-surface-hover)]/50' : '',
+        'hover:bg-[var(--admin-surface-hover)]',
+      ].join(' ')}
+    >
+      <div className="hidden px-5 py-3 sm:grid sm:grid-cols-[3rem_1fr_5rem_5rem_5rem_11rem] sm:items-center sm:gap-4 sm:text-sm">
         <div className="tabular text-[var(--admin-text-muted)]">{idLabel}</div>
         <div className="min-w-0">
-          <div className="truncate text-[var(--admin-text)]">{booth.name}</div>
+          <div className="truncate font-medium text-[var(--admin-text)]">{booth.name}</div>
           {booth.description && (
             <div className="hidden truncate text-xs text-[var(--admin-text-muted)] sm:block">
               {booth.description}
@@ -149,14 +180,23 @@ function BoothRow({ booth, isPending, onEdit, onChangePassword, onDelete }: Boot
         <div className="text-right tabular text-[var(--admin-text)]">
           {booth.currentWaitingTeams.toLocaleString()}
         </div>
-        <div className={open ? 'text-[var(--admin-success)]' : 'text-[var(--admin-text-muted)]'}>
-          {open ? '접수중' : '접수중단'}
+        <div>
+          <span
+            className={[
+              'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
+              open
+                ? 'bg-[var(--admin-success-soft)] text-[var(--admin-success)]'
+                : 'bg-[var(--admin-surface-hover)] text-[var(--admin-text-muted)]',
+            ].join(' ')}
+          >
+            {open ? '접수중' : '중단'}
+          </span>
         </div>
-        <div className="flex items-center justify-end gap-1 text-sm">
+        <div className="flex items-center justify-end gap-1 text-sm opacity-0 transition-opacity group-hover:opacity-100">
           <button
             type="button"
             onClick={onEdit}
-            className="rounded px-1.5 py-0.5 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
+            className="rounded px-2 py-1 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
           >
             수정
           </button>
@@ -164,7 +204,7 @@ function BoothRow({ booth, isPending, onEdit, onChangePassword, onDelete }: Boot
           <button
             type="button"
             onClick={onChangePassword}
-            className="rounded px-1.5 py-0.5 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
+            className="rounded px-2 py-1 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
           >
             비번
           </button>
@@ -182,51 +222,48 @@ function BoothRow({ booth, isPending, onEdit, onChangePassword, onDelete }: Boot
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 px-4 py-3 sm:hidden">
-        <div className="flex items-baseline gap-2 text-sm">
-          <span className="tabular text-[var(--admin-text-muted)]">{idLabel}</span>
-          <span className="text-[var(--admin-text-muted)]">·</span>
-          <span className="truncate text-[var(--admin-text)]">{booth.name}</span>
+      <div className="flex flex-col gap-3 px-4 py-3 sm:hidden">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="tabular text-xs text-[var(--admin-text-faint)]">{idLabel}</span>
+            <span className="text-sm font-medium text-[var(--admin-text)]">{booth.name}</span>
+          </div>
+          <span
+            className={[
+              'rounded-full px-2 py-0.5 text-xs font-medium',
+              open
+                ? 'bg-[var(--admin-success-soft)] text-[var(--admin-success)]'
+                : 'bg-[var(--admin-surface-hover)] text-[var(--admin-text-muted)]',
+            ].join(' ')}
+          >
+            {open ? '접수중' : '중단'}
+          </span>
         </div>
         {booth.description && (
-          <div className="truncate text-xs text-[var(--admin-text-muted)]">{booth.description}</div>
+          <p className="line-clamp-1 text-xs text-[var(--admin-text-muted)]">{booth.description}</p>
         )}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--admin-text-muted)]">
-          <span>
-            좋아요 <span className="tabular text-[var(--admin-text)]">{booth.likeCount}</span>
+        <div className="flex items-center gap-4 text-xs text-[var(--admin-text-muted)]">
+          <span className="tabular">
+            좋아요 <strong className="text-[var(--admin-text)]">{booth.likeCount}</strong>
           </span>
-          <span>
-            대기{' '}
-            <span className="tabular text-[var(--admin-text)]">{booth.currentWaitingTeams}</span>팀
-          </span>
-          <span className={open ? 'text-[var(--admin-success)]' : 'text-[var(--admin-text-muted)]'}>
-            {open ? '접수중' : '접수중단'}
+          <span className="tabular">
+            대기 <strong className="text-[var(--admin-text)]">{booth.currentWaitingTeams}</strong>팀
           </span>
         </div>
-        <div className="flex items-center gap-1 text-sm">
-          <button
-            type="button"
-            onClick={onEdit}
-            className="rounded px-1.5 py-0.5 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
-          >
+        <div className="flex items-center gap-2 border-t border-[var(--admin-border)] pt-2">
+          <Button variant="secondary" size="sm" onClick={onEdit}>
             수정
-          </button>
-          <span className="text-[var(--admin-text-faint)]">·</span>
-          <button
-            type="button"
-            onClick={onChangePassword}
-            className="rounded px-1.5 py-0.5 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
-          >
+          </Button>
+          <Button variant="ghost" size="sm" onClick={onChangePassword}>
             비번
-          </button>
-          <span className="text-[var(--admin-text-faint)]">·</span>
+          </Button>
           <Button
-            type="button"
             variant="danger"
             size="sm"
             onClick={onDelete}
             disabled={isPending}
             iconLeft={<Trash2 size={13} />}
+            className="ml-auto"
           >
             삭제
           </Button>
@@ -241,7 +278,7 @@ function SkeletonList() {
     <Card padding="sm">
       <ul className="flex flex-col gap-2">
         {Array.from({ length: 3 }).map((_, idx) => (
-          <li key={idx} className="h-10 animate-pulse rounded bg-[var(--admin-surface-hover)]" />
+          <li key={idx} className="h-12 animate-pulse rounded bg-[var(--admin-surface-hover)]" />
         ))}
       </ul>
     </Card>

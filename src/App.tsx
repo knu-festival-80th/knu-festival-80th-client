@@ -9,8 +9,6 @@ import BoothManageGuard from '@/components/guards/BoothManageGuard';
 import ConsoleGuard from '@/components/guards/ConsoleGuard';
 import BoothManageLoginPage from '@/pages/boothManage/BoothManageLoginPage';
 import BoothProfilePage from '@/pages/boothManage/BoothProfilePage';
-import MenuFormPage from '@/pages/boothManage/MenuFormPage';
-import MenuListPage from '@/pages/boothManage/MenuListPage';
 import WaitingInsertPage from '@/pages/boothManage/WaitingInsertPage';
 import WaitingListPage from '@/pages/boothManage/WaitingListPage';
 import BoothCreatePage from '@/pages/console/BoothCreatePage';
@@ -59,9 +57,6 @@ export default function App() {
           }
         >
           <Route index element={<BoothProfilePage />} />
-          <Route path="menus" element={<MenuListPage />} />
-          <Route path="menus/new" element={<MenuFormPage />} />
-          <Route path="menus/:menuId/edit" element={<MenuFormPage />} />
           <Route path="waitings" element={<WaitingListPage />} />
           <Route path="waitings/insert" element={<WaitingInsertPage />} />
         </Route>

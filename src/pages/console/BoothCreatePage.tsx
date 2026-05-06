@@ -11,7 +11,6 @@ interface FormState {
   description: string;
   xRatio: string;
   yRatio: string;
-  imageUrl: string;
   menuBoardImageUrl: string;
   adminPassword: string;
 }
@@ -21,7 +20,6 @@ const INITIAL_STATE: FormState = {
   description: '',
   xRatio: '',
   yRatio: '',
-  imageUrl: '',
   menuBoardImageUrl: '',
   adminPassword: '',
 };
@@ -89,7 +87,6 @@ export default function BoothCreatePage() {
       description: form.description.trim() || undefined,
       xRatio: x.value,
       yRatio: y.value,
-      imageUrl: form.imageUrl.trim() || undefined,
       menuBoardImageUrl: form.menuBoardImageUrl.trim() || undefined,
       adminPassword: form.adminPassword,
     });
@@ -109,125 +106,119 @@ export default function BoothCreatePage() {
           <span className="text-[var(--admin-text-faint)]">/</span>
           <span className="text-[var(--admin-text-muted)]">신규 부스 등록</span>
         </div>
-        <h1 className="mt-1 text-2xl font-semibold text-[var(--admin-text)]">신규 부스</h1>
+        <h1 className="mt-1 text-2xl font-bold text-[var(--admin-text)]">신규 부스</h1>
         <p className="text-sm text-[var(--admin-text-muted)]">
           부스 정보와 운영진 비밀번호를 설정합니다.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-        <Card padding="md">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-base font-semibold text-[var(--admin-text)]">기본 정보</h2>
-            <p className="text-sm text-[var(--admin-text-muted)]">
-              지도와 안내 페이지에 노출되는 정보입니다.
-            </p>
-          </div>
+      <form onSubmit={handleSubmit} noValidate>
+        <div className="flex flex-col gap-4 md:grid md:grid-cols-[2fr_1fr] md:items-start md:gap-6">
+          <div className="flex flex-col gap-4">
+            <Card padding="md">
+              <h2 className="mb-4 text-base font-semibold text-[var(--admin-text)]">기본 정보</h2>
+              <div className="flex flex-col gap-4">
+                <Field label="부스 이름" required htmlFor="booth-name">
+                  <Input
+                    id="booth-name"
+                    type="text"
+                    value={form.name}
+                    onChange={handleChange('name')}
+                    maxLength={100}
+                    required
+                    placeholder="예: 컴퓨터학부 주막"
+                  />
+                </Field>
 
-          <div className="mt-5 flex flex-col gap-4">
-            <Field label="부스 이름" required htmlFor="booth-name">
-              <Input
-                id="booth-name"
-                type="text"
-                value={form.name}
-                onChange={handleChange('name')}
-                maxLength={100}
+                <Field label="설명" htmlFor="booth-description">
+                  <Textarea
+                    id="booth-description"
+                    value={form.description}
+                    onChange={handleChange('description')}
+                    placeholder="부스 소개 문구"
+                  />
+                </Field>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="X 좌표" hint="0 ~ 1" htmlFor="booth-x-ratio">
+                    <Input
+                      id="booth-x-ratio"
+                      type="text"
+                      inputMode="decimal"
+                      numericMono
+                      value={form.xRatio}
+                      onChange={handleChange('xRatio')}
+                      placeholder="0.42"
+                    />
+                  </Field>
+                  <Field label="Y 좌표" hint="0 ~ 1" htmlFor="booth-y-ratio">
+                    <Input
+                      id="booth-y-ratio"
+                      type="text"
+                      inputMode="decimal"
+                      numericMono
+                      value={form.yRatio}
+                      onChange={handleChange('yRatio')}
+                      placeholder="0.18"
+                    />
+                  </Field>
+                </div>
+
+                <ImageUploadField
+                  label="메뉴판 이미지"
+                  hint="부스당 1장"
+                  value={form.menuBoardImageUrl}
+                  onChange={(next) => setForm((prev) => ({ ...prev, menuBoardImageUrl: next }))}
+                  emptyMessage="메뉴판 사진을 업로드하세요."
+                  previewClassName="max-h-72 w-full max-w-sm object-contain"
+                />
+              </div>
+            </Card>
+
+            <Card padding="md">
+              <h2 className="mb-4 text-base font-semibold text-[var(--admin-text)]">운영진 인증</h2>
+              <Field
+                label="관리 비밀번호"
                 required
-                placeholder="예: 컴퓨터학부 주막"
-              />
-            </Field>
-
-            <Field label="설명" htmlFor="booth-description">
-              <Textarea
-                id="booth-description"
-                value={form.description}
-                onChange={handleChange('description')}
-                placeholder="부스 소개 문구"
-              />
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="X 좌표" hint="0 ~ 1" htmlFor="booth-x-ratio">
+                hint="운영진에게 직접 전달"
+                htmlFor="booth-password"
+              >
                 <Input
-                  id="booth-x-ratio"
-                  type="text"
-                  inputMode="decimal"
-                  numericMono
-                  value={form.xRatio}
-                  onChange={handleChange('xRatio')}
-                  placeholder="0.42"
+                  id="booth-password"
+                  type="password"
+                  value={form.adminPassword}
+                  onChange={handleChange('adminPassword')}
+                  autoComplete="new-password"
+                  required
+                  placeholder="..........."
                 />
               </Field>
-              <Field label="Y 좌표" hint="0 ~ 1" htmlFor="booth-y-ratio">
-                <Input
-                  id="booth-y-ratio"
-                  type="text"
-                  inputMode="decimal"
-                  numericMono
-                  value={form.yRatio}
-                  onChange={handleChange('yRatio')}
-                  placeholder="0.18"
-                />
-              </Field>
-            </div>
-
-            <ImageUploadField
-              label="대표 이미지"
-              value={form.imageUrl}
-              onChange={(next) => setForm((prev) => ({ ...prev, imageUrl: next }))}
-              emptyMessage="부스 대표 이미지를 업로드하세요."
-            />
-
-            <ImageUploadField
-              label="메뉴판 이미지"
-              hint="부스당 1장"
-              value={form.menuBoardImageUrl}
-              onChange={(next) => setForm((prev) => ({ ...prev, menuBoardImageUrl: next }))}
-              emptyMessage="메뉴판 사진을 업로드하세요."
-              previewClassName="max-h-72 w-full max-w-sm object-contain"
-            />
-          </div>
-        </Card>
-
-        <Card padding="md">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-base font-semibold text-[var(--admin-text)]">운영진 인증</h2>
-            <p className="text-sm text-[var(--admin-text-muted)]">
-              부스 운영진에게 별도 채널로 안전하게 전달하세요.
-            </p>
+            </Card>
           </div>
 
-          <div className="mt-5">
-            <Field
-              label="관리 비밀번호"
-              required
-              hint="운영진에게 직접 전달"
-              htmlFor="booth-password"
-            >
-              <Input
-                id="booth-password"
-                type="password"
-                value={form.adminPassword}
-                onChange={handleChange('adminPassword')}
-                autoComplete="new-password"
-                required
-                placeholder="..........."
-              />
-            </Field>
+          <div className="hidden md:block">
+            <Card padding="md">
+              <h3 className="text-sm font-semibold text-[var(--admin-text)]">안내</h3>
+              <ul className="mt-3 flex flex-col gap-2 text-xs leading-relaxed text-[var(--admin-text-muted)]">
+                <li>X/Y 좌표는 지도 위 부스 위치 비율 (0~1)입니다.</li>
+                <li>비밀번호는 부스 운영진에게 별도 채널로 안전하게 전달하세요.</li>
+                <li>이미지는 정사각형 또는 가로형이 권장됩니다.</li>
+              </ul>
+            </Card>
           </div>
-        </Card>
+        </div>
 
         {errorMessage && (
           <div
             role="alert"
-            className="flex items-center gap-2 rounded-md border border-[var(--admin-danger)]/30 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
+            className="mt-4 flex items-center gap-2 rounded-md border border-[var(--admin-danger)]/30 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
           >
             <AlertCircle size={14} />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           <Button type="submit" variant="primary" disabled={createMutation.isPending}>
             {createMutation.isPending ? '등록 중...' : '등록'}
           </Button>

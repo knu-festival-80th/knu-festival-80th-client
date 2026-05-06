@@ -1,39 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { Camera, Check, Pencil, X } from 'lucide-react';
+import { useRef, useState, type ChangeEvent } from 'react';
 
-import { ApiClientError, boothApi, imageUrlToPath } from '@/apis';
+import { ApiClientError, boothApi, imagePathToSrc, imageUrlToPath, uploadApi } from '@/apis';
 import type { BoothListItem, BoothUpdateRequest } from '@/apis';
-import { Button, Card, Field, ImageUploadField, Input, Textarea } from '@/components/admin/ui';
 import { useAuthStore } from '@/stores/authStore';
-
-interface FormState {
-  name: string;
-  description: string;
-  xRatio: string;
-  yRatio: string;
-  imageUrl: string;
-  menuBoardImageUrl: string;
-}
-
-function toFormState(booth: BoothListItem): FormState {
-  return {
-    name: booth.name,
-    description: booth.description ?? '',
-    xRatio: booth.xRatio?.toString() ?? '',
-    yRatio: booth.yRatio?.toString() ?? '',
-    imageUrl: imageUrlToPath(booth.imageUrl),
-    menuBoardImageUrl: imageUrlToPath(booth.menuBoardImageUrl),
-  };
-}
-
-function parseRatio(raw: string): { value: number | undefined; error: string | null } {
-  const trimmed = raw.trim();
-  if (!trimmed) return { value: undefined, error: null };
-  const num = Number(trimmed);
-  if (!Number.isFinite(num)) return { value: undefined, error: '숫자만 입력해 주세요.' };
-  if (num < 0 || num > 1) return { value: undefined, error: '0과 1 사이의 값이어야 합니다.' };
-  return { value: num, error: null };
-}
 
 export default function BoothProfilePage() {
   const boothId = useAuthStore((s) => s.boothId);
@@ -45,198 +16,319 @@ export default function BoothProfilePage() {
 
   if (boothId === null) return null;
 
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-0.5">
-        <h1 className="text-xl font-semibold text-[var(--admin-text)]">부스 정보</h1>
-        <p className="text-sm text-[var(--admin-text-muted)]">
-          손님에게 노출되는 정보를 관리합니다.
-        </p>
+  if (boothsQuery.isLoading) {
+    return (
+      <div className="flex flex-col gap-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-16 animate-pulse rounded-2xl bg-[var(--admin-surface)]" />
+        ))}
       </div>
+    );
+  }
 
-      {boothsQuery.isLoading && (
-        <div className="h-64 animate-pulse rounded-md bg-[var(--admin-surface-hover)]" />
-      )}
+  if (boothsQuery.isError) {
+    return (
+      <div className="rounded-2xl bg-[var(--admin-danger-soft)] px-4 py-3 text-sm text-[var(--admin-danger)]">
+        {boothsQuery.error instanceof ApiClientError
+          ? boothsQuery.error.message
+          : '부스 정보를 불러오지 못했습니다.'}
+      </div>
+    );
+  }
 
-      {boothsQuery.isError && (
-        <div
-          role="alert"
-          className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
-        >
-          {boothsQuery.error instanceof ApiClientError
-            ? boothsQuery.error.message
-            : '부스 정보를 불러오지 못했습니다.'}
-        </div>
-      )}
+  const booth = boothsQuery.data?.find((b) => b.boothId === boothId);
+  if (!booth) {
+    return <p className="text-sm text-[var(--admin-text-faint)]">해당 부스를 찾을 수 없습니다.</p>;
+  }
 
-      {boothsQuery.data &&
-        (() => {
-          const booth = boothsQuery.data.find((b) => b.boothId === boothId);
-          if (!booth) {
-            return (
-              <p className="text-sm text-[var(--admin-text-muted)]">
-                해당 부스를 찾을 수 없습니다.
-              </p>
-            );
-          }
-          return <BoothProfileForm key={boothId} boothId={boothId} initial={toFormState(booth)} />;
-        })()}
-    </div>
-  );
+  return <BoothProfileView key={boothId} boothId={boothId} booth={booth} />;
 }
 
-interface BoothProfileFormProps {
+interface BoothProfileViewProps {
   boothId: number;
-  initial: FormState;
+  booth: BoothListItem;
 }
 
-function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
+function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<FormState>(initial);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const updateMutation = useMutation({
     mutationFn: (payload: BoothUpdateRequest) => boothApi.updateBooth(boothId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'booths'] });
-      setSuccessMessage('저장되었습니다.');
+      setEditingField(null);
+      showToast('success', '저장되었습니다.');
     },
     onError: (error: unknown) => {
-      setErrorMessage(error instanceof ApiClientError ? error.message : '저장에 실패했습니다.');
+      showToast('error', error instanceof ApiClientError ? error.message : '저장에 실패했습니다.');
     },
   });
 
-  const handleChange =
-    (key: keyof FormState) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev) => ({ ...prev, [key]: event.target.value }));
-      if (successMessage) setSuccessMessage(null);
-    };
-
-  const setField = (key: keyof FormState) => (next: string) => {
-    setForm((prev) => ({ ...prev, [key]: next }));
-    if (successMessage) setSuccessMessage(null);
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 2000);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setErrorMessage(null);
-    setSuccessMessage(null);
-
-    const x = parseRatio(form.xRatio);
-    const y = parseRatio(form.yRatio);
-    if (x.error) {
-      setErrorMessage(`X 좌표: ${x.error}`);
-      return;
-    }
-    if (y.error) {
-      setErrorMessage(`Y 좌표: ${y.error}`);
-      return;
-    }
-
-    updateMutation.mutate({
-      name: form.name.trim() || undefined,
-      description: form.description.trim() || undefined,
-      xRatio: x.value,
-      yRatio: y.value,
-      imageUrl: form.imageUrl.trim() || undefined,
-      menuBoardImageUrl: form.menuBoardImageUrl.trim() || undefined,
-    });
+  const startEdit = (field: string, currentValue: string) => {
+    setEditingField(field);
+    setEditValue(currentValue);
   };
+
+  const cancelEdit = () => {
+    setEditingField(null);
+    setEditValue('');
+  };
+
+  const saveField = (field: string, value: string) => {
+    const payload: BoothUpdateRequest = {};
+    if (field === 'name') payload.name = value.trim() || undefined;
+    else if (field === 'description') payload.description = value.trim();
+    else if (field === 'xRatio') {
+      const n = Number(value);
+      if (value && (!Number.isFinite(n) || n < 0 || n > 1)) {
+        showToast('error', '0과 1 사이의 값이어야 합니다.');
+        return;
+      }
+      payload.xRatio = value ? n : undefined;
+    } else if (field === 'yRatio') {
+      const n = Number(value);
+      if (value && (!Number.isFinite(n) || n < 0 || n > 1)) {
+        showToast('error', '0과 1 사이의 값이어야 합니다.');
+        return;
+      }
+      payload.yRatio = value ? n : undefined;
+    }
+    updateMutation.mutate(payload);
+  };
+
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const result = await uploadApi.uploadImage(file);
+      updateMutation.mutate({ menuBoardImageUrl: result.path });
+    } catch {
+      showToast('error', '이미지 업로드에 실패했습니다.');
+    }
+  };
+
+  const menuBoardSrc = imagePathToSrc(imageUrlToPath(booth.menuBoardImageUrl));
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Card padding="md">
-        <div className="flex flex-col gap-4">
-          {successMessage && (
-            <div
-              role="status"
-              className="rounded-md border border-[var(--admin-success)]/35 bg-[var(--admin-success-soft)] px-3 py-2 text-sm text-[var(--admin-success)]"
-            >
-              {successMessage}
-            </div>
-          )}
-          {errorMessage && (
-            <div
-              role="alert"
-              className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
-            >
-              {errorMessage}
-            </div>
-          )}
-
-          <Field label="부스 이름" htmlFor="booth-name">
-            <Input
-              id="booth-name"
-              type="text"
-              value={form.name}
-              onChange={handleChange('name')}
-              maxLength={100}
-              placeholder="예: 80주년 주막"
-            />
-          </Field>
-
-          <Field label="설명" hint={`${form.description.length}자`} htmlFor="booth-description">
-            <Textarea
-              id="booth-description"
-              value={form.description}
-              onChange={handleChange('description')}
-              placeholder="대표 메뉴, 분위기, 운영 시간 등을 짧게 소개해 주세요."
-            />
-          </Field>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="X 좌표" hint="0.0 ~ 1.0 비율" htmlFor="booth-x-ratio">
-              <Input
-                id="booth-x-ratio"
-                type="text"
-                inputMode="decimal"
-                numericMono
-                value={form.xRatio}
-                onChange={handleChange('xRatio')}
-                placeholder="0.42"
-              />
-            </Field>
-            <Field label="Y 좌표" hint="0.0 ~ 1.0 비율" htmlFor="booth-y-ratio">
-              <Input
-                id="booth-y-ratio"
-                type="text"
-                inputMode="decimal"
-                numericMono
-                value={form.yRatio}
-                onChange={handleChange('yRatio')}
-                placeholder="0.18"
-              />
-            </Field>
-          </div>
-
-          <ImageUploadField
-            label="대표 이미지"
-            value={form.imageUrl}
-            onChange={setField('imageUrl')}
-            emptyMessage="부스 대표 이미지를 업로드하세요."
-          />
-
-          <ImageUploadField
-            label="메뉴판 이미지"
-            hint="부스당 1장"
-            value={form.menuBoardImageUrl}
-            onChange={setField('menuBoardImageUrl')}
-            emptyMessage="메뉴판 사진을 업로드하세요."
-            previewClassName="max-h-80 w-full max-w-sm object-contain"
-          />
-
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            block
-            disabled={updateMutation.isPending}
-          >
-            {updateMutation.isPending ? '저장 중…' : '저장'}
-          </Button>
+    <div className="flex flex-col gap-3">
+      {toast && (
+        <div
+          className={[
+            'rounded-xl px-4 py-3 text-sm font-medium',
+            toast.type === 'success'
+              ? 'bg-[var(--admin-success-soft)] text-[var(--admin-success)]'
+              : 'bg-[var(--admin-danger-soft)] text-[var(--admin-danger)]',
+          ].join(' ')}
+        >
+          {toast.message}
         </div>
-      </Card>
-    </form>
+      )}
+
+      <div className="rounded-2xl bg-[var(--admin-surface)]">
+        <InlineRow
+          label="부스 이름"
+          value={booth.name}
+          editing={editingField === 'name'}
+          editValue={editValue}
+          onEdit={() => startEdit('name', booth.name)}
+          onCancel={cancelEdit}
+          onChange={setEditValue}
+          onSave={() => saveField('name', editValue)}
+          saving={updateMutation.isPending}
+        />
+        <div className="mx-4 border-t border-[var(--admin-border)]" />
+        <InlineRow
+          label="설명"
+          value={booth.description || ''}
+          placeholder="부스 소개를 입력하세요"
+          editing={editingField === 'description'}
+          editValue={editValue}
+          onEdit={() => startEdit('description', booth.description ?? '')}
+          onCancel={cancelEdit}
+          onChange={setEditValue}
+          onSave={() => saveField('description', editValue)}
+          saving={updateMutation.isPending}
+          multiline
+        />
+      </div>
+
+      <div className="rounded-2xl bg-[var(--admin-surface)]">
+        <div className="px-4 pt-4 pb-2">
+          <span className="text-[13px] font-semibold text-[var(--admin-text-muted)]">
+            위치 (지도 비율)
+          </span>
+        </div>
+        <InlineRow
+          label="X 좌표"
+          value={booth.xRatio?.toString() ?? ''}
+          placeholder="0.00"
+          editing={editingField === 'xRatio'}
+          editValue={editValue}
+          onEdit={() => startEdit('xRatio', booth.xRatio?.toString() ?? '')}
+          onCancel={cancelEdit}
+          onChange={setEditValue}
+          onSave={() => saveField('xRatio', editValue)}
+          saving={updateMutation.isPending}
+          inputMode="decimal"
+        />
+        <div className="mx-4 border-t border-[var(--admin-border)]" />
+        <InlineRow
+          label="Y 좌표"
+          value={booth.yRatio?.toString() ?? ''}
+          placeholder="0.00"
+          editing={editingField === 'yRatio'}
+          editValue={editValue}
+          onEdit={() => startEdit('yRatio', booth.yRatio?.toString() ?? '')}
+          onCancel={cancelEdit}
+          onChange={setEditValue}
+          onSave={() => saveField('yRatio', editValue)}
+          saving={updateMutation.isPending}
+          inputMode="decimal"
+        />
+      </div>
+
+      <div className="rounded-2xl bg-[var(--admin-surface)] p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-[13px] font-semibold text-[var(--admin-text-muted)]">
+            메뉴판 이미지
+          </span>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="flex items-center gap-1 text-[13px] font-medium text-[var(--admin-primary)]"
+          >
+            <Camera size={14} />
+            {menuBoardSrc ? '변경' : '업로드'}
+          </button>
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
+        {menuBoardSrc ? (
+          <img
+            src={menuBoardSrc}
+            alt="메뉴판"
+            className="w-full rounded-xl border border-[var(--admin-border)] object-contain"
+            style={{ maxHeight: 320 }}
+          />
+        ) : (
+          <div className="flex h-32 items-center justify-center rounded-xl bg-[var(--admin-surface-hover)] text-sm text-[var(--admin-text-faint)]">
+            메뉴판 사진을 업로드하세요
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface InlineRowProps {
+  label: string;
+  value: string;
+  placeholder?: string;
+  editing: boolean;
+  editValue: string;
+  onEdit: () => void;
+  onCancel: () => void;
+  onChange: (v: string) => void;
+  onSave: () => void;
+  saving: boolean;
+  multiline?: boolean;
+  inputMode?: 'text' | 'decimal';
+}
+
+function InlineRow({
+  label,
+  value,
+  placeholder,
+  editing,
+  editValue,
+  onEdit,
+  onCancel,
+  onChange,
+  onSave,
+  saving,
+  multiline,
+  inputMode = 'text',
+}: InlineRowProps) {
+  if (editing) {
+    return (
+      <div className="flex flex-col gap-2 px-4 py-3">
+        <span className="text-[13px] font-medium text-[var(--admin-text-muted)]">{label}</span>
+        {multiline ? (
+          <textarea
+            value={editValue}
+            onChange={(e) => onChange(e.target.value)}
+            className="min-h-20 rounded-xl border-0 bg-[var(--admin-surface-hover)] px-3 py-2.5 text-[15px] text-[var(--admin-text)] outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
+            autoFocus
+          />
+        ) : (
+          <input
+            type="text"
+            inputMode={inputMode}
+            value={editValue}
+            onChange={(e) => onChange(e.target.value)}
+            className="h-11 rounded-xl border-0 bg-[var(--admin-surface-hover)] px-3 text-[15px] text-[var(--admin-text)] outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onSave();
+              if (e.key === 'Escape') onCancel();
+            }}
+          />
+        )}
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={saving}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--admin-surface-hover)] text-[var(--admin-text-muted)]"
+          >
+            <X size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={saving}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--admin-primary)] text-white disabled:opacity-60"
+          >
+            <Check size={16} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onEdit}
+      className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors active:bg-[var(--admin-surface-hover)]"
+    >
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[13px] text-[var(--admin-text-muted)]">{label}</span>
+        <span
+          className={[
+            'text-[15px]',
+            value ? 'text-[var(--admin-text)]' : 'text-[var(--admin-text-faint)]',
+          ].join(' ')}
+        >
+          {value || placeholder || '미입력'}
+        </span>
+      </div>
+      <Pencil size={14} className="shrink-0 text-[var(--admin-text-faint)]" />
+    </button>
   );
 }
