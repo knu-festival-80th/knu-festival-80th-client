@@ -4,6 +4,7 @@ interface OutlineButtonProps {
   label: string;
   showArrow?: boolean;
   variant?: Variant;
+  onClick?: () => void;
 }
 
 const variantStyles: Record<Variant, { container: string; text: string; arrow: string }> = {
@@ -29,12 +30,13 @@ const variantStyles: Record<Variant, { container: string; text: string; arrow: s
   },
 };
 
-const OutlineButton = ({ label, showArrow = false, variant = 'default' }: OutlineButtonProps) => {
+const OutlineButton = ({ label, showArrow = false, variant = 'default', onClick }: OutlineButtonProps) => {
   const styles = variantStyles[variant];
   return (
     <button
       type="button"
-      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-5 py-2.5 ${styles.container}`}
+      onClick={onClick}
+      className={`flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-5 py-2.5 ${styles.container}`}
     >
       <span className={`font-wanted-sans text-sm leading-relaxed whitespace-nowrap ${styles.text}`}>
         {label}

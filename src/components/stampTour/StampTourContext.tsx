@@ -9,6 +9,7 @@ import prizeStars from '@/assets/stampTour/prize_stars.png';
 import prize1 from '@/assets/stampTour/prize_1.svg';
 import prize2 from '@/assets/stampTour/prize_2.svg';
 import prize3 from '@/assets/stampTour/prize_3.svg';
+import { useNavigate } from 'react-router-dom';
 import OutlineButton from './OutlineButton';
 import ProcessCard from './ProcessCard';
 
@@ -46,6 +47,9 @@ const prizes = [
 ];
 
 const StampTourContext = () => {
+  const navigate = useNavigate();
+  const goToBooths = () => navigate('/stamptour/booths');
+
   return (
     <section className="w-full bg-white">
       <div className="mx-auto flex w-full flex-col items-center gap-12 px-5 pb-[200px] pt-16">
@@ -63,7 +67,7 @@ const StampTourContext = () => {
               전용 스탬프를 모두 채우시면 대동제 기획팀이 준비한 특별한 선물을 드려요.
             </p>
           </div>
-          <OutlineButton label="부스 위치 확인하기" showArrow variant="red" />
+          <OutlineButton label="부스 위치 확인하기" showArrow variant="red" onClick={goToBooths} />
         </div>
 
         <img src={stampHero} alt="스탬프 투어 카드" className="w-[297px]" />
@@ -71,7 +75,7 @@ const StampTourContext = () => {
         {/* Step cards */}
         <div className="flex w-full flex-col gap-[30px]">
           {steps.map((s) => (
-            <ProcessCard key={s.step} {...s} />
+            <ProcessCard key={s.step} {...s} onButtonClick={goToBooths} />
           ))}
         </div>
 
