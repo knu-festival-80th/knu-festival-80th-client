@@ -38,7 +38,7 @@ http.interceptors.response.use(
   (error: unknown) => {
     const parsedError = toApiClientError(error);
 
-    if (parsedError.status === 401) {
+    if (parsedError.status === 401 || parsedError.status === 403) {
       unauthorizedHandler?.(parsedError.status);
     }
 
