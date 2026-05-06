@@ -34,64 +34,78 @@ export default function BoothManageShell() {
   });
 
   return (
-    <div data-admin-theme="booth" className="admin-frame flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-40 border-b border-[var(--admin-border)] bg-[var(--admin-bg)]/85 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl flex-col gap-1 px-4 py-3.5 sm:px-6">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex min-w-0 flex-col">
-              <span className="eyebrow text-[var(--admin-text-faint)]">
-                {boothId ? `BOOTH #${boothId}` : '주막 운영진'}
+    <div data-admin-theme="booth" className="min-h-dvh">
+      <header className="sticky top-0 z-30 border-b border-[var(--admin-border)] bg-[var(--admin-surface)]">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <div className="flex min-w-0 items-baseline gap-2">
+            {boothId !== null && (
+              <span className="text-xs font-medium text-[var(--admin-text-faint)] tabular">
+                #{boothId}
               </span>
-              <h1 className="truncate text-subheading font-bold tracking-tight text-[var(--admin-text)]">
-                {myBooth?.name ?? (boothsQuery.isLoading ? '불러오는 중…' : '내 주막')}
-              </h1>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {myBooth && (
-                <span
-                  className={[
-                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-caption font-semibold',
-                    myBooth.waitingOpen
-                      ? 'bg-[var(--admin-success-soft)] text-[var(--admin-success)]'
-                      : 'bg-[var(--admin-surface-hover)] text-[var(--admin-text-muted)]',
-                  ].join(' ')}
-                >
-                  <span
-                    className={[
-                      'h-1.5 w-1.5 rounded-full',
-                      myBooth.waitingOpen
-                        ? 'animate-pulse bg-[var(--admin-success)]'
-                        : 'bg-[var(--admin-text-muted)]',
-                    ].join(' ')}
-                  />
-                  {myBooth.waitingOpen ? '접수중' : '접수중단'}
-                </span>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => logoutMutation.mutate()}
-                disabled={logoutMutation.isPending}
-                iconLeft={<LogOut size={14} />}
+            )}
+            <h1 className="truncate text-base font-semibold text-[var(--admin-text)]">
+              {myBooth?.name ?? (boothsQuery.isLoading ? '불러오는 중…' : '내 주막')}
+            </h1>
+            {myBooth && (
+              <span
+                className={[
+                  'shrink-0 rounded-full px-2 py-0.5 text-xs font-medium',
+                  myBooth.waitingOpen
+                    ? 'bg-[var(--admin-success-soft)] text-[var(--admin-success)]'
+                    : 'bg-[var(--admin-surface-hover)] text-[var(--admin-text-muted)]',
+                ].join(' ')}
               >
-                <span className="hidden sm:inline">
-                  {logoutMutation.isPending ? '로그아웃 중' : '로그아웃'}
-                </span>
-              </Button>
-            </div>
+                {myBooth.waitingOpen ? '접수중' : '접수중단'}
+              </span>
+            )}
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            iconLeft={<LogOut size={14} />}
+            aria-label="로그아웃"
+          >
+            <span className="hidden sm:inline">
+              {logoutMutation.isPending ? '로그아웃 중' : '로그아웃'}
+            </span>
+          </Button>
         </div>
+        <nav
+          aria-label="부스 운영 탭 (데스크톱)"
+          className="mx-auto hidden max-w-3xl gap-1 px-4 sm:flex sm:px-6"
+        >
+          {TABS.map(({ to, label, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                [
+                  'border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'border-[var(--admin-primary)] text-[var(--admin-text)]'
+                    : 'border-transparent text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]',
+                ].join(' ')
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pt-5 pb-28 sm:px-6 sm:pb-8">
+      <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-24 sm:px-6 sm:pt-6 sm:pb-10">
         <Outlet />
       </main>
 
       <nav
-        aria-label="부스 운영 탭"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--admin-border)] bg-[var(--admin-surface)]/95 backdrop-blur sm:relative sm:border-0 sm:bg-transparent"
+        aria-label="부스 운영 탭 (모바일)"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--admin-border)] bg-[var(--admin-surface)] sm:hidden"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="mx-auto grid max-w-3xl grid-cols-3 sm:flex sm:gap-2 sm:px-6 sm:pb-4">
+        <div className="grid grid-cols-3">
           {TABS.map(({ to, label, Icon, end }) => (
             <NavLink
               key={to}
@@ -99,22 +113,15 @@ export default function BoothManageShell() {
               end={end}
               className={({ isActive }) =>
                 [
-                  'flex items-center justify-center gap-1.5 py-3 text-caption font-semibold',
-                  'transition-colors duration-150',
-                  'sm:rounded-full sm:px-4 sm:py-2 sm:text-body2',
+                  'flex min-h-[56px] flex-col items-center justify-center gap-1 text-xs font-medium transition-colors',
                   isActive
-                    ? 'text-[var(--admin-primary)] sm:bg-[var(--admin-primary)] sm:text-[var(--admin-primary-fg)]'
-                    : 'text-[var(--admin-text-muted)] hover:text-[var(--admin-text)] sm:hover:bg-[var(--admin-surface-hover)]',
+                    ? 'text-[var(--admin-primary)]'
+                    : 'text-[var(--admin-text-muted)] active:text-[var(--admin-text)]',
                 ].join(' ')
               }
             >
-              {({ isActive }) => (
-                <>
-                  <Icon size={18} strokeWidth={isActive ? 2.4 : 2} className="sm:hidden" />
-                  <Icon size={15} strokeWidth={2} className="hidden sm:inline" />
-                  <span>{label}</span>
-                </>
-              )}
+              <Icon size={20} strokeWidth={2} />
+              <span>{label}</span>
             </NavLink>
           ))}
         </div>

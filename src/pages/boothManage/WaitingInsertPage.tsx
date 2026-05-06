@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowLeft, Hash, Save } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Hash } from 'lucide-react';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -70,7 +70,7 @@ export default function WaitingInsertPage() {
       !Number.isInteger(insertAfterSortOrder) ||
       insertAfterSortOrder < 1
     ) {
-      setErrorMessage('삽입 위치(이 순번 뒤에 삽입)는 1 이상의 정수여야 합니다.');
+      setErrorMessage('삽입 위치는 1 이상의 정수여야 합니다.');
       return;
     }
 
@@ -83,21 +83,28 @@ export default function WaitingInsertPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-20">
+    <div className="flex flex-col gap-3">
       <Link
         to="/booth/manage/waitings"
-        className="inline-flex items-center gap-1 text-caption text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]"
+        className="inline-flex items-center gap-1 text-sm text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]"
       >
         <ArrowLeft size={14} />
         대기열
       </Link>
 
-      <form onSubmit={handleSubmit}>
-        <Card eyebrow="대기열" title="중간 삽입" padding="lg">
-          <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-0.5">
+        <h1 className="mt-3 text-xl font-semibold text-[var(--admin-text)]">대기 중간 삽입</h1>
+        <p className="text-sm text-[var(--admin-text-muted)]">
+          오프라인 등록 등 특수 상황에서만 사용하세요.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <Card padding="md">
+          <div className="flex flex-col gap-4">
             <div
               role="note"
-              className="flex items-start gap-2 rounded-md border border-[var(--admin-warn)]/40 bg-[var(--admin-warn)]/10 px-3 py-2.5 text-body2 text-[var(--admin-warn)]"
+              className="flex items-start gap-2 rounded-md border border-[var(--admin-warn)]/40 bg-[var(--admin-warn)]/10 px-3 py-2 text-xs text-[var(--admin-warn)]"
             >
               <AlertTriangle size={14} className="mt-0.5 shrink-0" />
               <span>
@@ -108,7 +115,7 @@ export default function WaitingInsertPage() {
             {errorMessage && (
               <div
                 role="alert"
-                className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
+                className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
               >
                 {errorMessage}
               </div>
@@ -144,6 +151,7 @@ export default function WaitingInsertPage() {
               <Input
                 id="waiting-phone"
                 type="tel"
+                inputMode="tel"
                 value={form.phoneNumber}
                 onChange={handleChange('phoneNumber')}
                 placeholder="010-1234-5678"
@@ -172,28 +180,28 @@ export default function WaitingInsertPage() {
                 />
               </div>
             </Field>
-
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                disabled={insertMutation.isPending}
-                iconLeft={<Save size={18} />}
-              >
-                {insertMutation.isPending ? '등록 중…' : '삽입 등록'}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="lg"
-                onClick={() => navigate('/booth/manage/waitings')}
-              >
-                취소
-              </Button>
-            </div>
           </div>
         </Card>
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            block
+            disabled={insertMutation.isPending}
+          >
+            {insertMutation.isPending ? '등록 중…' : '삽입 등록'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="lg"
+            onClick={() => navigate('/booth/manage/waitings')}
+          >
+            취소
+          </Button>
+        </div>
       </form>
     </div>
   );

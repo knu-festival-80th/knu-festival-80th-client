@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
@@ -45,73 +45,68 @@ export default function BoothEditPage() {
     queryFn: () => boothApi.listAdminBooths('likes'),
   });
 
+  const booth = boothsQuery.data?.find((b) => b.boothId === boothId);
+
   return (
-    <div className="flex flex-col gap-6">
-      <Link
-        to="/console"
-        className="inline-flex items-center gap-1.5 self-start text-caption text-[var(--admin-text-muted)] transition hover:text-[var(--admin-text)]"
-      >
-        <ArrowLeft size={14} />
-        부스 목록
-      </Link>
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2 text-sm">
+          <Link
+            to="/console"
+            className="inline-flex items-center gap-1 text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]"
+          >
+            <ArrowLeft size={14} />
+            부스 목록
+          </Link>
+          <span className="text-[var(--admin-text-faint)]">/</span>
+          <span className="truncate text-[var(--admin-text-muted)]">
+            {booth ? `${booth.name} 수정` : '부스 수정'}
+          </span>
+        </div>
+        <h1 className="mt-1 text-2xl font-semibold text-[var(--admin-text)]">
+          {booth ? `${booth.name} 수정` : '부스 수정'}
+        </h1>
+      </div>
 
-      {boothsQuery.isLoading && <PageStatus message="불러오는 중…" />}
-
-      {boothsQuery.isError && (
-        <PageStatus
-          tone="danger"
-          message={
-            boothsQuery.error instanceof ApiClientError
-              ? boothsQuery.error.message
-              : '부스 정보를 불러오지 못했습니다.'
-          }
-        />
+      {boothsQuery.isLoading && (
+        <div className="py-16 text-center text-sm text-[var(--admin-text-muted)]">
+          불러오는 중...
+        </div>
       )}
 
-      {boothsQuery.data &&
-        (() => {
-          const booth = boothsQuery.data.find((b) => b.boothId === boothId);
-          if (!booth) {
-            return <PageStatus message="해당 부스를 찾을 수 없습니다." />;
-          }
-          return (
-            <BoothEditForm
-              key={boothId}
-              boothId={boothId}
-              boothName={booth.name}
-              initial={toFormState(booth)}
-            />
-          );
-        })()}
-    </div>
-  );
-}
+      {boothsQuery.isError && (
+        <div className="py-16 text-center text-sm text-[var(--admin-text-muted)]">
+          <p className="mb-3">
+            {boothsQuery.error instanceof ApiClientError
+              ? boothsQuery.error.message
+              : '부스 정보를 불러오지 못했습니다.'}
+          </p>
+          <Link to="/console" className="text-[var(--admin-primary)] hover:underline">
+            부스 목록으로 돌아가기
+          </Link>
+        </div>
+      )}
 
-function PageStatus({ message, tone = 'muted' }: { message: string; tone?: 'muted' | 'danger' }) {
-  if (tone === 'danger') {
-    return (
-      <p
-        role="alert"
-        className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-4 py-12 text-center text-body2 text-[var(--admin-danger)]"
-      >
-        {message}
-      </p>
-    );
-  }
-  return (
-    <p className="rounded-[14px] border border-dashed border-[var(--admin-border)] px-4 py-16 text-center text-body2 text-[var(--admin-text-muted)]">
-      {message}
-    </p>
+      {boothsQuery.data && !booth && (
+        <div className="py-16 text-center text-sm text-[var(--admin-text-muted)]">
+          <p className="mb-3">해당 부스를 찾을 수 없습니다.</p>
+          <Link to="/console" className="text-[var(--admin-primary)] hover:underline">
+            부스 목록으로 돌아가기
+          </Link>
+        </div>
+      )}
+
+      {booth && <BoothEditForm key={boothId} boothId={boothId} initial={toFormState(booth)} />}
+    </div>
   );
 }
 
 interface BoothEditFormProps {
   boothId: number;
-  boothName: string;
   initial: FormState;
 }
 
-function BoothEditForm({ boothId, boothName, initial }: BoothEditFormProps) {
+function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState>(initial);
@@ -160,102 +155,98 @@ function BoothEditForm({ boothId, boothName, initial }: BoothEditFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      <Card
-        eyebrow="정보 수정"
-        title={`부스 #${boothId} 수정`}
-        description={boothName}
-        padding="lg"
-      >
-        <div className="flex flex-col gap-6">
-          <section className="flex flex-col gap-5">
-            <span className="eyebrow text-[var(--admin-text-faint)]">기본 정보</span>
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      <Card padding="md">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-base font-semibold text-[var(--admin-text)]">기본 정보</h2>
+          <p className="text-sm text-[var(--admin-text-muted)]">
+            지도와 안내 페이지에 노출되는 정보입니다.
+          </p>
+        </div>
 
-            <Field label="부스 이름" htmlFor="booth-name">
+        <div className="mt-5 flex flex-col gap-4">
+          <Field label="부스 이름" htmlFor="booth-name">
+            <Input
+              id="booth-name"
+              type="text"
+              value={form.name}
+              onChange={handleChange('name')}
+              maxLength={100}
+            />
+          </Field>
+
+          <Field label="설명" htmlFor="booth-description">
+            <Textarea
+              id="booth-description"
+              value={form.description}
+              onChange={handleChange('description')}
+            />
+          </Field>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="X 좌표" hint="0 ~ 1" htmlFor="booth-x-ratio">
               <Input
-                id="booth-name"
+                id="booth-x-ratio"
                 type="text"
-                value={form.name}
-                onChange={handleChange('name')}
-                maxLength={100}
+                inputMode="decimal"
+                numericMono
+                value={form.xRatio}
+                onChange={handleChange('xRatio')}
               />
             </Field>
-
-            <Field label="설명" htmlFor="booth-description">
-              <Textarea
-                id="booth-description"
-                value={form.description}
-                onChange={handleChange('description')}
+            <Field label="Y 좌표" hint="0 ~ 1" htmlFor="booth-y-ratio">
+              <Input
+                id="booth-y-ratio"
+                type="text"
+                inputMode="decimal"
+                numericMono
+                value={form.yRatio}
+                onChange={handleChange('yRatio')}
               />
             </Field>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="X 좌표" hint="0 ~ 1 (지도 가로 비율)" htmlFor="booth-x-ratio">
-                <Input
-                  id="booth-x-ratio"
-                  type="text"
-                  inputMode="decimal"
-                  numericMono
-                  value={form.xRatio}
-                  onChange={handleChange('xRatio')}
-                />
-              </Field>
-              <Field label="Y 좌표" hint="0 ~ 1 (지도 세로 비율)" htmlFor="booth-y-ratio">
-                <Input
-                  id="booth-y-ratio"
-                  type="text"
-                  inputMode="decimal"
-                  numericMono
-                  value={form.yRatio}
-                  onChange={handleChange('yRatio')}
-                />
-              </Field>
-            </div>
-            <p className="-mt-2 text-caption text-[var(--admin-text-faint)]">
-              축제 지도 이미지에서의 비율 좌표. 지도 컴포넌트 완성 시 클릭 입력으로 교체됩니다.
-            </p>
-
-            <ImageUploadField
-              label="대표 이미지"
-              value={form.imageUrl}
-              onChange={(next) => setForm((prev) => ({ ...prev, imageUrl: next }))}
-              emptyMessage="부스 대표 이미지를 업로드하세요."
-            />
-
-            <ImageUploadField
-              label="메뉴판 이미지"
-              hint="부스당 1장"
-              value={form.menuBoardImageUrl}
-              onChange={(next) => setForm((prev) => ({ ...prev, menuBoardImageUrl: next }))}
-              emptyMessage="메뉴판 사진을 업로드하세요."
-              previewClassName="max-h-72 w-full max-w-sm object-contain"
-            />
-          </section>
-
-          {errorMessage && (
-            <p
-              role="alert"
-              className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
-            >
-              {errorMessage}
-            </p>
-          )}
-
-          <div className="flex flex-wrap items-center gap-2 pt-2">
-            <Button type="submit" variant="primary" disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? '저장 중…' : '저장'}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => navigate('/console')}
-              disabled={updateMutation.isPending}
-            >
-              취소
-            </Button>
           </div>
+
+          <ImageUploadField
+            label="대표 이미지"
+            value={form.imageUrl}
+            onChange={(next) => setForm((prev) => ({ ...prev, imageUrl: next }))}
+            emptyMessage="부스 대표 이미지를 업로드하세요."
+          />
+
+          <ImageUploadField
+            label="메뉴판 이미지"
+            hint="부스당 1장"
+            value={form.menuBoardImageUrl}
+            onChange={(next) => setForm((prev) => ({ ...prev, menuBoardImageUrl: next }))}
+            emptyMessage="메뉴판 사진을 업로드하세요."
+            previewClassName="max-h-72 w-full max-w-sm object-contain"
+          />
         </div>
       </Card>
+
+      {errorMessage && (
+        <div
+          role="alert"
+          className="flex items-center gap-2 rounded-md border border-[var(--admin-danger)]/30 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
+        >
+          <AlertCircle size={14} />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button type="submit" variant="primary" disabled={updateMutation.isPending}>
+          {updateMutation.isPending ? '저장 중...' : '저장'}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => navigate('/console')}
+          disabled={updateMutation.isPending}
+        >
+          취소
+        </Button>
+      </div>
     </form>
   );
 }

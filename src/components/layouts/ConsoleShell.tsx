@@ -7,7 +7,7 @@ import { Button } from '@/components/admin/ui';
 import { useAuthStore } from '@/stores/authStore';
 
 const NAV = [
-  { to: '/console', label: '부스', end: true },
+  { to: '/console', label: '부스 목록', end: true },
   { to: '/console/booths/new', label: '신규 등록' },
 ];
 
@@ -26,34 +26,28 @@ export default function ConsoleShell() {
   });
 
   return (
-    <div data-admin-theme="console" className="admin-frame admin-grain">
-      <header className="border-b border-[var(--admin-border)] bg-[var(--admin-bg)]/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <div className="flex items-baseline gap-3">
-            <span className="eyebrow text-[var(--admin-primary)]">KNU·80</span>
-            <h1 className="text-subheading font-semibold tracking-tight text-[var(--admin-text)]">
-              축제 운영 콘솔
-            </h1>
-          </div>
+    <div data-admin-theme="console" className="min-h-dvh">
+      <header className="border-b border-[var(--admin-border)] bg-[var(--admin-surface)]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <span className="hidden rounded-full border border-[var(--admin-primary)]/35 bg-[var(--admin-primary-soft)] px-3 py-1 text-caption font-semibold text-[var(--admin-primary)] sm:inline-flex">
+            <span className="text-base font-semibold text-[var(--admin-text)]">KNU 운영 콘솔</span>
+            <span className="hidden rounded-full bg-[var(--admin-primary-soft)] px-2 py-0.5 text-xs font-medium text-[var(--admin-primary)] sm:inline-flex">
               최고 관리자
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending}
-              iconLeft={<LogOut size={14} />}
-            >
-              {logoutMutation.isPending ? '로그아웃 중' : '로그아웃'}
-            </Button>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => logoutMutation.mutate()}
+            disabled={logoutMutation.isPending}
+            iconLeft={<LogOut size={14} />}
+          >
+            {logoutMutation.isPending ? '로그아웃 중' : '로그아웃'}
+          </Button>
         </div>
-
         <nav
           aria-label="콘솔 메뉴"
-          className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-5 pb-3 sm:px-8"
+          className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 sm:px-6"
         >
           {NAV.map((item) => (
             <NavLink
@@ -62,11 +56,10 @@ export default function ConsoleShell() {
               end={item.end}
               className={({ isActive }) =>
                 [
-                  'rounded-full px-4 py-1.5 text-body2 font-medium whitespace-nowrap',
-                  'transition-colors duration-150',
+                  'border-b-2 px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors',
                   isActive
-                    ? 'bg-[var(--admin-primary)] text-[var(--admin-primary-fg)]'
-                    : 'text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-hover)] hover:text-[var(--admin-text)]',
+                    ? 'border-[var(--admin-primary)] text-[var(--admin-text)]'
+                    : 'border-transparent text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]',
                 ].join(' ')
               }
             >
@@ -76,15 +69,9 @@ export default function ConsoleShell() {
         </nav>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         <Outlet />
       </main>
-
-      <footer className="mx-auto max-w-6xl px-5 pb-8 sm:px-8">
-        <p className="eyebrow text-[var(--admin-text-faint)]">
-          KNU Festival · Operations Console · 2026
-        </p>
-      </footer>
     </div>
   );
 }

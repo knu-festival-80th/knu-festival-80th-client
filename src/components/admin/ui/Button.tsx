@@ -13,26 +13,24 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'cla
 }
 
 const sizeClass: Record<Size, string> = {
-  sm: 'h-8 px-3 text-body2',
-  md: 'h-10 px-4 text-body2',
-  lg: 'h-12 px-5 text-body1',
+  sm: 'h-8 px-3 text-sm',
+  md: 'h-10 px-4 text-sm',
+  lg: 'h-12 px-5 text-base',
 };
 
 const variantClass: Record<Variant, string> = {
   primary:
-    'bg-[var(--admin-primary)] text-[var(--admin-primary-fg)] font-semibold ' +
-    'hover:bg-[var(--admin-primary-strong)] disabled:opacity-50 ' +
-    'shadow-[0_8px_20px_-12px_var(--admin-primary)]',
+    'bg-[var(--admin-primary)] text-[var(--admin-primary-fg)] font-medium ' +
+    'hover:bg-[var(--admin-primary-strong)] disabled:opacity-50',
   secondary:
-    'bg-[var(--admin-surface-strong)] text-[var(--admin-text)] border border-[var(--admin-border-strong)] ' +
+    'bg-[var(--admin-surface)] text-[var(--admin-text)] border border-[var(--admin-border-strong)] font-medium ' +
     'hover:bg-[var(--admin-surface-hover)] disabled:opacity-50',
   ghost:
-    'bg-transparent text-[var(--admin-text)] border border-[var(--admin-border)] ' +
-    'hover:bg-[var(--admin-surface-hover)] hover:border-[var(--admin-border-strong)] ' +
-    'disabled:opacity-50',
+    'bg-transparent text-[var(--admin-text-muted)] font-medium ' +
+    'hover:bg-[var(--admin-surface-hover)] hover:text-[var(--admin-text)] disabled:opacity-50',
   danger:
-    'bg-[var(--admin-danger-soft)] text-[var(--admin-danger)] border border-[var(--admin-danger)]/35 ' +
-    'hover:bg-[var(--admin-danger)] hover:text-white disabled:opacity-50',
+    'bg-transparent text-[var(--admin-danger)] border border-[var(--admin-danger)]/30 font-medium ' +
+    'hover:bg-[var(--admin-danger-soft)] disabled:opacity-50',
 };
 
 export default function Button({
@@ -51,7 +49,7 @@ export default function Button({
       {...rest}
       type={type}
       className={[
-        'inline-flex items-center justify-center gap-2 rounded-md',
+        'inline-flex items-center justify-center gap-1.5 rounded-md',
         'transition-colors duration-150 ease-out',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--admin-bg)]',
         'disabled:cursor-not-allowed',

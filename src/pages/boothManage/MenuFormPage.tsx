@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
@@ -41,15 +41,13 @@ export default function MenuFormPage() {
   if (boothId === null) return null;
 
   if (isEdit && menusQuery.isLoading) {
-    return (
-      <div className="h-64 animate-pulse rounded-[14px] border border-[var(--admin-border)] bg-[var(--admin-surface)]" />
-    );
+    return <div className="h-64 animate-pulse rounded-md bg-[var(--admin-surface-hover)]" />;
   }
   if (isEdit && menusQuery.isError) {
     return (
       <div
         role="alert"
-        className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
+        className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
       >
         {menusQuery.error instanceof ApiClientError
           ? menusQuery.error.message
@@ -62,7 +60,7 @@ export default function MenuFormPage() {
     const menu = menusQuery.data?.find((m) => m.menuId === menuId);
     if (!menu) {
       return (
-        <p className="text-body2 text-[var(--admin-text-muted)]">해당 메뉴를 찾을 수 없습니다.</p>
+        <p className="text-sm text-[var(--admin-text-muted)]">해당 메뉴를 찾을 수 없습니다.</p>
       );
     }
     return (
@@ -70,21 +68,23 @@ export default function MenuFormPage() {
         key={menu.menuId}
         boothId={boothId}
         menuId={menu.menuId}
+        menuName={menu.name}
         initial={toFormState(menu)}
       />
     );
   }
 
-  return <MenuForm boothId={boothId} menuId={null} initial={EMPTY} />;
+  return <MenuForm boothId={boothId} menuId={null} menuName={null} initial={EMPTY} />;
 }
 
 interface MenuFormProps {
   boothId: number;
   menuId: number | null;
+  menuName: string | null;
   initial: FormState;
 }
 
-function MenuForm({ boothId, menuId, initial }: MenuFormProps) {
+function MenuForm({ boothId, menuId, menuName, initial }: MenuFormProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isEdit = menuId !== null;
@@ -158,27 +158,29 @@ function MenuForm({ boothId, menuId, initial }: MenuFormProps) {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <Link
         to="/booth/manage/menus"
-        className="inline-flex items-center gap-1 text-caption text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]"
+        className="inline-flex items-center gap-1 text-sm text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]"
       >
         <ArrowLeft size={14} />
         메뉴 목록
       </Link>
 
-      <form onSubmit={handleSubmit}>
-        <Card
-          eyebrow="메뉴"
-          title={isEdit ? '메뉴 수정' : '신규 메뉴'}
-          description="여기서 입력한 가격과 이미지가 손님에게 그대로 노출됩니다."
-          padding="lg"
-        >
-          <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-0.5">
+        <h1 className="mt-3 text-xl font-semibold text-[var(--admin-text)]">
+          {isEdit ? '메뉴 수정' : '신규 메뉴'}
+        </h1>
+        {isEdit && menuName && <p className="text-sm text-[var(--admin-text-muted)]">{menuName}</p>}
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <Card padding="md">
+          <div className="flex flex-col gap-4">
             {errorMessage && (
               <div
                 role="alert"
-                className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
+                className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
               >
                 {errorMessage}
               </div>
@@ -196,7 +198,7 @@ function MenuForm({ boothId, menuId, initial }: MenuFormProps) {
               />
             </Field>
 
-            <Field label="가격" required hint="원 단위" htmlFor="menu-price">
+            <Field label="가격" required htmlFor="menu-price">
               <div className="relative">
                 <Input
                   id="menu-price"
@@ -210,7 +212,7 @@ function MenuForm({ boothId, menuId, initial }: MenuFormProps) {
                   placeholder="0"
                   className="pr-10"
                 />
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-body2 text-[var(--admin-text-muted)]">
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[var(--admin-text-muted)]">
                   원
                 </span>
               </div>
@@ -231,28 +233,22 @@ function MenuForm({ boothId, menuId, initial }: MenuFormProps) {
                 placeholder="짧고 군침 도는 한 줄이 잘 팔립니다."
               />
             </Field>
-
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                disabled={isPending}
-                iconLeft={<Save size={18} />}
-              >
-                {isPending ? '저장 중…' : isEdit ? '수정 저장' : '등록'}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="lg"
-                onClick={() => navigate('/booth/manage/menus')}
-              >
-                취소
-              </Button>
-            </div>
           </div>
         </Card>
+
+        <div className="flex items-center gap-2">
+          <Button type="submit" variant="primary" size="lg" block disabled={isPending}>
+            {isPending ? '저장 중…' : '저장'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="lg"
+            onClick={() => navigate('/booth/manage/menus')}
+          >
+            취소
+          </Button>
+        </div>
       </form>
     </div>
   );

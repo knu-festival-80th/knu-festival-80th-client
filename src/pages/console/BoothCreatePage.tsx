@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -96,140 +96,150 @@ export default function BoothCreatePage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <Link
-        to="/console"
-        className="inline-flex items-center gap-1.5 self-start text-caption text-[var(--admin-text-muted)] transition hover:text-[var(--admin-text)]"
-      >
-        <ArrowLeft size={14} />
-        부스 목록
-      </Link>
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2 text-sm">
+          <Link
+            to="/console"
+            className="inline-flex items-center gap-1 text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]"
+          >
+            <ArrowLeft size={14} />
+            부스 목록
+          </Link>
+          <span className="text-[var(--admin-text-faint)]">/</span>
+          <span className="text-[var(--admin-text-muted)]">신규 부스 등록</span>
+        </div>
+        <h1 className="mt-1 text-2xl font-semibold text-[var(--admin-text)]">신규 부스</h1>
+        <p className="text-sm text-[var(--admin-text-muted)]">
+          부스 정보와 운영진 비밀번호를 설정합니다.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} noValidate>
-        <Card
-          eyebrow="신규 부스"
-          title="신규 부스 등록"
-          description="기본 정보와 운영진 비밀번호를 설정합니다."
-          padding="lg"
-        >
-          <div className="flex flex-col gap-6">
-            <section className="flex flex-col gap-5">
-              <span className="eyebrow text-[var(--admin-text-faint)]">기본 정보</span>
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        <Card padding="md">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-base font-semibold text-[var(--admin-text)]">기본 정보</h2>
+            <p className="text-sm text-[var(--admin-text-muted)]">
+              지도와 안내 페이지에 노출되는 정보입니다.
+            </p>
+          </div>
 
-              <Field label="부스 이름" required htmlFor="booth-name">
-                <Input
-                  id="booth-name"
-                  type="text"
-                  value={form.name}
-                  onChange={handleChange('name')}
-                  maxLength={100}
-                  required
-                  placeholder="예: 컴퓨터학부 주막"
-                />
-              </Field>
-
-              <Field label="설명" htmlFor="booth-description">
-                <Textarea
-                  id="booth-description"
-                  value={form.description}
-                  onChange={handleChange('description')}
-                  placeholder="부스 소개 문구"
-                />
-              </Field>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="X 좌표" hint="0 ~ 1 (지도 가로 비율)" htmlFor="booth-x-ratio">
-                  <Input
-                    id="booth-x-ratio"
-                    type="text"
-                    inputMode="decimal"
-                    numericMono
-                    value={form.xRatio}
-                    onChange={handleChange('xRatio')}
-                    placeholder="0.42"
-                  />
-                </Field>
-                <Field label="Y 좌표" hint="0 ~ 1 (지도 세로 비율)" htmlFor="booth-y-ratio">
-                  <Input
-                    id="booth-y-ratio"
-                    type="text"
-                    inputMode="decimal"
-                    numericMono
-                    value={form.yRatio}
-                    onChange={handleChange('yRatio')}
-                    placeholder="0.18"
-                  />
-                </Field>
-              </div>
-              <p className="-mt-2 text-caption text-[var(--admin-text-faint)]">
-                축제 지도 이미지에서의 비율 좌표입니다. 추후 지도 컴포넌트가 완성되면 클릭으로
-                선택할 수 있도록 교체될 예정입니다.
-              </p>
-
-              <ImageUploadField
-                label="대표 이미지"
-                value={form.imageUrl}
-                onChange={(next) => setForm((prev) => ({ ...prev, imageUrl: next }))}
-                emptyMessage="부스 대표 이미지를 업로드하세요."
-              />
-
-              <ImageUploadField
-                label="메뉴판 이미지"
-                hint="부스당 1장"
-                value={form.menuBoardImageUrl}
-                onChange={(next) => setForm((prev) => ({ ...prev, menuBoardImageUrl: next }))}
-                emptyMessage="메뉴판 사진을 업로드하세요."
-                previewClassName="max-h-72 w-full max-w-sm object-contain"
-              />
-            </section>
-
-            <hr className="my-2 border-[var(--admin-border)]" />
-
-            <section className="flex flex-col gap-5">
-              <span className="eyebrow text-[var(--admin-text-faint)]">운영진 인증</span>
-
-              <Field
-                label="관리 비밀번호"
+          <div className="mt-5 flex flex-col gap-4">
+            <Field label="부스 이름" required htmlFor="booth-name">
+              <Input
+                id="booth-name"
+                type="text"
+                value={form.name}
+                onChange={handleChange('name')}
+                maxLength={100}
                 required
-                hint="부스 운영진에게 직접 전달"
-                htmlFor="booth-password"
-              >
+                placeholder="예: 컴퓨터학부 주막"
+              />
+            </Field>
+
+            <Field label="설명" htmlFor="booth-description">
+              <Textarea
+                id="booth-description"
+                value={form.description}
+                onChange={handleChange('description')}
+                placeholder="부스 소개 문구"
+              />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="X 좌표" hint="0 ~ 1" htmlFor="booth-x-ratio">
                 <Input
-                  id="booth-password"
-                  type="password"
-                  value={form.adminPassword}
-                  onChange={handleChange('adminPassword')}
-                  autoComplete="new-password"
-                  required
-                  placeholder="•••••••••••"
+                  id="booth-x-ratio"
+                  type="text"
+                  inputMode="decimal"
+                  numericMono
+                  value={form.xRatio}
+                  onChange={handleChange('xRatio')}
+                  placeholder="0.42"
                 />
               </Field>
-            </section>
-
-            {errorMessage && (
-              <p
-                role="alert"
-                className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
-              >
-                {errorMessage}
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              <Button type="submit" variant="primary" disabled={createMutation.isPending}>
-                {createMutation.isPending ? '등록 중…' : '등록'}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => navigate('/console')}
-                disabled={createMutation.isPending}
-              >
-                취소
-              </Button>
+              <Field label="Y 좌표" hint="0 ~ 1" htmlFor="booth-y-ratio">
+                <Input
+                  id="booth-y-ratio"
+                  type="text"
+                  inputMode="decimal"
+                  numericMono
+                  value={form.yRatio}
+                  onChange={handleChange('yRatio')}
+                  placeholder="0.18"
+                />
+              </Field>
             </div>
+
+            <ImageUploadField
+              label="대표 이미지"
+              value={form.imageUrl}
+              onChange={(next) => setForm((prev) => ({ ...prev, imageUrl: next }))}
+              emptyMessage="부스 대표 이미지를 업로드하세요."
+            />
+
+            <ImageUploadField
+              label="메뉴판 이미지"
+              hint="부스당 1장"
+              value={form.menuBoardImageUrl}
+              onChange={(next) => setForm((prev) => ({ ...prev, menuBoardImageUrl: next }))}
+              emptyMessage="메뉴판 사진을 업로드하세요."
+              previewClassName="max-h-72 w-full max-w-sm object-contain"
+            />
           </div>
         </Card>
+
+        <Card padding="md">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-base font-semibold text-[var(--admin-text)]">운영진 인증</h2>
+            <p className="text-sm text-[var(--admin-text-muted)]">
+              부스 운영진에게 별도 채널로 안전하게 전달하세요.
+            </p>
+          </div>
+
+          <div className="mt-5">
+            <Field
+              label="관리 비밀번호"
+              required
+              hint="운영진에게 직접 전달"
+              htmlFor="booth-password"
+            >
+              <Input
+                id="booth-password"
+                type="password"
+                value={form.adminPassword}
+                onChange={handleChange('adminPassword')}
+                autoComplete="new-password"
+                required
+                placeholder="..........."
+              />
+            </Field>
+          </div>
+        </Card>
+
+        {errorMessage && (
+          <div
+            role="alert"
+            className="flex items-center gap-2 rounded-md border border-[var(--admin-danger)]/30 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
+          >
+            <AlertCircle size={14} />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Button type="submit" variant="primary" disabled={createMutation.isPending}>
+            {createMutation.isPending ? '등록 중...' : '등록'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => navigate('/console')}
+            disabled={createMutation.isPending}
+          >
+            취소
+          </Button>
+        </div>
       </form>
     </div>
   );

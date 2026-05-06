@@ -1,35 +1,44 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, Check, ListOrdered, MessageSquare, Phone, Plus, Users, X } from 'lucide-react';
-import { useState } from 'react';
+import { Bell, Check, MessageSquare, Plus, RefreshCw, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { ApiClientError, boothApi, waitingApi } from '@/apis';
 import type { WaitingItem, WaitingStatus } from '@/apis';
-import { Button, StatusBadge } from '@/components/admin/ui';
+import { Button, Card, StatusBadge } from '@/components/admin/ui';
 import { useAuthStore } from '@/stores/authStore';
 
-const STATUS_FILTERS: { value: WaitingStatus | 'ALL'; label: string }[] = [
-  { value: 'ALL', label: '전체' },
-  { value: 'WAITING', label: '대기중' },
-  { value: 'CALLED', label: '호출됨' },
-  { value: 'ENTERED', label: '입장' },
-  { value: 'SKIPPED', label: '미방문' },
-  { value: 'CANCELLED', label: '취소' },
+type FilterKey = 'ALL' | 'ACTIVE' | 'DONE' | 'OTHER';
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: 'ALL', label: '전체' },
+  { key: 'ACTIVE', label: '진행중' },
+  { key: 'DONE', label: '완료' },
+  { key: 'OTHER', label: '기타' },
 ];
 
-const STATUS_BAND: Record<WaitingStatus, string> = {
-  WAITING: 'bg-[var(--color-secondary-blue)]',
-  CALLED: 'bg-[var(--color-knu-gold)]',
-  ENTERED: 'bg-[var(--admin-success)]',
-  SKIPPED: 'bg-[var(--admin-text-faint)]',
-  CANCELLED: 'bg-[var(--admin-danger)]',
-};
+const ACTIVE_STATUSES: WaitingStatus[] = ['WAITING', 'CALLED'];
+const OTHER_STATUSES: WaitingStatus[] = ['SKIPPED', 'CANCELLED'];
+
+function matchesFilter(status: WaitingStatus, filter: FilterKey): boolean {
+  if (filter === 'ALL') return true;
+  if (filter === 'ACTIVE') return ACTIVE_STATUSES.includes(status);
+  if (filter === 'DONE') return status === 'ENTERED';
+  return OTHER_STATUSES.includes(status);
+}
+
+function emptyMessage(filter: FilterKey): string {
+  if (filter === 'ACTIVE') return '진행중인 대기팀이 없습니다.';
+  if (filter === 'DONE') return '입장 완료된 팀이 없습니다.';
+  if (filter === 'OTHER') return '미방문/취소된 팀이 없습니다.';
+  return '표시할 대기팀이 없습니다.';
+}
 
 export default function WaitingListPage() {
   const boothId = useAuthStore((s) => s.boothId);
   const queryClient = useQueryClient();
 
-  const [statusFilter, setStatusFilter] = useState<WaitingStatus | 'ALL'>('ALL');
+  const [filter, setFilter] = useState<FilterKey>('ALL');
 
   const boothsQuery = useQuery({
     queryKey: ['admin', 'booths', { sort: 'likes' }],
@@ -38,15 +47,8 @@ export default function WaitingListPage() {
   const myBooth = boothsQuery.data?.find((b) => b.boothId === boothId);
 
   const waitingsQuery = useQuery({
-    queryKey: [
-      'admin',
-      'booth',
-      boothId,
-      'waitings',
-      { status: statusFilter === 'ALL' ? null : statusFilter },
-    ],
-    queryFn: () =>
-      waitingApi.listWaitings(boothId as number, statusFilter === 'ALL' ? undefined : statusFilter),
+    queryKey: ['admin', 'booth', boothId, 'waitings'],
+    queryFn: () => waitingApi.listWaitings(boothId as number),
     enabled: boothId !== null && Number.isInteger(boothId) && boothId > 0,
     refetchInterval: 5000,
   });
@@ -79,7 +81,7 @@ export default function WaitingListPage() {
   const skipMutation = useMutation({
     mutationFn: waitingApi.skipWaiting,
     onSuccess: invalidate,
-    onError: (e) => onError(e, '건너뛰기에 실패했습니다.'),
+    onError: (e) => onError(e, '미방문 처리에 실패했습니다.'),
   });
   const resendSmsMutation = useMutation({
     mutationFn: waitingApi.resendWaitingSms,
@@ -98,6 +100,23 @@ export default function WaitingListPage() {
     onError: (e) => onError(e, '대기 접수 상태 변경에 실패했습니다.'),
   });
 
+  const allWaitings = useMemo(() => waitingsQuery.data ?? [], [waitingsQuery.data]);
+
+  const counts = useMemo(() => {
+    return allWaitings.reduce(
+      (acc, w) => {
+        acc[w.status] = (acc[w.status] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<WaitingStatus, number>,
+    );
+  }, [allWaitings]);
+
+  const visible = useMemo(
+    () => allWaitings.filter((w) => matchesFilter(w.status, filter)),
+    [allWaitings, filter],
+  );
+
   if (boothId === null) return null;
 
   const handleReorder = (waiting: WaitingItem) => {
@@ -111,100 +130,42 @@ export default function WaitingListPage() {
     reorderMutation.mutate({ waitingId: waiting.waitingId, newSortOrder });
   };
 
-  const waitings = waitingsQuery.data ?? [];
-  const counts = waitings.reduce(
-    (acc, w) => {
-      acc[w.status] = (acc[w.status] ?? 0) + 1;
-      return acc;
-    },
-    {} as Record<WaitingStatus, number>,
-  );
   const waitingCount = counts.WAITING ?? 0;
   const calledCount = counts.CALLED ?? 0;
-  const isFresh = waitingsQuery.isFetched && !waitingsQuery.isFetching;
+  const enteredCount = counts.ENTERED ?? 0;
 
   return (
-    <div className="flex flex-col gap-4 pb-24 sm:pb-4">
+    <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <span className="eyebrow inline-flex items-center gap-1.5">
-            <span className="relative flex h-1.5 w-1.5">
-              {!isFresh ? null : (
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--admin-success)] opacity-60" />
-              )}
-              <span
-                className={`relative inline-flex h-1.5 w-1.5 rounded-full ${
-                  isFresh ? 'bg-[var(--admin-success)]' : 'bg-[var(--admin-text-faint)]'
-                }`}
-              />
-            </span>
-            대기열 · 실시간
-          </span>
-          <h2 className="text-heading2 font-semibold text-[var(--admin-text)]">
-            대기 <span className="tabular text-[var(--admin-primary)]">{waitingCount}</span>팀 ·
-            호출 <span className="tabular text-[var(--color-knu-gold)]">{calledCount}</span>팀
-          </h2>
+        <div className="flex flex-col gap-0.5">
+          <h1 className="text-xl font-semibold text-[var(--admin-text)]">대기열</h1>
+          <p className="tabular text-sm text-[var(--admin-text-muted)]">
+            대기 {waitingCount} · 호출 {calledCount} · 입장 {enteredCount}
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2">
           {myBooth && (
             <Button
-              variant={myBooth.waitingOpen ? 'primary' : 'ghost'}
+              variant={myBooth.waitingOpen ? 'primary' : 'secondary'}
               size="md"
               onClick={() => toggleMutation.mutate(!myBooth.waitingOpen)}
               disabled={toggleMutation.isPending}
-              className={
-                !myBooth.waitingOpen
-                  ? 'border-[var(--admin-danger)]/40 text-[var(--admin-danger)]'
-                  : ''
-              }
             >
-              {myBooth.waitingOpen ? '접수중' : '접수 중단'}
+              {myBooth.waitingOpen ? '접수 중단' : '접수 시작'}
             </Button>
           )}
           <Link to="/booth/manage/waitings/insert">
-            <Button variant="secondary" size="md" iconLeft={<Plus size={16} />}>
+            <Button variant="secondary" size="md" iconLeft={<Plus size={14} />}>
               중간 삽입
             </Button>
           </Link>
         </div>
       </header>
 
-      <div className="flex flex-wrap gap-1.5">
-        {STATUS_FILTERS.map((filter) => {
-          const active = statusFilter === filter.value;
-          return (
-            <button
-              key={filter.value}
-              type="button"
-              onClick={() => setStatusFilter(filter.value)}
-              className={[
-                'rounded-full px-3.5 py-1.5 text-body2 font-medium transition-colors',
-                active
-                  ? 'bg-[var(--admin-primary)] text-[var(--admin-primary-fg)]'
-                  : 'bg-transparent text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-hover)] hover:text-[var(--admin-text)]',
-              ].join(' ')}
-            >
-              {filter.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {waitingsQuery.isLoading && (
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-28 animate-pulse rounded-[14px] border border-[var(--admin-border)] bg-[var(--admin-surface)]"
-            />
-          ))}
-        </div>
-      )}
-
       {waitingsQuery.isError && (
         <div
           role="alert"
-          className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
+          className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
         >
           {waitingsQuery.error instanceof ApiClientError
             ? waitingsQuery.error.message
@@ -212,41 +173,66 @@ export default function WaitingListPage() {
         </div>
       )}
 
-      {waitingsQuery.data && waitings.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-[14px] border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-12 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--admin-surface-hover)] text-[var(--admin-text-muted)]">
-            <Users size={28} />
-          </div>
-          <p className="text-body1 font-semibold text-[var(--admin-text)]">
-            표시할 대기팀이 없어요
-          </p>
-          <p className="max-w-xs text-body2 text-[var(--admin-text-muted)]">
-            손님이 줄을 서면 자동으로 나타납니다. 5초마다 새로고침되고 있어요.
-          </p>
+      <div className="flex flex-wrap gap-1.5">
+        {FILTERS.map((f) => {
+          const active = filter === f.key;
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setFilter(f.key)}
+              className={[
+                'inline-flex h-8 items-center rounded-full px-3 text-xs font-medium transition-colors',
+                active
+                  ? 'bg-[var(--admin-primary)] text-[var(--admin-primary-fg)]'
+                  : 'border border-[var(--admin-border-strong)] bg-[var(--admin-surface)] text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]',
+              ].join(' ')}
+            >
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {waitingsQuery.isLoading && (
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-24 animate-pulse rounded-md bg-[var(--admin-surface-hover)]"
+            />
+          ))}
         </div>
       )}
 
-      {waitingsQuery.data && waitings.length > 0 && (
-        <ul className="flex flex-col gap-3">
-          {waitings.map((waiting) => (
-            <WaitingCard
-              key={waiting.waitingId}
-              waiting={waiting}
-              onCall={() => callMutation.mutate(waiting.waitingId)}
-              onEnter={() => enterMutation.mutate(waiting.waitingId)}
-              onCancel={() => cancelMutation.mutate(waiting.waitingId)}
-              onSkip={() => skipMutation.mutate(waiting.waitingId)}
-              onResendSms={() => resendSmsMutation.mutate(waiting.waitingId)}
-              onReorder={() => handleReorder(waiting)}
-              pending={{
-                call: callMutation.isPending,
-                enter: enterMutation.isPending,
-                cancel: cancelMutation.isPending,
-                skip: skipMutation.isPending,
-                resend: resendSmsMutation.isPending,
-                reorder: reorderMutation.isPending,
-              }}
-            />
+      {waitingsQuery.data && visible.length === 0 && (
+        <div className="rounded-md border border-dashed border-[var(--admin-border-strong)] bg-[var(--admin-surface)] px-4 py-10 text-center">
+          <p className="text-sm text-[var(--admin-text-muted)]">{emptyMessage(filter)}</p>
+        </div>
+      )}
+
+      {waitingsQuery.data && visible.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {visible.map((waiting) => (
+            <li key={waiting.waitingId}>
+              <WaitingRow
+                waiting={waiting}
+                onCall={() => callMutation.mutate(waiting.waitingId)}
+                onEnter={() => enterMutation.mutate(waiting.waitingId)}
+                onCancel={() => cancelMutation.mutate(waiting.waitingId)}
+                onSkip={() => skipMutation.mutate(waiting.waitingId)}
+                onResendSms={() => resendSmsMutation.mutate(waiting.waitingId)}
+                onReorder={() => handleReorder(waiting)}
+                pending={{
+                  call: callMutation.isPending,
+                  enter: enterMutation.isPending,
+                  cancel: cancelMutation.isPending,
+                  skip: skipMutation.isPending,
+                  resend: resendSmsMutation.isPending,
+                  reorder: reorderMutation.isPending,
+                }}
+              />
+            </li>
           ))}
         </ul>
       )}
@@ -254,7 +240,7 @@ export default function WaitingListPage() {
   );
 }
 
-interface WaitingCardProps {
+interface WaitingRowProps {
   waiting: WaitingItem;
   onCall: () => void;
   onEnter: () => void;
@@ -272,7 +258,7 @@ interface WaitingCardProps {
   };
 }
 
-function WaitingCard({
+function WaitingRow({
   waiting,
   onCall,
   onEnter,
@@ -281,123 +267,131 @@ function WaitingCard({
   onResendSms,
   onReorder,
   pending,
-}: WaitingCardProps) {
-  const showCallActions = waiting.status === 'WAITING';
-  const showCalledActions = waiting.status === 'CALLED';
-  const showEnter = waiting.status === 'WAITING' || waiting.status === 'CALLED';
-  const showSecondaryActions = waiting.status === 'WAITING' || waiting.status === 'CALLED';
+}: WaitingRowProps) {
+  const isWaiting = waiting.status === 'WAITING';
+  const isCalled = waiting.status === 'CALLED';
+  const showActions = isWaiting || isCalled;
 
   return (
-    <li className="relative overflow-hidden rounded-[14px] border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[var(--admin-shadow-card)]">
-      <span
-        aria-hidden
-        className={`absolute left-0 top-0 bottom-0 w-1 ${STATUS_BAND[waiting.status]}`}
-      />
-
-      <div className="flex flex-col gap-3 p-4 pl-5 sm:flex-row sm:items-stretch sm:gap-0 sm:p-0 sm:pl-1">
-        <div className="flex shrink-0 flex-row items-center justify-between gap-3 sm:flex-col sm:justify-center sm:gap-1 sm:border-r sm:border-[var(--admin-border)] sm:px-5 sm:py-4">
-          <span className="tabular text-display1 font-bold leading-none text-[var(--admin-text)] sm:text-[3.25rem]">
-            #{waiting.waitingNumber}
-          </span>
-          <span className="text-caption text-[var(--admin-text-faint)]">
-            순서 <span className="tabular">{waiting.sortOrder}</span>
-          </span>
-        </div>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-3 sm:p-4">
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="flex min-w-0 flex-col gap-1">
-              <div className="flex items-baseline gap-2">
-                <span className="truncate text-subheading font-semibold text-[var(--admin-text)]">
-                  {waiting.name}
-                </span>
-                <span className="text-caption text-[var(--admin-text-muted)]">
-                  (<span className="tabular">{waiting.partySize}</span>명)
-                </span>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 text-caption text-[var(--admin-text-muted)]">
-                <span className="inline-flex items-center gap-1">
-                  <Phone size={12} />
-                  <span className="tabular">{waiting.maskedPhoneNumber}</span>
-                </span>
-                {waiting.smsSent && (
-                  <span className="inline-flex items-center gap-1 text-[var(--admin-success)]">
-                    <MessageSquare size={12} />
-                    SMS 발송
-                  </span>
-                )}
-              </div>
-            </div>
-            <StatusBadge status={waiting.status} pulse={waiting.status === 'CALLED'} />
+    <Card padding="sm">
+      <div className="flex items-start gap-3">
+        <span className="tabular shrink-0 text-base font-semibold text-[var(--admin-text)]">
+          #{waiting.waitingNumber}
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="flex min-w-0 items-baseline gap-2">
+            <span className="truncate text-sm font-medium text-[var(--admin-text)]">
+              {waiting.name}
+            </span>
+            <span className="tabular shrink-0 text-xs text-[var(--admin-text-muted)]">
+              {waiting.partySize}명
+            </span>
           </div>
+          <div className="tabular flex items-center gap-1.5 text-xs text-[var(--admin-text-muted)]">
+            <span>{waiting.maskedPhoneNumber}</span>
+            {waiting.smsSent && (
+              <MessageSquare
+                size={12}
+                aria-label="SMS 발송됨"
+                className="text-[var(--admin-text-muted)]"
+              />
+            )}
+            <span aria-hidden>·</span>
+            <span>순서 {waiting.sortOrder}</span>
+          </div>
+        </div>
+        <StatusBadge status={waiting.status} />
+      </div>
 
-          {(showCallActions || showCalledActions || showEnter || showSecondaryActions) && (
-            <div className="flex flex-wrap gap-2">
-              {showCallActions && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={onCall}
-                  disabled={pending.call}
-                  iconLeft={<Bell size={14} />}
-                >
-                  호출
-                </Button>
-              )}
-              {showEnter && (
-                <Button
-                  variant={showCalledActions ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={onEnter}
-                  disabled={pending.enter}
-                  iconLeft={<Check size={14} />}
-                >
-                  입장 완료
-                </Button>
-              )}
-              {showCalledActions && (
-                <>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={onResendSms}
-                    disabled={pending.resend}
-                    iconLeft={<MessageSquare size={14} />}
-                  >
-                    SMS 재발송
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={onSkip} disabled={pending.skip}>
-                    미방문
-                  </Button>
-                </>
-              )}
-              {showSecondaryActions && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onReorder}
-                    disabled={pending.reorder}
-                    iconLeft={<ListOrdered size={14} />}
-                  >
-                    순서 변경
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={onCancel}
-                    disabled={pending.cancel}
-                    iconLeft={<X size={14} />}
-                    className="ml-auto"
-                  >
-                    취소
-                  </Button>
-                </>
-              )}
-            </div>
+      {showActions && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {isWaiting && (
+            <>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={onCall}
+                disabled={pending.call}
+                iconLeft={<Bell size={14} />}
+                className="min-h-9"
+              >
+                호출
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onReorder}
+                disabled={pending.reorder}
+                className="min-h-9"
+              >
+                순서 변경
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={onCancel}
+                disabled={pending.cancel}
+                iconLeft={<X size={14} />}
+                className="ml-auto min-h-9"
+              >
+                취소
+              </Button>
+            </>
+          )}
+          {isCalled && (
+            <>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={onEnter}
+                disabled={pending.enter}
+                iconLeft={<Check size={14} />}
+                className="min-h-9"
+              >
+                입장
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={onResendSms}
+                disabled={pending.resend}
+                iconLeft={<RefreshCw size={14} />}
+                className="min-h-9"
+              >
+                재발송
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onSkip}
+                disabled={pending.skip}
+                className="min-h-9"
+              >
+                미방문
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onReorder}
+                disabled={pending.reorder}
+                className="min-h-9"
+              >
+                순서 변경
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={onCancel}
+                disabled={pending.cancel}
+                iconLeft={<X size={14} />}
+                className="min-h-9"
+              >
+                취소
+              </Button>
+            </>
           )}
         </div>
-      </div>
-    </li>
+      )}
+    </Card>
   );
 }

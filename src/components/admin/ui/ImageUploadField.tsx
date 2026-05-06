@@ -129,12 +129,12 @@ export default function ImageUploadField({
             {uploading ? (
               <>
                 <RefreshCw size={28} className="animate-spin" />
-                <span className="text-caption">업로드 중…</span>
+                <span className="text-xs">업로드 중…</span>
               </>
             ) : (
               <>
                 <ImageIcon size={28} />
-                <span className="text-caption">{emptyMessage}</span>
+                <span className="text-xs">{emptyMessage}</span>
               </>
             )}
           </button>

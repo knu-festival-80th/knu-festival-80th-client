@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Heart, KeyRound, Pencil, Plus, Trash2, Users } from 'lucide-react';
+import { AlertCircle, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ApiClientError, boothApi } from '@/apis';
 import type { BoothListItem, BoothSort } from '@/apis';
-import { Button } from '@/components/admin/ui';
+import { Button, Card } from '@/components/admin/ui';
 
 export default function BoothListPage() {
   const navigate = useNavigate();
@@ -38,268 +38,232 @@ export default function BoothListPage() {
   const activeCount = booths.filter((b) => b.waitingOpen).length;
 
   return (
-    <div className="flex flex-col gap-10">
-      <header className="flex flex-col gap-6 border-b border-[var(--admin-border)] pb-8 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
-        <div className="flex flex-col gap-3">
-          <span className="eyebrow text-[var(--admin-primary)]">Booth Registry</span>
-          <h1 className="text-display1 leading-[1.05] font-bold tracking-tight text-[var(--admin-text)]">
-            부스
-          </h1>
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-semibold text-[var(--admin-text)]">부스</h1>
           {boothsQuery.data && (
-            <p className="text-body2 text-[var(--admin-text-muted)]">
-              <span className="tabular text-[var(--admin-text)]">{booths.length}</span>개 등록됨 ·{' '}
-              <span className="tabular text-[var(--admin-text)]">{activeCount}</span>개 접수중
+            <p className="mt-1 text-sm text-[var(--admin-text-muted)]">
+              총 {booths.length}개 · 접수중 {activeCount}개
             </p>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <SegmentedSort value={sort} onChange={setSort} />
-          <Button
-            type="button"
-            onClick={() => navigate('/console/booths/new')}
-            iconLeft={<Plus size={16} strokeWidth={2.25} />}
-          >
-            신규 등록
-          </Button>
-        </div>
-      </header>
+        <Button
+          type="button"
+          variant="primary"
+          onClick={() => navigate('/console/booths/new')}
+          iconLeft={<Plus size={14} />}
+        >
+          신규 등록
+        </Button>
+      </div>
+
+      <div className="flex items-center justify-end gap-2">
+        <label htmlFor="booth-sort" className="text-xs text-[var(--admin-text-muted)]">
+          정렬
+        </label>
+        <select
+          id="booth-sort"
+          value={sort}
+          onChange={(event) => setSort(event.target.value as BoothSort)}
+          className="h-9 rounded-md border border-[var(--admin-border-strong)] bg-[var(--admin-surface)] px-2.5 text-sm text-[var(--admin-text)] focus:border-[var(--admin-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20"
+        >
+          <option value="likes">좋아요 순</option>
+          <option value="waiting-asc">대기 적은 순</option>
+        </select>
+      </div>
 
       {boothsQuery.isError && (
-        <p
+        <div
           role="alert"
-          className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
+          className="flex items-center gap-2 rounded-md border border-[var(--admin-danger)]/30 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
         >
-          {boothsQuery.error instanceof ApiClientError
-            ? boothsQuery.error.message
-            : '목록을 불러오지 못했습니다.'}
-        </p>
+          <AlertCircle size={14} />
+          <span>
+            {boothsQuery.error instanceof ApiClientError
+              ? boothsQuery.error.message
+              : '목록을 불러오지 못했습니다.'}
+          </span>
+        </div>
       )}
 
-      {boothsQuery.isLoading && <SkeletonRows />}
+      {boothsQuery.isLoading && <SkeletonList />}
 
       {boothsQuery.data && booths.length === 0 && <EmptyState />}
 
       {boothsQuery.data && booths.length > 0 && (
-        <ul className="flex flex-col">
-          {booths.map((booth, index) => (
-            <BoothRow
-              key={booth.boothId}
-              booth={booth}
-              isFirst={index === 0}
-              isPending={deleteMutation.isPending}
-              onEdit={() => navigate(`/console/booths/${booth.boothId}/edit`)}
-              onChangePassword={() => navigate(`/console/booths/${booth.boothId}/password`)}
-              onDelete={() => handleDelete(booth.boothId, booth.name)}
-            />
-          ))}
-        </ul>
+        <Card padding="none">
+          <div className="hidden border-b border-[var(--admin-border)] px-4 py-2.5 text-xs text-[var(--admin-text-muted)] sm:grid sm:grid-cols-[3rem_1fr_5rem_5rem_6rem_auto] sm:items-center sm:gap-4">
+            <div>ID</div>
+            <div>이름</div>
+            <div className="text-right tabular">좋아요</div>
+            <div className="text-right tabular">대기</div>
+            <div>상태</div>
+            <div className="text-right">액션</div>
+          </div>
+          <ul>
+            {booths.map((booth) => (
+              <BoothRow
+                key={booth.boothId}
+                booth={booth}
+                isPending={deleteMutation.isPending}
+                onEdit={() => navigate(`/console/booths/${booth.boothId}/edit`)}
+                onChangePassword={() => navigate(`/console/booths/${booth.boothId}/password`)}
+                onDelete={() => handleDelete(booth.boothId, booth.name)}
+              />
+            ))}
+          </ul>
+        </Card>
       )}
-    </div>
-  );
-}
-
-interface SegmentedSortProps {
-  value: BoothSort;
-  onChange: (value: BoothSort) => void;
-}
-
-function SegmentedSort({ value, onChange }: SegmentedSortProps) {
-  const options: { value: BoothSort; label: string }[] = [
-    { value: 'likes', label: '좋아요 순' },
-    { value: 'waiting-asc', label: '대기 적은 순' },
-  ];
-  return (
-    <div
-      role="tablist"
-      aria-label="정렬 기준"
-      className="inline-flex items-center gap-1 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface)] p-1"
-    >
-      {options.map((option) => {
-        const active = value === option.value;
-        return (
-          <button
-            key={option.value}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(option.value)}
-            className={[
-              'rounded-sm px-3 py-1.5 text-body2 transition-colors duration-150',
-              active
-                ? 'bg-[var(--admin-primary)] font-semibold text-[var(--admin-primary-fg)]'
-                : 'text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]',
-            ].join(' ')}
-          >
-            {option.label}
-          </button>
-        );
-      })}
     </div>
   );
 }
 
 interface BoothRowProps {
   booth: BoothListItem;
-  isFirst: boolean;
   isPending: boolean;
   onEdit: () => void;
   onChangePassword: () => void;
   onDelete: () => void;
 }
 
-function BoothRow({
-  booth,
-  isFirst,
-  isPending,
-  onEdit,
-  onChangePassword,
-  onDelete,
-}: BoothRowProps) {
+function BoothRow({ booth, isPending, onEdit, onChangePassword, onDelete }: BoothRowProps) {
+  const idLabel = `#${booth.boothId.toString().padStart(2, '0')}`;
+  const open = booth.waitingOpen;
+
   return (
-    <li
-      className={[
-        'group grid grid-cols-1 gap-4 py-5 sm:grid-cols-12 sm:items-center sm:gap-6',
-        'border-b border-[var(--admin-border)]',
-        isFirst ? 'border-t' : '',
-      ].join(' ')}
-    >
-      <div className="flex flex-col gap-1.5 sm:col-span-6">
-        <div className="flex items-baseline gap-3">
-          <span className="eyebrow tabular text-[var(--admin-primary)]">
-            #{booth.boothId.toString().padStart(2, '0')}
-          </span>
-          <span className="text-subheading font-semibold text-[var(--admin-text)]">
-            {booth.name}
-          </span>
+    <li className="border-b border-[var(--admin-border)] last:border-b-0 hover:bg-[var(--admin-surface-hover)]">
+      <div className="hidden px-4 py-3 sm:grid sm:grid-cols-[3rem_1fr_5rem_5rem_6rem_auto] sm:items-center sm:gap-4 sm:text-sm">
+        <div className="tabular text-[var(--admin-text-muted)]">{idLabel}</div>
+        <div className="min-w-0">
+          <div className="truncate text-[var(--admin-text)]">{booth.name}</div>
+          {booth.description && (
+            <div className="hidden truncate text-xs text-[var(--admin-text-muted)] sm:block">
+              {booth.description}
+            </div>
+          )}
+        </div>
+        <div className="text-right tabular text-[var(--admin-text)]">
+          {booth.likeCount.toLocaleString()}
+        </div>
+        <div className="text-right tabular text-[var(--admin-text)]">
+          {booth.currentWaitingTeams.toLocaleString()}
+        </div>
+        <div className={open ? 'text-[var(--admin-success)]' : 'text-[var(--admin-text-muted)]'}>
+          {open ? '접수중' : '접수중단'}
+        </div>
+        <div className="flex items-center justify-end gap-1 text-sm">
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded px-1.5 py-0.5 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
+          >
+            수정
+          </button>
+          <span className="text-[var(--admin-text-faint)]">·</span>
+          <button
+            type="button"
+            onClick={onChangePassword}
+            className="rounded px-1.5 py-0.5 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
+          >
+            비번
+          </button>
+          <span className="text-[var(--admin-text-faint)]">·</span>
+          <Button
+            type="button"
+            variant="danger"
+            size="sm"
+            onClick={onDelete}
+            disabled={isPending}
+            iconLeft={<Trash2 size={13} />}
+          >
+            삭제
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 px-4 py-3 sm:hidden">
+        <div className="flex items-baseline gap-2 text-sm">
+          <span className="tabular text-[var(--admin-text-muted)]">{idLabel}</span>
+          <span className="text-[var(--admin-text-muted)]">·</span>
+          <span className="truncate text-[var(--admin-text)]">{booth.name}</span>
         </div>
         {booth.description && (
-          <p className="line-clamp-1 text-body2 text-[var(--admin-text-muted)]">
-            {booth.description}
-          </p>
+          <div className="truncate text-xs text-[var(--admin-text-muted)]">{booth.description}</div>
         )}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 sm:col-span-3 sm:flex-nowrap">
-        <Metric icon={<Heart size={14} strokeWidth={2} />} value={booth.likeCount} />
-        <Metric
-          icon={<Users size={14} strokeWidth={2} />}
-          value={booth.currentWaitingTeams}
-          suffix="팀"
-        />
-      </div>
-
-      <div className="sm:col-span-3 sm:justify-self-start">
-        <WaitingPill open={booth.waitingOpen} />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-1.5 sm:col-span-12 sm:justify-end">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={onEdit}
-          iconLeft={<Pencil size={13} />}
-        >
-          정보 수정
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={onChangePassword}
-          iconLeft={<KeyRound size={13} />}
-        >
-          비번 변경
-        </Button>
-        <Button
-          type="button"
-          variant="danger"
-          size="sm"
-          onClick={onDelete}
-          disabled={isPending}
-          iconLeft={<Trash2 size={13} />}
-        >
-          삭제
-        </Button>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--admin-text-muted)]">
+          <span>
+            좋아요 <span className="tabular text-[var(--admin-text)]">{booth.likeCount}</span>
+          </span>
+          <span>
+            대기{' '}
+            <span className="tabular text-[var(--admin-text)]">{booth.currentWaitingTeams}</span>팀
+          </span>
+          <span className={open ? 'text-[var(--admin-success)]' : 'text-[var(--admin-text-muted)]'}>
+            {open ? '접수중' : '접수중단'}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 text-sm">
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded px-1.5 py-0.5 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
+          >
+            수정
+          </button>
+          <span className="text-[var(--admin-text-faint)]">·</span>
+          <button
+            type="button"
+            onClick={onChangePassword}
+            className="rounded px-1.5 py-0.5 text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-text)]"
+          >
+            비번
+          </button>
+          <span className="text-[var(--admin-text-faint)]">·</span>
+          <Button
+            type="button"
+            variant="danger"
+            size="sm"
+            onClick={onDelete}
+            disabled={isPending}
+            iconLeft={<Trash2 size={13} />}
+          >
+            삭제
+          </Button>
+        </div>
       </div>
     </li>
   );
 }
 
-function Metric({
-  icon,
-  value,
-  suffix,
-}: {
-  icon: React.ReactNode;
-  value: number;
-  suffix?: string;
-}) {
+function SkeletonList() {
   return (
-    <span className="inline-flex items-center gap-1.5 text-body2 text-[var(--admin-text-muted)]">
-      <span className="text-[var(--admin-text-faint)]">{icon}</span>
-      <span className="tabular text-[var(--admin-text)]">{value.toLocaleString()}</span>
-      {suffix && <span className="text-caption text-[var(--admin-text-faint)]">{suffix}</span>}
-    </span>
-  );
-}
-
-function WaitingPill({ open }: { open: boolean }) {
-  return (
-    <span className="inline-flex items-center gap-2 text-body2 text-[var(--admin-text-muted)]">
-      <span
-        className={[
-          'h-1.5 w-1.5 rounded-full',
-          open ? 'bg-[var(--admin-success)]' : 'bg-[var(--admin-text-faint)]',
-        ].join(' ')}
-      />
-      <span className={open ? 'text-[var(--admin-text)]' : 'text-[var(--admin-text-muted)]'}>
-        {open ? '접수중' : '접수중단'}
-      </span>
-    </span>
-  );
-}
-
-function SkeletonRows() {
-  return (
-    <ul className="flex flex-col">
-      {Array.from({ length: 3 }).map((_, idx) => (
-        <li
-          key={idx}
-          className={[
-            'grid grid-cols-12 items-center gap-6 py-5',
-            'border-b border-[var(--admin-border)]',
-            idx === 0 ? 'border-t' : '',
-          ].join(' ')}
-        >
-          <div className="col-span-6 flex flex-col gap-2">
-            <div className="h-4 w-2/3 animate-pulse rounded bg-[var(--admin-surface-strong)]" />
-            <div className="h-3 w-1/2 animate-pulse rounded bg-[var(--admin-surface-strong)]" />
-          </div>
-          <div className="col-span-3 h-4 w-24 animate-pulse rounded bg-[var(--admin-surface-strong)]" />
-          <div className="col-span-3 h-4 w-20 animate-pulse rounded bg-[var(--admin-surface-strong)]" />
-        </li>
-      ))}
-    </ul>
+    <Card padding="sm">
+      <ul className="flex flex-col gap-2">
+        {Array.from({ length: 3 }).map((_, idx) => (
+          <li key={idx} className="h-10 animate-pulse rounded bg-[var(--admin-surface-hover)]" />
+        ))}
+      </ul>
+    </Card>
   );
 }
 
 function EmptyState() {
   const navigate = useNavigate();
   return (
-    <div className="flex flex-col items-center gap-4 rounded-[14px] border border-dashed border-[var(--admin-border-strong)] py-20 text-center">
-      <span className="eyebrow text-[var(--admin-text-faint)]">Empty Registry</span>
-      <p className="max-w-xs text-body1 text-[var(--admin-text-muted)]">
-        아직 등록된 부스가 없습니다. 첫 부스를 등록해 주세요.
-      </p>
-      <Button
-        type="button"
-        onClick={() => navigate('/console/booths/new')}
-        iconLeft={<Plus size={16} />}
-        className="mt-2"
-      >
-        신규 등록
-      </Button>
-    </div>
+    <Card padding="lg">
+      <div className="flex flex-col items-center gap-3 py-8 text-center">
+        <p className="text-sm text-[var(--admin-text-muted)]">등록된 부스가 없습니다.</p>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={() => navigate('/console/booths/new')}
+          iconLeft={<Plus size={14} />}
+        >
+          신규 등록
+        </Button>
+      </div>
+    </Card>
   );
 }

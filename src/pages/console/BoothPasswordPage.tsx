@@ -1,5 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
-import { ArrowLeft, KeyRound } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { AlertCircle, AlertTriangle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
@@ -15,6 +15,14 @@ export default function BoothPasswordPage() {
   const [confirm, setConfirm] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const boothsQuery = useQuery({
+    queryKey: ['admin', 'booths', { sort: 'likes' }],
+    queryFn: () => boothApi.listAdminBooths('likes'),
+  });
+
+  const booth = boothsQuery.data?.find((b) => b.boothId === boothId);
+  const boothName = booth?.name ?? `부스 #${Number.isFinite(boothId) ? boothId : ''}`;
 
   const passwordMutation = useMutation({
     mutationFn: ({ id, newPassword }: { id: number; newPassword: string }) =>
@@ -53,28 +61,44 @@ export default function BoothPasswordPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <Link
-        to="/console"
-        className="inline-flex items-center gap-1.5 self-start text-caption text-[var(--admin-text-muted)] transition hover:text-[var(--admin-text)]"
-      >
-        <ArrowLeft size={14} />
-        부스 목록
-      </Link>
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2 text-sm">
+          <Link
+            to="/console"
+            className="inline-flex items-center gap-1 text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]"
+          >
+            <ArrowLeft size={14} />
+            부스 목록
+          </Link>
+          <span className="text-[var(--admin-text-faint)]">/</span>
+          <span className="truncate text-[var(--admin-text-muted)]">비밀번호 변경</span>
+        </div>
+        <h1 className="mt-1 text-2xl font-semibold text-[var(--admin-text)]">비밀번호 변경</h1>
+        <p className="text-sm text-[var(--admin-text-muted)]">{boothName}</p>
+      </div>
 
-      <form onSubmit={handleSubmit} noValidate>
-        <Card
-          eyebrow={
-            <span className="inline-flex items-center gap-1.5">
-              <KeyRound size={11} className="text-[var(--admin-primary)]" />
-              자격 증명
-            </span>
-          }
-          title={`부스 #${boothId} 비밀번호 변경`}
-          description="비밀번호 변경 후에는 이전 비밀번호를 복구할 수 없습니다. 새 비밀번호는 부스 운영진에게 별도 채널로 안전하게 전달해 주세요."
-          padding="lg"
-        >
-          <div className="flex flex-col gap-5">
+      <div
+        role="alert"
+        className="flex items-start gap-2 rounded-md border border-[var(--admin-warn)]/30 bg-[var(--admin-warn-soft)] px-3 py-2 text-sm text-[var(--admin-warn)]"
+      >
+        <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+        <span>비밀번호를 변경하면 기존 부스 운영진 로그인은 즉시 차단됩니다.</span>
+      </div>
+
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+        {successMessage && (
+          <div
+            role="status"
+            className="flex items-center gap-2 rounded-md border border-[var(--admin-success)]/30 bg-[var(--admin-success-soft)] px-3 py-2 text-sm text-[var(--admin-success)]"
+          >
+            <CheckCircle2 size={14} />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        <Card padding="md">
+          <div className="flex flex-col gap-4">
             <Field label="새 비밀번호" required htmlFor="new-password">
               <Input
                 id="new-password"
@@ -82,7 +106,7 @@ export default function BoothPasswordPage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="new-password"
-                placeholder="•••••••••••"
+                placeholder="..........."
               />
             </Field>
 
@@ -93,48 +117,35 @@ export default function BoothPasswordPage() {
                 value={confirm}
                 onChange={(event) => setConfirm(event.target.value)}
                 autoComplete="new-password"
-                placeholder="•••••••••••"
+                placeholder="..........."
               />
             </Field>
-
-            {errorMessage && (
-              <p
-                role="alert"
-                className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
-              >
-                {errorMessage}
-              </p>
-            )}
-
-            {successMessage && (
-              <p
-                role="status"
-                className="rounded-md border border-[var(--admin-success)]/35 bg-[var(--admin-success-soft)] px-3 py-2 text-body2 text-[var(--admin-success)]"
-              >
-                {successMessage}
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              <Button
-                type="submit"
-                variant="primary"
-                disabled={passwordMutation.isPending}
-                iconLeft={<KeyRound size={14} />}
-              >
-                {passwordMutation.isPending ? '변경 중…' : '비밀번호 변경'}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => navigate('/console')}
-                disabled={passwordMutation.isPending}
-              >
-                돌아가기
-              </Button>
-            </div>
           </div>
         </Card>
+
+        {errorMessage && (
+          <div
+            role="alert"
+            className="flex items-center gap-2 rounded-md border border-[var(--admin-danger)]/30 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
+          >
+            <AlertCircle size={14} />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Button type="submit" variant="primary" disabled={passwordMutation.isPending}>
+            {passwordMutation.isPending ? '변경 중...' : '비밀번호 변경'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => navigate('/console')}
+            disabled={passwordMutation.isPending}
+          >
+            취소
+          </Button>
+        </div>
       </form>
     </div>
   );

@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, MapPin, Save } from 'lucide-react';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 
 import { ApiClientError, boothApi, imageUrlToPath } from '@/apis';
@@ -46,35 +45,44 @@ export default function BoothProfilePage() {
 
   if (boothId === null) return null;
 
-  if (boothsQuery.isLoading) {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="h-32 animate-pulse rounded-[14px] border border-[var(--admin-border)] bg-[var(--admin-surface)]" />
-        <div className="h-64 animate-pulse rounded-[14px] border border-[var(--admin-border)] bg-[var(--admin-surface)]" />
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-0.5">
+        <h1 className="text-xl font-semibold text-[var(--admin-text)]">부스 정보</h1>
+        <p className="text-sm text-[var(--admin-text-muted)]">
+          손님에게 노출되는 정보를 관리합니다.
+        </p>
       </div>
-    );
-  }
-  if (boothsQuery.isError) {
-    return (
-      <div
-        role="alert"
-        className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
-      >
-        {boothsQuery.error instanceof ApiClientError
-          ? boothsQuery.error.message
-          : '부스 정보를 불러오지 못했습니다.'}
-      </div>
-    );
-  }
 
-  const booth = boothsQuery.data?.find((b) => b.boothId === boothId);
-  if (!booth) {
-    return (
-      <p className="text-body2 text-[var(--admin-text-muted)]">해당 부스를 찾을 수 없습니다.</p>
-    );
-  }
+      {boothsQuery.isLoading && (
+        <div className="h-64 animate-pulse rounded-md bg-[var(--admin-surface-hover)]" />
+      )}
 
-  return <BoothProfileForm key={boothId} boothId={boothId} initial={toFormState(booth)} />;
+      {boothsQuery.isError && (
+        <div
+          role="alert"
+          className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
+        >
+          {boothsQuery.error instanceof ApiClientError
+            ? boothsQuery.error.message
+            : '부스 정보를 불러오지 못했습니다.'}
+        </div>
+      )}
+
+      {boothsQuery.data &&
+        (() => {
+          const booth = boothsQuery.data.find((b) => b.boothId === boothId);
+          if (!booth) {
+            return (
+              <p className="text-sm text-[var(--admin-text-muted)]">
+                해당 부스를 찾을 수 없습니다.
+              </p>
+            );
+          }
+          return <BoothProfileForm key={boothId} boothId={boothId} initial={toFormState(booth)} />;
+        })()}
+    </div>
+  );
 }
 
 interface BoothProfileFormProps {
@@ -92,7 +100,7 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
     mutationFn: (payload: BoothUpdateRequest) => boothApi.updateBooth(boothId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'booths'] });
-      setSuccessMessage('부스 정보가 저장되었습니다.');
+      setSuccessMessage('저장되었습니다.');
     },
     onError: (error: unknown) => {
       setErrorMessage(error instanceof ApiClientError ? error.message : '저장에 실패했습니다.');
@@ -137,27 +145,21 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <Card
-        eyebrow="내 주막"
-        title="부스 정보"
-        description="손님에게 노출되는 주막 이름·설명·위치·메뉴판을 관리합니다."
-        padding="lg"
-      >
-        <div className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit}>
+      <Card padding="md">
+        <div className="flex flex-col gap-4">
           {successMessage && (
             <div
               role="status"
-              className="flex items-center gap-2 rounded-md border border-[var(--admin-success)]/35 bg-[var(--admin-success-soft)] px-3 py-2 text-body2 text-[var(--admin-success)]"
+              className="rounded-md border border-[var(--admin-success)]/35 bg-[var(--admin-success-soft)] px-3 py-2 text-sm text-[var(--admin-success)]"
             >
-              <Check size={16} />
               {successMessage}
             </div>
           )}
           {errorMessage && (
             <div
               role="alert"
-              className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-body2 text-[var(--admin-danger)]"
+              className="rounded-md border border-[var(--admin-danger)]/35 bg-[var(--admin-danger-soft)] px-3 py-2 text-sm text-[var(--admin-danger)]"
             >
               {errorMessage}
             </div>
@@ -183,8 +185,8 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
             />
           </Field>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="X 좌표" hint="0 ~ 1 (가로 비율)" htmlFor="booth-x-ratio">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="X 좌표" hint="0.0 ~ 1.0 비율" htmlFor="booth-x-ratio">
               <Input
                 id="booth-x-ratio"
                 type="text"
@@ -195,7 +197,7 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
                 placeholder="0.42"
               />
             </Field>
-            <Field label="Y 좌표" hint="0 ~ 1 (세로 비율)" htmlFor="booth-y-ratio">
+            <Field label="Y 좌표" hint="0.0 ~ 1.0 비율" htmlFor="booth-y-ratio">
               <Input
                 id="booth-y-ratio"
                 type="text"
@@ -207,10 +209,6 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
               />
             </Field>
           </div>
-          <p className="-mt-2 inline-flex items-center gap-1 text-caption text-[var(--admin-text-faint)]">
-            <MapPin size={12} />
-            축제 지도 이미지에서의 비율 좌표. 두 값이 모두 채워져야 지도에 핀이 표시됩니다.
-          </p>
 
           <ImageUploadField
             label="대표 이미지"
@@ -228,17 +226,15 @@ function BoothProfileForm({ boothId, initial }: BoothProfileFormProps) {
             previewClassName="max-h-80 w-full max-w-sm object-contain"
           />
 
-          <div className="pt-1">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              disabled={updateMutation.isPending}
-              iconLeft={<Save size={18} />}
-            >
-              {updateMutation.isPending ? '저장 중…' : '저장하기'}
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            block
+            disabled={updateMutation.isPending}
+          >
+            {updateMutation.isPending ? '저장 중…' : '저장'}
+          </Button>
         </div>
       </Card>
     </form>
