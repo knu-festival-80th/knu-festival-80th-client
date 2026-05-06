@@ -6,10 +6,18 @@ type SectionBlockProps = {
   label: string;
   title: string;
   description?: string;
+  action?: ReactNode;
   viewAllTo?: string;
   viewAllLabel?: string;
   viewAllClassName?: string;
   direction?: 'left' | 'right';
+  animate?: boolean;
+  className?: string;
+  headingClassName?: string;
+  labelClassName?: string;
+  titleClassName?: string;
+  descriptionClassName?: string;
+  actionClassName?: string;
   children: ReactNode;
 };
 
@@ -17,28 +25,33 @@ export default function SectionBlock({
   label,
   title,
   description,
+  action,
   viewAllTo,
   viewAllLabel,
   viewAllClassName,
   direction = 'left',
+  animate = true,
+  className = 'flex flex-col gap-12',
+  headingClassName = 'flex flex-col px-5',
+  labelClassName = 'text-body1 font-bold text-ink',
+  titleClassName = 'mt-1.5 text-subheading font-bold leading-none tracking-tight text-black',
+  descriptionClassName = 'mt-1.5 text-body2 text-text-muted whitespace-pre-line',
+  actionClassName = 'mt-4',
   children,
 }: SectionBlockProps) {
   return (
     <motion.div
-      className="flex flex-col gap-12"
-      initial={{ opacity: 0, x: direction === 'left' ? -40 : 40 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className={className}
+      initial={animate ? { opacity: 0, x: direction === 'left' ? -40 : 40 } : false}
+      whileInView={animate ? { opacity: 1, x: 0 } : undefined}
+      viewport={animate ? { once: true, amount: 0.2 } : undefined}
+      transition={animate ? { duration: 0.5, ease: 'easeOut' } : undefined}
     >
-      <div className="flex flex-col px-5">
-        <p className="text-body1 font-bold text-ink">{label}</p>
-        <h2 className="mt-1.5 text-subheading font-bold leading-none tracking-tight text-black">
-          {title}
-        </h2>
-        {description && (
-          <p className="mt-1.5 text-body2 text-text-muted whitespace-pre-line">{description}</p>
-        )}
+      <div className={headingClassName}>
+        <p className={labelClassName}>{label}</p>
+        <h2 className={titleClassName}>{title}</h2>
+        {description && <p className={descriptionClassName}>{description}</p>}
+        {action && <div className={actionClassName}>{action}</div>}
         {viewAllTo && (
           <div className="mt-4">
             <ViewAllButton to={viewAllTo} label={viewAllLabel} className={viewAllClassName} />
