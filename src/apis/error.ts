@@ -1,41 +1,26 @@
 import axios from 'axios';
 
-import type { ApiResponse, ApiResult, BackendErrorEnvelope } from './types';
+import type { ApiResponse } from './types';
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-function pickErrorInfo(payload: unknown): {
-  status?: number;
-  message?: string;
-  code?: string;
-  result?: ApiResult;
-} {
+function pickErrorInfo(payload: unknown): { code?: string; message?: string } {
   if (!isObject(payload)) {
     return {};
   }
 
-  const envelope = payload as BackendErrorEnvelope;
-  const nestedError = isObject(envelope.error) ? envelope.error : undefined;
-  const nestedStatus = typeof nestedError?.state === 'number' ? nestedError.state : undefined;
+  const error = isObject(payload.error) ? payload.error : undefined;
+  const code = typeof error?.code === 'string' ? error.code : undefined;
+  const message = typeof error?.message === 'string' ? error.message : undefined;
 
-  const message =
-    (typeof envelope.message === 'string' ? envelope.message : undefined) ??
-    (typeof nestedError?.message === 'string' ? nestedError.message : undefined);
-  const code =
-    (typeof envelope.code === 'string' ? envelope.code : undefined) ??
-    (typeof nestedError?.code === 'string' ? nestedError.code : undefined);
-  const result =
-    envelope.result === 'SUCCESS' || envelope.result === 'FAIL' ? envelope.result : undefined;
-
-  return { status: nestedStatus, message, code, result };
+  return { code, message };
 }
 
 export class ApiClientError extends Error {
   readonly status: number;
   readonly code?: string;
-  readonly result?: ApiResult;
   readonly raw?: unknown;
 
   constructor(
@@ -43,7 +28,6 @@ export class ApiClientError extends Error {
     options: {
       status: number;
       code?: string;
-      result?: ApiResult;
       raw?: unknown;
     },
   ) {
@@ -51,7 +35,6 @@ export class ApiClientError extends Error {
     this.name = 'ApiClientError';
     this.status = options.status;
     this.code = options.code;
-    this.result = options.result;
     this.raw = options.raw;
   }
 }
@@ -63,13 +46,12 @@ export function toApiClientError(error: unknown): ApiClientError {
 
   if (axios.isAxiosError(error)) {
     const info = pickErrorInfo(error.response?.data);
-    const status = info.status ?? error.response?.status ?? 0;
+    const status = error.response?.status ?? 0;
     const message = info.message ?? error.message ?? '요청 처리 중 오류가 발생했습니다.';
 
     return new ApiClientError(message, {
       status,
       code: info.code,
-      result: info.result,
       raw: error,
     });
   }
@@ -88,14 +70,23 @@ export function toApiClientError(error: unknown): ApiClientError {
 }
 
 export function unwrapApiResponse<T>(payload: ApiResponse<T>): T {
-  if (payload.result === 'FAIL') {
-    throw new ApiClientError(payload.message ?? '요청 처리에 실패했습니다.', {
+  if (!payload.success || payload.data === null) {
+    throw new ApiClientError(payload.error?.message ?? '요청 처리에 실패했습니다.', {
       status: 200,
-      code: payload.code,
-      result: payload.result,
+      code: payload.error?.code,
       raw: payload,
     });
   }
 
   return payload.data;
+}
+
+export function unwrapVoidApiResponse(payload: ApiResponse<unknown>): void {
+  if (!payload.success) {
+    throw new ApiClientError(payload.error?.message ?? '요청 처리에 실패했습니다.', {
+      status: 200,
+      code: payload.error?.code,
+      raw: payload,
+    });
+  }
 }

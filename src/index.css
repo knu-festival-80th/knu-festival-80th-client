@@ -149,3 +149,54 @@
     radial-gradient(circle at 82% 18%, rgba(91, 121, 200, 0.12), transparent 24rem),
     var(--color-background);
 }
+
+[data-admin-theme] {
+  color: var(--admin-text);
+  background: var(--admin-bg);
+}
+
+[data-admin-theme='console'] {
+  --admin-bg: #f8fafc;
+  --admin-surface: #ffffff;
+  --admin-surface-hover: #f1f5f9;
+  --admin-border: #e2e8f0;
+  --admin-border-strong: #cbd5e1;
+  --admin-text: #0f172a;
+  --admin-text-muted: #475569;
+  --admin-text-faint: #94a3b8;
+  --admin-primary: #1d2038;
+  --admin-primary-strong: #0f1120;
+  --admin-primary-soft: rgba(29, 32, 56, 0.06);
+  --admin-primary-fg: #ffffff;
+  --admin-danger: #b91c1c;
+  --admin-danger-soft: rgba(185, 28, 28, 0.08);
+  --admin-success: #15803d;
+  --admin-success-soft: rgba(21, 128, 61, 0.08);
+  --admin-warn: #b45309;
+  --admin-warn-soft: rgba(180, 83, 9, 0.08);
+}
+
+[data-admin-theme='booth'] {
+  --admin-bg: #fafaf7;
+  --admin-surface: #ffffff;
+  --admin-surface-hover: #f5f4ef;
+  --admin-border: #e8e4dc;
+  --admin-border-strong: #d3cdbf;
+  --admin-text: #1d2038;
+  --admin-text-muted: #5e5b56;
+  --admin-text-faint: #9b968c;
+  --admin-primary: #ea5147;
+  --admin-primary-strong: #d3382e;
+  --admin-primary-soft: rgba(234, 81, 71, 0.08);
+  --admin-primary-fg: #ffffff;
+  --admin-danger: #b91c1c;
+  --admin-danger-soft: rgba(185, 28, 28, 0.08);
+  --admin-success: #15803d;
+  --admin-success-soft: rgba(21, 128, 61, 0.08);
+  --admin-warn: #b45309;
+  --admin-warn-soft: rgba(180, 83, 9, 0.08);
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
