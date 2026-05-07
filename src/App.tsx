@@ -23,8 +23,12 @@ import NotFoundPage from '@/pages/NotFoundPage';
 import TavernMapPage from '@/pages/TavernMapPage';
 import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
+<<<<<<< HEAD
 import StampTourPage from './pages/stampTour/StampTourPage';
 import StampBoothListPage from './pages/stampTour/StampBoothListPage';
+=======
+import InstaTingPage from './pages/InstaTingPage';
+>>>>>>> 0bd24f1 ([#11]Fix: /instating 라우트 누락 수정)
 
 export default function App() {
   return (
@@ -69,8 +73,12 @@ export default function App() {
           <Route path="/taverns" element={<TavernMapPage />} />
           <Route path="/timetable" element={<TimeTablePage />} />
           <Route path="/goods" element={<GoodsPage />} />
+<<<<<<< HEAD
           <Route path="/stamptour" element={<StampTourPage />} />
           <Route path="/stamptour/booths" element={<StampBoothListPage />} />
+=======
+          <Route path="/instating" element={<InstaTingPage />} />
+>>>>>>> 0bd24f1 ([#11]Fix: /instating 라우트 누락 수정)
           <Route path="/congrat-video" element={<CongratVideoPage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
