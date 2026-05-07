@@ -22,9 +22,13 @@ export default function TavernCard({
 }: TavernCardProps) {
   const cardRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const previousExpandedRef = useRef(expanded);
 
   useEffect(() => {
-    if (!expanded) {
+    const wasExpanded = previousExpandedRef.current;
+    previousExpandedRef.current = expanded;
+
+    if (!expanded || wasExpanded) {
       return;
     }
 
