@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
 import menuImage from '@/assets/images/menu.jpg';
@@ -19,6 +20,22 @@ export default function TavernCard({
   onRegister,
   onSelect,
 }: TavernCardProps) {
+  const cardRef = useRef<HTMLElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!expanded) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      (menuRef.current ?? cardRef.current)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+  }, [expanded]);
+
   const cardSummary = (
     <>
       <div>
@@ -39,7 +56,10 @@ export default function TavernCard({
   );
 
   return (
-    <article className="overflow-hidden rounded-[12px] border border-[#e5e5e5] bg-white">
+    <article
+      ref={cardRef}
+      className="scroll-mt-28 overflow-hidden rounded-[12px] border border-[#e5e5e5] bg-white"
+    >
       <div className="flex flex-col items-center gap-2.5 px-6 pb-2.5 pt-5">
         <div className="flex w-full flex-col gap-4">
           {onSelect ? (
@@ -67,7 +87,10 @@ export default function TavernCard({
           <FiChevronDown className={expanded ? 'rotate-180' : ''} size={18} />
         </button>
         {expanded && (
-          <div className="h-[260px] w-full border-t border-[#e5e5e5] pt-3">
+          <div
+            ref={menuRef}
+            className="h-[260px] w-full scroll-mt-28 border-t border-[#e5e5e5] pt-3"
+          >
             <img
               src={menuImage}
               alt={`${tavern.name} 메뉴판`}
