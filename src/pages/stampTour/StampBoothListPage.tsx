@@ -104,19 +104,22 @@ const StampBoothListPage = () => {
           'linear-gradient(to bottom, rgba(255,218,61,0.3) 0%, rgba(255,141,101,0.3) 49%, rgba(255,61,144,0.3) 100%)',
       }}
     >
-      <div className="mx-auto flex w-full max-w-[450px] flex-col gap-[30px] px-5 pb-32 pt-7">
-        <p className="font-wanted-sans text-subheading font-bold tracking-tight text-ink">
+      <div className="mx-auto flex w-full max-w-[450px] flex-col gap-5 px-5 pb-32 pt-7">
+        <h1 className="font-wanted-sans text-subheading font-bold tracking-tight text-ink">
           부스 목록
-        </p>
+        </h1>
 
-        {BOOTHS.map((booth) => (
-          <BoothCard
-            key={booth.id}
-            {...booth}
-            isExpanded={openBoothId === booth.id}
-            onDetailClick={() => handleDetailClick(booth.id)}
-          />
-        ))}
+        <ul className="flex flex-col gap-[30px]">
+          {BOOTHS.map((booth) => (
+            <li key={booth.id}>
+              <BoothCard
+                {...booth}
+                isExpanded={openBoothId === booth.id}
+                onDetailClick={() => handleDetailClick(booth.id)}
+              />
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

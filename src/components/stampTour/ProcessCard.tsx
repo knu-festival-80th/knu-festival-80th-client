@@ -17,7 +17,7 @@ const ProcessCard = ({
   imgSrc,
   onButtonClick,
 }: ProcessCardProps) => (
-  <div className="relative flex aspect-4/5 w-full flex-col overflow-hidden rounded-md p-6">
+  <article className="relative flex aspect-4/5 w-full flex-col overflow-hidden rounded-md p-6">
     <div aria-hidden className="pointer-events-none absolute inset-0">
       <img src={bgSrc} alt="" className="absolute inset-0 size-full object-cover" />
       <div
@@ -33,7 +33,7 @@ const ProcessCard = ({
       <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#333]">
         Step {step}
       </p>
-      <p className="font-wanted-sans text-heading3 font-bold text-ink">{title}</p>
+      <h3 className="font-wanted-sans text-heading3 font-bold text-ink">{title}</h3>
       <p className="font-wanted-sans text-body1 leading-[1.4] tracking-tight text-gray whitespace-pre-line">
         {description}
       </p>
@@ -51,7 +51,7 @@ const ProcessCard = ({
     <div className="relative flex justify-end">
       <OutlineButton label="지도 보기" showArrow variant="glass" onClick={onButtonClick} />
     </div>
-  </div>
+  </article>
 );
 
 export default ProcessCard;

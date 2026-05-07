@@ -59,9 +59,9 @@ const StampTourContext = () => {
             <p className="font-wanted-sans text-body1 font-bold tracking-tight text-ink">
               2026 Stamp Tour
             </p>
-            <p className="font-wanted-sans text-subheading font-bold tracking-tight text-ink">
+            <h2 className="font-wanted-sans text-subheading font-bold tracking-tight text-ink">
               2026 대동제 스탬프 투어
-            </p>
+            </h2>
             <p className="font-wanted-sans text-body1 leading-[1.4] tracking-tight text-gray">
               부스 방문하고 스탬프를 모아보세요! <br />
               전용 스탬프를 모두 채우시면 대동제 기획팀이 준비한 특별한 선물을 드려요.
@@ -73,11 +73,13 @@ const StampTourContext = () => {
         <img src={stampHero} alt="스탬프 투어 카드" className="w-[297px]" />
 
         {/* Step cards */}
-        <div className="flex w-full flex-col gap-[30px]">
+        <ol className="flex w-full flex-col gap-[30px]">
           {steps.map((s) => (
-            <ProcessCard key={s.step} {...s} onButtonClick={goToBooths} />
+            <li key={s.step}>
+              <ProcessCard {...s} onButtonClick={goToBooths} />
+            </li>
           ))}
-        </div>
+        </ol>
 
         {/* Prizes */}
         <div className="flex w-full flex-col gap-12">
@@ -85,13 +87,13 @@ const StampTourContext = () => {
             <p className="font-wanted-sans text-body1 font-bold tracking-tight text-ink">
               Stamp Prizes
             </p>
-            <p className="font-wanted-sans text-subheading font-bold tracking-tight text-ink">
+            <h2 className="font-wanted-sans text-subheading font-bold tracking-tight text-ink">
               2026 대동제가 준비한 상품
-            </p>
+            </h2>
           </div>
-          <div className="flex flex-col gap-8">
+          <ul className="flex flex-col gap-8">
             {prizes.map(({ rank, name, imgSrc }) => (
-              <div
+              <li
                 key={rank}
                 className="flex h-[196px] items-end justify-center gap-[30px] rounded-lg bg-[rgba(255,61,61,0.03)] px-[30px] py-5"
               >
@@ -120,9 +122,9 @@ const StampTourContext = () => {
                   alt={name.replace('\n', ' ')}
                   className="shrink-0 size-[156px] object-contain"
                 />
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </div>
     </section>

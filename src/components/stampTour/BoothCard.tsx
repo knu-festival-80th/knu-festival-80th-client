@@ -27,10 +27,10 @@ const BoothCard = ({
   onDetailClick,
 }: BoothCardProps) => {
   return (
-    <div className="flex w-full flex-col gap-2.5 rounded-[12px] border border-border bg-white px-6 pb-2.5 pt-6">
+    <article className="flex w-full flex-col gap-2.5 rounded-[12px] border border-border bg-white px-6 pb-2.5 pt-6">
       <div className="flex w-full flex-col items-start gap-5">
         <ZoneBadge label={zone} />
-        <p className="font-wanted-sans text-heading2 font-bold tracking-tight text-ink">{name}</p>
+        <h3 className="font-wanted-sans text-heading2 font-bold tracking-tight text-ink">{name}</h3>
         <p className="font-wanted-sans text-body1 leading-[1.4] tracking-tight text-[#4d4d4d]">
           {description}
         </p>
@@ -78,7 +78,7 @@ const BoothCard = ({
           className={`size-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
         />
       </button>
-    </div>
+    </article>
   );
 };
 
