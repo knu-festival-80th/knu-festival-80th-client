@@ -6,8 +6,12 @@ type VideoCardProps = {
 };
 
 function getYoutubeId(url: string): string {
-  const match = url.match(/[?&]v=([^&]+)/);
-  return match ? match[1] : '';
+  const watchMatch = url.match(/[?&]v=([^&]+)/);
+  if (watchMatch) return watchMatch[1];
+  const shortsMatch = url.match(/shorts\/([^?&]+)/);
+  if (shortsMatch) return shortsMatch[1];
+  const shortMatch = url.match(/youtu\.be\/([^?&]+)/);
+  return shortMatch ? shortMatch[1] : '';
 }
 
 export default function VideoCard({ badge, videoUrl }: VideoCardProps) {
