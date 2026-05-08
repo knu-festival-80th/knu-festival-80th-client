@@ -48,7 +48,6 @@ export default function CongratVideoPage() {
           viewAllTo="#"
           viewAllLabel="80주년 더보기"
           viewAllClassName="border-sub-red text-sub-red"
-          direction="left"
         >
           <div className="px-5">
             <img
@@ -59,7 +58,7 @@ export default function CongratVideoPage() {
           </div>
         </SectionBlock>
 
-        <SectionBlock label="Official Video" title="80년의 기록과 보존, 홍보영상" direction="right">
+        <SectionBlock label="Official Video" title="80년의 기록과 보존, 홍보영상">
           <div className="flex flex-col gap-8 px-5">
             {CONGRAT_VIDEOS.map((video) => (
               <VideoCard key={video.badge} badge={video.badge} videoUrl={video.videoUrl} />
@@ -74,7 +73,6 @@ export default function CongratVideoPage() {
           viewAllTo="#"
           viewAllLabel="발전기금"
           viewAllClassName="border-sub-red text-sub-red"
-          direction="left"
         >
           <div className="px-5">
             <img
