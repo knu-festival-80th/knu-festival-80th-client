@@ -7,7 +7,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'THE GRAND MOMENT 80주년',
     children: [
       { label: '경북대학교 80주년', to: '/' },
-      { label: '80주년 롤링페이퍼', to: '/' },
+      { label: '80주년 롤링페이퍼', to: '/rolling-paper' },
       { label: '축전 영상', to: '/congrat-video' },
     ],
   },
@@ -16,9 +16,9 @@ export const NAV_ITEMS: NavItem[] = [
     label: '지도 및 주막 정보',
     children: [
       { label: '소개', to: '/' },
-      { label: '지도', to: '/' },
-      { label: '주막 목록', to: '/' },
-      { label: '예약 조회', to: '/' },
+      { label: '지도', to: '/map' },
+      { label: '주막 목록', to: '/taverns' },
+      { label: '예약 조회', to: '/taverns' },
     ],
   },
   {
@@ -34,7 +34,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: '이벤트',
     children: [
       { label: '호반우스타그램', to: '/' },
-      { label: '축제의 스탬프 투어', to: '/' },
+      { label: '축제의 스탬프 투어', to: '/stamptour' },
     ],
   },
 ];

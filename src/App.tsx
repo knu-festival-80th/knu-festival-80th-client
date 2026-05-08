@@ -20,6 +20,8 @@ import CongratVideoPage from '@/pages/CongratVideoPage';
 import GoodsPage from '@/pages/GoodsPage';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import RollingPaperBoardPage from '@/pages/RollingPaperBoardPage';
+import RollingPaperIntroPage from '@/pages/RollingPaperIntroPage';
 import TavernMapPage from '@/pages/TavernMapPage';
 import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
@@ -72,6 +74,8 @@ export default function App() {
           <Route path="/stamptour" element={<StampTourPage />} />
           <Route path="/stamptour/booths" element={<StampBoothListPage />} />
           <Route path="/congrat-video" element={<CongratVideoPage />} />
+          <Route path="/rolling-paper" element={<RollingPaperIntroPage />} />
+          <Route path="/rolling-paper/board" element={<RollingPaperBoardPage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Route>
