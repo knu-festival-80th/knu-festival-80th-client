@@ -3,6 +3,8 @@ import VideoCard from '@/components/congratVideo/VideoCard';
 import { CONGRAT_VIDEOS } from '@/constants/congratVideo';
 import heroBg from '@/assets/congratVideo/hero-bg.png';
 import heroDecoration from '@/assets/congratVideo/hero-decoration.svg';
+import about80thImg from '@/assets/congratVideo/about-80th.png';
+import anniversaryFundImg from '@/assets/congratVideo/anniversary-fund.png';
 
 export default function CongratVideoPage() {
   return (
@@ -45,13 +47,13 @@ export default function CongratVideoPage() {
           description={
             '80년의 시간 속에서 견고히 쌓아 올린\n경북대학교의 위대한 이름이\n이제 새로운 미래의 문을 열고 있습니다.\n지금, 우리의 가장 빛나는 순간이 새롭게 시작됩니다.'
           }
-          viewAllTo="#"
+          viewAllTo="https://www.knu.ac.kr/wbbs/knu80th.action"
           viewAllLabel="80주년 더보기"
           viewAllClassName="border-sub-red text-sub-red"
         >
           <div className="px-5">
             <img
-              src="https://picsum.photos/seed/about80/335/242"
+              src={about80thImg}
               alt="경북대학교 80주년"
               className="w-full aspect-335/242 object-cover"
             />
@@ -70,13 +72,13 @@ export default function CongratVideoPage() {
           label="Anniversary Fund"
           title="80주년의 새로운 영광을 함께, 발전기금"
           description={'함께 만드는 80년의 자부심.\n여러분의 후원으로 더 밝은 내일을 열어갑니다.'}
-          viewAllTo="#"
+          viewAllTo="http://fund.knu.ac.kr/pages/index.htm"
           viewAllLabel="발전기금"
           viewAllClassName="border-sub-red text-sub-red"
         >
           <div className="px-5">
             <img
-              src="https://picsum.photos/seed/fund80/235/235"
+              src={anniversaryFundImg}
               alt="발전기금"
               className="w-full aspect-square object-cover"
             />
