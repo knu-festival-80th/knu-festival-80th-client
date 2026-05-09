@@ -24,9 +24,9 @@ import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import StampTourPage from './pages/stampTour/StampTourPage';
 import StampBoothListPage from './pages/stampTour/StampBoothListPage';
-import InstaTingLayout from './pages/instaTing/InstaTingLayout';
-import InstaTingPage from './pages/instaTing/InstaTingPage';
-import InstaTingApplyPage from './pages/instaTing/InstaTingApplyPage';
+import InstaTingLayout from './pages/InstaTingPage';
+import InstaTingIntroView from '@/components/instating/views/InstaTingIntroView';
+import InstaTingApplyView from '@/components/instating/views/InstaTingApplyView';
 
 export default function App() {
   return (
@@ -74,8 +74,8 @@ export default function App() {
           <Route path="/stamptour" element={<StampTourPage />} />
           <Route path="/stamptour/booths" element={<StampBoothListPage />} />
           <Route path="/instating" element={<InstaTingLayout />}>
-            <Route index element={<InstaTingPage />} />
-            <Route path="apply" element={<InstaTingApplyPage />} />
+            <Route index element={<InstaTingIntroView />} />
+            <Route path="apply" element={<InstaTingApplyView />} />
           </Route>
           <Route path="/congrat-video" element={<CongratVideoPage />} />
           <Route path="/404" element={<NotFoundPage />} />

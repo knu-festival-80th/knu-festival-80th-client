@@ -3,7 +3,7 @@ import ApplicantsNumberSection from '@/components/instating/ApplicantsNumberSect
 import CountDownSection from '@/components/instating/CountDownSection';
 import InstaTingContent from '@/components/instating/InstaTingContent';
 
-const InstaTingPage = () => {
+const InstaTingIntroView = () => {
   return (
     <>
       <GradientBanner title="두근두근 인스타팅" />
@@ -14,4 +14,4 @@ const InstaTingPage = () => {
   );
 };
 
-export default InstaTingPage;
+export default InstaTingIntroView;
