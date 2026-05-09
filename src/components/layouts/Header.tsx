@@ -9,7 +9,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className="fixed left-1/2 top-0 z-50 h-16 w-full max-w-150 -translate-x-1/2 bg-background shadow-sm">
+      <header className="fixed left-1/2 top-0 z-50 h-16 w-full max-w-150 -translate-x-1/2 bg-white">
         <div className="mx-auto flex h-full max-w-[600px] items-center justify-between px-5">
           <Link to="/" aria-label="홈으로 이동">
             <img
