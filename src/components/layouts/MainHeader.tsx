@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { LuChevronDown, LuMenu } from 'react-icons/lu';
 import { NavigationDrawer } from '@/components/navigationDrawer/NavigationDrawer';
 import knu80thLogo from '@/assets/logo/knu80th_logo_dark.png';
@@ -41,7 +40,7 @@ export const MainHeader = () => {
               </div>
             </button>
             {isLangOpen && (
-              <div className="absolute left-0 top-full mt-1 min-w-full overflow-hidden rounded-lg border border-black/30 bg-transparent">
+              <div className="absolute left-0 top-full mt-1 min-w-full overflow-hidden rounded-lg border border-black/30 backdrop-blur-sm bg-white/5">
                 {(['KR', 'EN'] as Language[]).map((l) => (
                   <button
                     key={l}
@@ -59,14 +58,12 @@ export const MainHeader = () => {
             )}
           </div>
 
-          <Link to="/" aria-label="홈으로 이동">
-            <img
-              src={knu80thLogo}
-              alt="KNU 80주년 대동제"
-              className="h-4.5 w-47.5 object-contain"
-              style={{ aspectRatio: '95 / 9' }}
-            />
-          </Link>
+          <img
+            src={knu80thLogo}
+            alt="KNU 80주년 대동제"
+            className="h-4.5 w-47.5 object-contain"
+            style={{ aspectRatio: '95 / 9' }}
+          />
 
           <button type="button" className="text-ink" onClick={() => setIsDrawerOpen(true)}>
             <LuMenu size={24} />
