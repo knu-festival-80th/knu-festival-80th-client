@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LuChevronDown, LuMenu } from 'react-icons/lu';
 import { NavigationDrawer } from '@/components/navigationDrawer/NavigationDrawer';
 import knu80thLogo from '@/assets/logo/knu80th_logo_dark.png';
-import { Link } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 type Language = 'KR' | 'EN';
 
@@ -59,7 +59,11 @@ export const MainHeader = () => {
             )}
           </div>
 
-          <Link to="/" aria-label="홈으로 이동">
+          <Link
+            to="/"
+            aria-label="홈으로 이동"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
             <img
               src={knu80thLogo}
               alt="KNU 80주년 대동제"
