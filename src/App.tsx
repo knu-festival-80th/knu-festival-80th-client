@@ -1,6 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-
 import BoothManageShell from '@/components/layouts/BoothManageShell';
 import ConsoleShell from '@/components/layouts/ConsoleShell';
 import DefaultLayout from '@/components/layouts/DefaultLayout';
@@ -25,7 +24,9 @@ import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import StampTourPage from './pages/stampTour/StampTourPage';
 import StampBoothListPage from './pages/stampTour/StampBoothListPage';
-import InstaTingPage from './pages/InstaTingPage';
+import InstaTingLayout from './pages/instaTing/InstaTingLayout';
+import InstaTingPage from './pages/instaTing/InstaTingPage';
+import InstaTingApplyPage from './pages/instaTing/InstaTingApplyPage';
 
 export default function App() {
   return (
@@ -72,7 +73,10 @@ export default function App() {
           <Route path="/goods" element={<GoodsPage />} />
           <Route path="/stamptour" element={<StampTourPage />} />
           <Route path="/stamptour/booths" element={<StampBoothListPage />} />
-          <Route path="/instating" element={<InstaTingPage />} />
+          <Route path="/instating" element={<InstaTingLayout />}>
+            <Route index element={<InstaTingPage />} />
+            <Route path="apply" element={<InstaTingApplyPage />} />
+          </Route>
           <Route path="/congrat-video" element={<CongratVideoPage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
