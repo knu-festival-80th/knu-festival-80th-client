@@ -9,6 +9,7 @@ import step4Illust from '@/assets/instating/stepCard/step4_illust.png';
 import forwardArrowIcon from '@/assets/instating/arrowIcon/forwardArrowIcon.svg';
 import OutlineButton from './OutlineButton';
 import ProcessCard from './ProcessCard';
+import { useNavigate } from 'react-router';
 
 const steps = [
   {
@@ -42,6 +43,8 @@ const steps = [
 ];
 
 const InstaTingContent = () => {
+  const navigate = useNavigate();
+  const goApplyPage = () => navigate('/instating/apply');
   return (
     <section className="w-full bg-white">
       <div className="mx-auto flex w-full flex-col items-center gap-12 px-5 pb-16 pt-16">
@@ -56,7 +59,7 @@ const InstaTingContent = () => {
               올해의 새로운 인연과 만나보세요!
             </p>
           </div>
-          <OutlineButton label="바로 신청하기" icon={forwardArrowIcon} />
+          <OutlineButton label="바로 신청하기" icon={forwardArrowIcon} onClick={goApplyPage} />
         </div>
 
         {/* Step cards */}
@@ -81,7 +84,7 @@ const InstaTingContent = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <OutlineButton label="신청하기" icon={forwardArrowIcon} />
+            <OutlineButton label="신청하기" icon={forwardArrowIcon} onClick={goApplyPage} />
             <OutlineButton label="결과 확인하기" dark />
           </div>
         </div>
