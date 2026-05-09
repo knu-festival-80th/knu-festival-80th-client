@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { LuChevronDown, LuMenu } from 'react-icons/lu';
 import { NavigationDrawer } from '@/components/navigationDrawer/NavigationDrawer';
 import knu80thLogo from '@/assets/logo/knu80th_logo_dark.png';
+import { Link } from 'lucide-react';
 
 type Language = 'KR' | 'EN';
 
@@ -58,12 +59,14 @@ export const MainHeader = () => {
             )}
           </div>
 
-          <img
-            src={knu80thLogo}
-            alt="KNU 80주년 대동제"
-            className="h-4.5 w-47.5 object-contain"
-            style={{ aspectRatio: '95 / 9' }}
-          />
+          <Link to="/" aria-label="홈으로 이동">
+            <img
+              src={knu80thLogo}
+              alt="KNU 80주년 대동제"
+              className="h-4.5 w-47.5 object-contain"
+              style={{ aspectRatio: '95 / 9' }}
+            />
+          </Link>
 
           <button type="button" className="text-ink" onClick={() => setIsDrawerOpen(true)}>
             <LuMenu size={24} />
