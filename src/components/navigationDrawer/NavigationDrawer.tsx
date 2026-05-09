@@ -46,10 +46,7 @@ export const NavigationDrawer = ({ isOpen, onClose }: NavigationDrawerProps) => 
               'linear-gradient(0deg, rgba(255, 208, 189, 0.50) 0.58%, rgba(255, 255, 255, 0.50) 60.27%), #FFF',
           }}
         >
-          <div
-            className="flex shrink-0 items-center justify-between px-5"
-            style={{ paddingTop: '3.125rem', paddingBottom: '0.75rem' }}
-          >
+          <div className="flex h-16 shrink-0 items-center justify-between px-5">
             <img
               src={knu80thLogo}
               alt="KNU 80주년 대동제"
