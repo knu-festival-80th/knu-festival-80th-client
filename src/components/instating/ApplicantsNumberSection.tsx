@@ -15,7 +15,7 @@ const ApplicantCard = ({ label, count, color }: ApplicantCardProps) => (
   </div>
 );
 
-const ApplicantsSection = () => {
+const ApplicantsNumberSection = () => {
   return (
     <div className="flex w-full flex-col gap-6 bg-white px-5 pb-16 pt-8">
       <div className="flex flex-col gap-1.5">
@@ -36,4 +36,4 @@ const ApplicantsSection = () => {
   );
 };
 
-export default ApplicantsSection;
+export default ApplicantsNumberSection;

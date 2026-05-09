@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import TabNavigation from '@/components/instating/TabNavigation';
 
-const InstaTingLayout = () => {
+const InstaTingPage = () => {
   return (
     <>
       <TabNavigation />
@@ -10,4 +10,4 @@ const InstaTingLayout = () => {
   );
 };
 
-export default InstaTingLayout;
+export default InstaTingPage;

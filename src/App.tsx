@@ -24,7 +24,7 @@ import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import StampTourPage from './pages/stampTour/StampTourPage';
 import StampBoothListPage from './pages/stampTour/StampBoothListPage';
-import InstaTingLayout from './pages/InstaTingPage';
+import InstaTingPage from './pages/InstaTingPage';
 import InstaTingIntroView from '@/components/instating/views/InstaTingIntroView';
 import InstaTingApplyView from '@/components/instating/views/InstaTingApplyView';
 
@@ -73,7 +73,7 @@ export default function App() {
           <Route path="/goods" element={<GoodsPage />} />
           <Route path="/stamptour" element={<StampTourPage />} />
           <Route path="/stamptour/booths" element={<StampBoothListPage />} />
-          <Route path="/instating" element={<InstaTingLayout />}>
+          <Route path="/instating" element={<InstaTingPage />}>
             <Route index element={<InstaTingIntroView />} />
             <Route path="apply" element={<InstaTingApplyView />} />
           </Route>
