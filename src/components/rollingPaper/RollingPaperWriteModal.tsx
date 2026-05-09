@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent, ReactNode } from 'react';
 import { ArrowLeft, Circle, Minus, Plus, X } from 'lucide-react';
-import rollingBoardFrameMain from '@/assets/rollingPaper/rolling-board-frame-main.png';
-import rollingBoardFrameTypography from '@/assets/rollingPaper/rolling-board-frame-typography.png';
 import {
   ROLLING_PAPER_DEFAULT_MESSAGE,
   ROLLING_PAPER_MAX_MESSAGE_LENGTH,
@@ -27,6 +25,7 @@ import {
   type PlacedRollingPaperNote,
   type RollingPaperPlacement,
 } from '@/lib/rollingPaperLayout';
+import { rollingPaperBoardFrames } from './rollingPaperBoardAssets';
 import RollingPaperSticker from './RollingPaperSticker';
 
 type WriteStep = 'compose' | 'place';
@@ -54,8 +53,6 @@ type RollingPaperWriteModalProps = {
   onClose: () => void;
   onPlace: (note: PlacedRollingPaperNote) => void;
 };
-
-const boardFrames = [rollingBoardFrameMain, rollingBoardFrameTypography] as const;
 
 const stickerPreviewClassNames: Record<RollingPaperStickerColorId, string> = {
   red: 'w-8',
@@ -442,7 +439,7 @@ function PlacementPreview({
           />
 
           <img
-            src={boardFrames[boardVariant]}
+            src={rollingPaperBoardFrames[boardVariant] ?? rollingPaperBoardFrames[0]}
             alt=""
             className="absolute object-contain"
             style={{
@@ -499,7 +496,7 @@ function PlacementPreview({
             }}
           />
           <img
-            src={boardFrames[boardVariant]}
+            src={rollingPaperBoardFrames[boardVariant] ?? rollingPaperBoardFrames[0]}
             alt=""
             className="absolute object-contain opacity-90"
             style={{
