@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { LuChevronDown, LuMenu } from 'react-icons/lu';
 import { NavigationDrawer } from '@/components/navigationDrawer/NavigationDrawer';
 import knu80thLogo from '@/assets/logo/knu80th_logo_dark.png';
+import { Link } from 'react-router-dom';
 
 type Language = 'KR' | 'EN';
 
@@ -11,6 +12,8 @@ export const MainHeader = () => {
   const [lang, setLang] = useState<Language>('KR');
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, minWidth: 0 });
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -22,15 +25,24 @@ export const MainHeader = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleLangToggle = () => {
+    if (btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left, minWidth: rect.width });
+    }
+    setIsLangOpen((prev) => !prev);
+  };
+
   return (
     <>
-      <header className="fixed left-1/2 top-0 z-50 w-full max-w-[600px] -translate-x-1/2 bg-transparent">
+      <header className="fixed left-1/2 top-0 z-50 w-full max-w-[600px] -translate-x-1/2 backdrop-blur-[15px] bg-[rgba(255,255,255,0.03)]">
         <div className="mx-auto flex h-16 w-full items-center justify-between px-5">
           <div ref={langRef} className="relative">
             <button
+              ref={btnRef}
               type="button"
-              className="flex flex-col items-start self-stretch gap-2.5 rounded-full border border-black/30 bg-black/10 px-4 py-1.5"
-              onClick={() => setIsLangOpen((prev) => !prev)}
+              className="flex flex-col items-start self-stretch gap-2.5 rounded-full border border-[rgba(219,219,219,0.4)] bg-[rgba(219,219,219,0.1)] px-4 py-1.5"
+              onClick={handleLangToggle}
             >
               <div className="flex items-center gap-0.5">
                 <span className="font-sans text-sm font-medium text-[#1A1A1A]">{lang}</span>
@@ -40,26 +52,41 @@ export const MainHeader = () => {
                 />
               </div>
             </button>
-            {isLangOpen && (
-              <div className="absolute left-0 top-full mt-1 min-w-full overflow-hidden rounded-lg border border-black/30 bg-transparent">
-                {(['KR', 'EN'] as Language[]).map((l) => (
-                  <button
-                    key={l}
-                    type="button"
-                    className={`block w-full px-4 py-2 text-left text-sm font-medium text-[#1A1A1A] hover:bg-black/10 ${lang === l ? 'font-semibold' : ''}`}
-                    onClick={() => {
-                      setLang(l);
-                      setIsLangOpen(false);
-                    }}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
-            )}
+            {isLangOpen &&
+              createPortal(
+                <div
+                  className="fixed z-9999 overflow-hidden rounded-lg border border-[rgba(219,219,219,0.4)] backdrop-blur-2xl bg-[rgba(219,219,219,0.15)]"
+                  style={{
+                    top: dropdownPos.top,
+                    left: dropdownPos.left,
+                    minWidth: dropdownPos.minWidth,
+                  }}
+                >
+                  {(['KR', 'EN'] as Language[]).map((l, i) => (
+                    <div key={l}>
+                      {i > 0 && <div className="h-px bg-[rgba(219,219,219,0.4)]" />}
+                      <button
+                        type="button"
+                        className={`block w-full px-4 py-2 text-left text-sm font-medium text-[#1A1A1A] hover:bg-black/10 ${lang === l ? 'font-semibold' : ''}`}
+                        onClick={() => {
+                          setLang(l);
+                          setIsLangOpen(false);
+                        }}
+                      >
+                        {l}
+                      </button>
+                    </div>
+                  ))}
+                </div>,
+                document.body,
+              )}
           </div>
 
-          <Link to="/" aria-label="홈으로 이동">
+          <Link
+            to="/"
+            aria-label="홈으로 이동"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
             <img
               src={knu80thLogo}
               alt="KNU 80주년 대동제"
