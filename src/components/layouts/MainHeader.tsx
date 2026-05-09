@@ -29,7 +29,7 @@ export const MainHeader = () => {
           <div ref={langRef} className="relative">
             <button
               type="button"
-              className="flex flex-col items-start self-stretch gap-2.5 rounded-full border border-black/30 bg-black/10 px-4 py-1.5"
+              className="flex flex-col items-start self-stretch gap-2.5 rounded-full border border-[rgba(219,219,219,0.4)] bg-[rgba(219,219,219,0.1)] px-4 py-1.5"
               onClick={() => setIsLangOpen((prev) => !prev)}
             >
               <div className="flex items-center gap-0.5">
@@ -41,19 +41,21 @@ export const MainHeader = () => {
               </div>
             </button>
             {isLangOpen && (
-              <div className="absolute left-0 top-full mt-1 min-w-full overflow-hidden rounded-lg border border-black/30 backdrop-blur-sm bg-white/5">
-                {(['KR', 'EN'] as Language[]).map((l) => (
-                  <button
-                    key={l}
-                    type="button"
-                    className={`block w-full px-4 py-2 text-left text-sm font-medium text-[#1A1A1A] hover:bg-black/10 ${lang === l ? 'font-semibold' : ''}`}
-                    onClick={() => {
-                      setLang(l);
-                      setIsLangOpen(false);
-                    }}
-                  >
-                    {l}
-                  </button>
+              <div className="absolute left-0 top-full mt-1 min-w-full overflow-hidden rounded-lg border border-[rgba(219,219,219,0.4)] backdrop-blur-[15px] bg-[rgba(219,219,219,0.15)]">
+                {(['KR', 'EN'] as Language[]).map((l, i) => (
+                  <div key={l}>
+                    {i > 0 && <div className="h-px bg-[rgba(219,219,219,0.4)]" />}
+                    <button
+                      type="button"
+                      className={`block w-full px-4 py-2 text-left text-sm font-medium text-[#1A1A1A] hover:bg-black/10 ${lang === l ? 'font-semibold' : ''}`}
+                      onClick={() => {
+                        setLang(l);
+                        setIsLangOpen(false);
+                      }}
+                    >
+                      {l}
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
