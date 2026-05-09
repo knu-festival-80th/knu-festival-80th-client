@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const TABS = [
@@ -14,7 +15,7 @@ const TabNavigation = () => {
     path === '/instating' ? pathname === '/instating' : pathname.startsWith(path);
 
   return (
-    <nav className="flex gap-7 border-b border-border px-5 bg-white">
+    <nav className="flex gap-7 border-b border-border bg-white px-5">
       {TABS.map(({ label, path }) => {
         const active = isActive(path);
         return (
@@ -22,11 +23,18 @@ const TabNavigation = () => {
             key={path}
             type="button"
             onClick={() => navigate(path)}
-            className={`py-2 font-wanted-sans text-body1 tracking-tight ${
-              active ? 'border-b-2 border-sub-red pb-2.5 font-bold text-ink' : 'text-gray'
+            className={`relative py-2.5 font-wanted-sans text-body1 tracking-tight transition-colors ${
+              active ? 'font-bold text-ink' : 'text-gray'
             }`}
           >
             {label}
+            {active && (
+              <motion.div
+                layoutId="tab-indicator"
+                className="absolute -bottom-px left-0 right-0 h-0.5 bg-sub-red"
+                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+              />
+            )}
           </button>
         );
       })}
