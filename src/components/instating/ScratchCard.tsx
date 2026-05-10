@@ -1,52 +1,33 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { useScratchCanvas } from '@/hooks/instating/useScratchCanvas';
-
 interface ScratchCardProps {
-  instagramId?: string;
-  onRevealed?: () => void;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  handlers: {
+    onPointerDown: (e: React.PointerEvent<HTMLCanvasElement>) => void;
+    onPointerMove: (e: React.PointerEvent<HTMLCanvasElement>) => void;
+    onPointerUp: (e: React.PointerEvent<HTMLCanvasElement>) => void;
+    onPointerLeave: (e: React.PointerEvent<HTMLCanvasElement>) => void;
+    onContextMenu: (e: React.MouseEvent<HTMLCanvasElement>) => void;
+  };
 }
 
-const ScratchCard = ({ instagramId = 'instagram_id', onRevealed }: ScratchCardProps) => {
-  const { canvasRef, revealed, handlers } = useScratchCanvas({ onRevealed });
-
-  return (
-    <article
-      className="relative w-full overflow-hidden rounded-2xl shadow-md"
-      style={{ height: 176 }}
-    >
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
-        <p className="text-xs font-medium tracking-widest text-gray-400">MATCHED</p>
-        <p className="text-2xl font-bold tracking-tight text-gray-900">@{instagramId}</p>
-        <AnimatePresence>
-          {revealed && (
-            <motion.p
-              key="celebrate"
-              initial={{ opacity: 0, scale: 0.5, y: 6 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="text-lg"
-            >
-              ✨ 🎉 ✨
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <AnimatePresence>
-        {!revealed && (
-          <motion.canvas
-            key="scratch"
-            ref={canvasRef}
-            aria-label="스크래치 카드 - 긁어서 매칭 결과를 확인하세요"
-            role="img"
-            exit={{ opacity: 0, transition: { duration: 0.5, ease: 'easeOut' } }}
-            className="absolute inset-0 h-full w-full touch-none select-none"
-            {...handlers}
-          />
-        )}
-      </AnimatePresence>
+const ScratchCard = ({ canvasRef, handlers }: ScratchCardProps) => (
+  <div className="relative shrink-0" style={{ width: 269, height: 346 }}>
+    <div
+      className="pointer-events-none absolute inset-0 rounded-[24px] border-4 border-white"
+      style={{
+        boxShadow: '0px 8px 20px 0px rgba(0,0,0,0.02), 0px 4px 20px 0px rgba(255,182,193,0.25)',
+      }}
+    />
+    <article className="absolute inset-1 overflow-hidden rounded-[20px]">
+      <div className="absolute inset-0" style={{ background: '#f0eeff' }} />
+      <canvas
+        ref={canvasRef}
+        aria-label="스크래치 카드 - 긁어서 매칭 결과를 확인하세요"
+        role="img"
+        className="absolute inset-0 h-full w-full touch-none select-none"
+        {...handlers}
+      />
     </article>
-  );
-};
+  </div>
+);
 
 export default ScratchCard;
