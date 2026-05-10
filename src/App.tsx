@@ -18,6 +18,7 @@ import BoothPasswordPage from '@/pages/console/BoothPasswordPage';
 import ConsoleLoginPage from '@/pages/console/ConsoleLoginPage';
 import CongratVideoPage from '@/pages/CongratVideoPage';
 import GoodsPage from '@/pages/GoodsPage';
+import HobanustagramPage from '@/pages/HobanustagramPage';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import TavernMapPage from '@/pages/TavernMapPage';
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/goods" element={<GoodsPage />} />
           <Route path="/stamptour" element={<StampTourPage />} />
           <Route path="/stamptour/booths" element={<StampBoothListPage />} />
+          <Route path="/hobanustagram" element={<HobanustagramPage />} />
           <Route path="/congrat-video" element={<CongratVideoPage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
