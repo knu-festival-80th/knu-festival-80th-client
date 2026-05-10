@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import IntroOverview from '@/components/tavern/intro/IntroOverview';
 import TavernDetailView from '@/components/tavern/list/TavernDetailView';
@@ -14,6 +15,15 @@ import { taverns, type Tavern, type TavernSortKey } from '@/constants/taverns';
 
 const MAX_WAITING_RESERVATION_COUNT = 3;
 const INITIAL_MOCK_WAITING_RESERVATION_COUNT = 2;
+const TAVERN_TABS = ['intro', 'map', 'list', 'reservation'] as const satisfies readonly TopTab[];
+
+const resolveTavernTabFromUrl = (pathname: string, search: string): TopTab => {
+  const tabParam = new URLSearchParams(search).get('tab');
+  if (TAVERN_TABS.includes(tabParam as TopTab)) return tabParam as TopTab;
+  if (pathname === '/taverns') return 'list';
+  if (pathname === '/map') return 'map';
+  return 'intro';
+};
 
 const sortTaverns = (sortKey: TavernSortKey) => {
   const list = [...taverns];
@@ -30,7 +40,13 @@ const sortTaverns = (sortKey: TavernSortKey) => {
 };
 
 export default function TavernMapExperience() {
-  const [activeTab, setActiveTab] = useState<TopTab>('intro');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const activeTab = useMemo(
+    () => resolveTavernTabFromUrl(location.pathname, location.search),
+    [location.pathname, location.search],
+  );
   const [sortKey, setSortKey] = useState<TavernSortKey>('shortWait');
   const [selectedTavern, setSelectedTavern] = useState<Tavern | null>(null);
   const [detailTavern, setDetailTavern] = useState<Tavern | null>(null);
@@ -43,10 +59,12 @@ export default function TavernMapExperience() {
   const [showReservationLimitModal, setShowReservationLimitModal] = useState(false);
 
   const sortedTaverns = useMemo(() => sortTaverns(sortKey), [sortKey]);
+  const detailTavernId = (location.state as { detailTavernId?: string } | null)?.detailTavernId;
+  const shouldShowDetail = detailTavern && detailTavernId === detailTavern.id;
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, [activeTab, detailTavern?.id]);
+  }, [activeTab, location.key, shouldShowDetail]);
 
   const handleRegister = (tavern: Tavern) => {
     setSelectedTavern(tavern);
@@ -62,12 +80,14 @@ export default function TavernMapExperience() {
   const handleOpenTavernDetail = (tavern: Tavern) => {
     setSelectedTavern(tavern);
     setDetailTavern(tavern);
-    setActiveTab('list');
+    navigate('/taverns?tab=list', { replace: true, state: { detailTavernId: tavern.id } });
   };
 
   const handleTabChange = (tab: TopTab) => {
-    setActiveTab(tab);
     setDetailTavern(null);
+    navigate(tab === 'list' || tab === 'reservation' ? `/taverns?tab=${tab}` : `/map?tab=${tab}`, {
+      replace: true,
+    });
   };
 
   return (
@@ -77,7 +97,7 @@ export default function TavernMapExperience() {
       {activeTab === 'intro' ? (
         <IntroOverview onTabChange={handleTabChange} />
       ) : activeTab === 'list' ? (
-        detailTavern ? (
+        shouldShowDetail ? (
           <TavernDetailView tavern={detailTavern} onRegister={handleRegister} />
         ) : (
           <TavernListView
