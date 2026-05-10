@@ -90,7 +90,7 @@ export default function HomePage() {
               title={`부스를 방문하고 스탬프를 모아\n상품을 응모하세요`}
               imageSrc={cardBg1}
               illustrationSrc={illustStemp}
-              to="/"
+              to="/stamptour"
             />
           </div>
           <div className="px-5">
@@ -157,7 +157,7 @@ export default function HomePage() {
               description="축제에서 만날 특별한 사람 매칭하기"
               imageSrc={cardBg1}
               illustrationSrc={illustInstaing}
-              to="/"
+              to="/instating"
             />
           </div>
 
@@ -168,7 +168,7 @@ export default function HomePage() {
               description="80주년 카메라 필터로 특별한 추억 만들기"
               imageSrc={cardBg3}
               illustrationSrc={illustPhotobooth}
-              to="/"
+              to="/congrat-video"
             />
           </div>
         </SectionBlock>
