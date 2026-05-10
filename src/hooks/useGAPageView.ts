@@ -1,19 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-declare global {
-  interface Window {
-    gtag?: (
-      command: string,
-      action: string,
-      params?: {
-        page_path?: string;
-        page_title?: string;
-      },
-    ) => void;
-  }
-}
-
 export function useGAPageView() {
   const location = useLocation();
 

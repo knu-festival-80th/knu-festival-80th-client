@@ -1,0 +1,55 @@
+import type { DayLineup } from '@/types/home';
+import kwoneunbi from '@/assets/lineup/권은비.png';
+import nctWish from '@/assets/lineup/NCT위시.png';
+import aichillin from '@/assets/lineup/아이칠린.png';
+import zico from '@/assets/lineup/지코.jpg';
+import sunmi from '@/assets/lineup/선미.png';
+import leeyoungji from '@/assets/lineup/이영지.png';
+
+export const MOCK_LINEUP: DayLineup[] = [
+  {
+    day: 20,
+    artists: [],
+    schedules: [
+      { name: '무대 관객 입장', startTime: '18:00', endTime: '18:30' },
+      { name: '오프닝 공연', startTime: '18:30', endTime: '19:30' },
+      { name: '메인 공연', startTime: '19:30', endTime: '22:00' },
+    ],
+  },
+  {
+    day: 21,
+    artists: [
+      { src: kwoneunbi, alt: '권은비' },
+      { src: nctWish, alt: 'NCT WISH' },
+    ],
+    schedules: [
+      { name: 'KNU 가요제 및 시상식', startTime: '18:00', endTime: '19:00' },
+      { name: "축하공연 '권은비'", startTime: '19:00', endTime: '19:30' },
+      { name: '개회식', startTime: '19:30', endTime: '19:50' },
+      { name: '드론쇼', startTime: '19:50', endTime: '20:00' },
+      {
+        name: "DJ와 함께하는 워터파티 '도미노보이즈,할리퀸'",
+        startTime: '20:00',
+        endTime: '21:00',
+      },
+      { name: "축하공연 'NCT WISH'", startTime: '21:00', endTime: '21:30' },
+    ],
+  },
+  {
+    day: 22,
+    artists: [
+      { src: aichillin, alt: '아이칠린' },
+      { src: zico, alt: '지코' },
+      { src: sunmi, alt: '선미' },
+      { src: leeyoungji, alt: '이영지' },
+    ],
+    schedules: [
+      { name: '동아리 공연', startTime: '18:30', endTime: '19:30' },
+      { name: "축하공연 '아이칠린'", startTime: '19:30', endTime: '20:00' },
+      { name: "축하공연 '지코'", startTime: '20:00', endTime: '20:30' },
+      { name: '불꽃쇼', startTime: '20:30', endTime: '20:40' },
+      { name: "축하공연 '선미'", startTime: '20:40', endTime: '21:10' },
+      { name: "축하공연 '이영지'", startTime: '21:10', endTime: '21:40' },
+    ],
+  },
+];

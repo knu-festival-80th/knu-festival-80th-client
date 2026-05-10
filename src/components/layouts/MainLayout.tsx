@@ -1,20 +1,24 @@
-import styled from '@emotion/styled';
-import { Outlet } from 'react-router-dom';
-
-import { theme } from '@/styles/theme';
+import { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { Footer } from './Footer';
+import { MainHeader } from './MainHeader';
 
 export default function MainLayout() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
-    <PageFrame>
-      <Outlet />
-    </PageFrame>
+    <div className="min-h-dvh bg-background md:bg-[#eceef3]">
+      <div className="page-frame mx-auto flex min-h-dvh w-full max-w-[600px] flex-col overflow-x-hidden bg-background md:shadow-[0_0_20px_rgba(29,32,56,0.14)]">
+        <MainHeader />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
+    </div>
   );
 }
-
-const PageFrame = styled.main`
-  min-height: 100dvh;
-  background:
-    radial-gradient(circle at 16% 12%, rgba(234, 81, 71, 0.12), transparent 28rem),
-    radial-gradient(circle at 82% 18%, rgba(91, 121, 200, 0.12), transparent 24rem),
-    ${theme.colors.background};
-`;

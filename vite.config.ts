@@ -2,6 +2,8 @@ import { configDefaults, defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 
 const sentryPlugin =
   process.env.SENTRY_AUTH_TOKEN && process.env.VITE_SENTRY_ORG && process.env.VITE_SENTRY_PROJECT
@@ -15,11 +17,13 @@ const sentryPlugin =
 
 export default defineConfig({
   plugins: [
-    react({
-      jsxImportSource: '@emotion/react',
-      babel: {
-        plugins: ['@emotion/babel-plugin'],
-      },
+    tailwindcss(),
+    react(),
+    ViteImageOptimizer({
+      png: { quality: 80, compressionLevel: 9 },
+      jpg: { quality: 80 },
+      jpeg: { quality: 80 },
+      webp: { quality: 80 },
     }),
     sentryPlugin,
   ],
