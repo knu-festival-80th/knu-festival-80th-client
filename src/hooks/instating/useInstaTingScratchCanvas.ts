@@ -16,6 +16,7 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDown = useRef(false);
   const rafRef = useRef<number>(0);
+  const hintRafRef = useRef<number>(0);
   const [revealed, setRevealed] = useState(false);
 
   const drawOverlay = useCallback((canvas: HTMLCanvasElement) => {
@@ -39,12 +40,12 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
 
     // Blurred heart
     ctx.save();
-    ctx.filter = `blur(${Math.round(w * 0.03)}px)`;
+    ctx.filter = `blur(${Math.round(w * 0.07)}px)`;
     ctx.fillStyle = '#f9b8c6';
-    ctx.font = `${Math.round(w * 0.52)}px serif`;
+    ctx.font = `${Math.round(w * 0.62)}px serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('♥', w / 2, h / 2);
+    ctx.fillText('♥', w / 2, h / 1.75);
     ctx.restore();
 
     // White sheen overlay (top-left)
@@ -79,12 +80,93 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
     const ro = new ResizeObserver(init);
     ro.observe(canvas);
 
+    // 하트 경로 힌트 애니메이션
+    const HINT_STEPS = 120;
+    const HINT_BRUSH = 13;
+    const HINT_PAUSE = 30; // ~0.5s
+
+    const heartPoint = (t: number, w: number, h: number) => {
+      // 하트 공식 x: ±16, y: -17~12 → scale은 카드 너비 기준으로 작게 설정
+      const scale = w * 0.017; // scale=4.5 수준 (하트 너비 ~144px)
+      const cx = w / 2;
+      const cy = h / 2 - scale * 2.5; // y 공식의 상하 비대칭(-17~12) 보정으로 시각적 중앙 정렬
+      return {
+        x: cx + scale * 16 * Math.pow(Math.sin(t), 3),
+        y:
+          cy -
+          scale * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)),
+      };
+    };
+
+    const FILL_SPEED = 2;
+
+    let step = 0;
+    let pauseFrames = 0;
+    let fillStep = 0;
+    let phase: 'trace' | 'pause' | 'fill' = 'trace';
+
+    const animateHint = () => {
+      if (isDown.current) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+
+      if (phase === 'trace') {
+        const t = (step / HINT_STEPS) * Math.PI * 2;
+        const { x, y } = heartPoint(t, w, h);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, HINT_BRUSH, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+        step++;
+        if (step > HINT_STEPS) {
+          phase = 'pause';
+          pauseFrames = 0;
+        }
+      } else if (phase === 'pause') {
+        pauseFrames++;
+        if (pauseFrames >= HINT_PAUSE) {
+          fillStep = 0;
+          phase = 'fill';
+        }
+      } else {
+        // fill phase: redraw overlay then re-erase only fillStep..HINT_STEPS
+        // this progressively covers the heart from start toward end
+        drawOverlay(canvas);
+        ctx.globalCompositeOperation = 'destination-out';
+        for (let s = fillStep; s <= HINT_STEPS; s++) {
+          const t = (s / HINT_STEPS) * Math.PI * 2;
+          const { x, y } = heartPoint(t, w, h);
+          ctx.beginPath();
+          ctx.arc(x, y, HINT_BRUSH, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+        fillStep += FILL_SPEED;
+        if (fillStep > HINT_STEPS) {
+          drawOverlay(canvas);
+          step = 0;
+          phase = 'trace';
+        }
+      }
+
+      hintRafRef.current = requestAnimationFrame(animateHint);
+    };
+
+    hintRafRef.current = requestAnimationFrame(animateHint);
+
     const blockScroll = (e: TouchEvent) => e.preventDefault();
     canvas.addEventListener('touchstart', blockScroll, { passive: false });
     canvas.addEventListener('touchmove', blockScroll, { passive: false });
 
     return () => {
       ro.disconnect();
+      cancelAnimationFrame(hintRafRef.current);
       canvas.removeEventListener('touchstart', blockScroll);
       canvas.removeEventListener('touchmove', blockScroll);
       cancelAnimationFrame(rafRef.current);
