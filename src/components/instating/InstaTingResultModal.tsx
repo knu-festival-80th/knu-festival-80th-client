@@ -110,7 +110,11 @@ const InstaTingResultModal = ({ onClose, result }: InstaTingResultModalProps) =>
             <AnimatePresence mode="wait">
               {!revealed ? (
                 <motion.div key="scratch" exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-                  <ScratchCard canvasRef={canvasRef} handlers={wrappedHandlers} />
+                  <ScratchCard
+                    canvasRef={canvasRef}
+                    handlers={wrappedHandlers}
+                    hideLabel={hasStartedScratching}
+                  />
                 </motion.div>
               ) : (
                 <motion.div
