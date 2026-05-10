@@ -4,7 +4,7 @@ import ScratchCard from '@/components/instating/ScratchCard';
 const TITLE = '매칭 결과 | 경북대학교 80주년 대동제';
 const DEFAULT_TITLE = '경북대학교 80주년 대동제';
 
-const InstaTingResultPage = () => {
+const InstaTingResultModalPage = () => {
   useEffect(() => {
     document.title = TITLE;
 
@@ -26,4 +26,4 @@ const InstaTingResultPage = () => {
   );
 };
 
-export default InstaTingResultPage;
+export default InstaTingResultModalPage;
