@@ -9,6 +9,7 @@ export interface CameraOverlayProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   overlayRef: React.RefObject<HTMLImageElement | null>;
   bottomBarRef: React.RefObject<HTMLDivElement | null>;
+  facingMode: 'user' | 'environment';
   isReady: boolean;
   error: string | null;
   selectedCharacter: CharacterKey;
@@ -29,6 +30,7 @@ export const CameraOverlay = ({
   videoRef,
   overlayRef,
   bottomBarRef,
+  facingMode,
   isReady,
   error,
   selectedCharacter,
@@ -47,7 +49,13 @@ export const CameraOverlay = ({
     <div className="fixed inset-0 z-100 bg-black">
       {cameraState === 'shooting' && (
         <>
-          <video ref={videoRef} className="h-full w-full object-cover" playsInline muted />
+          <video
+            ref={videoRef}
+            className="h-full w-full object-cover"
+            style={facingMode === 'user' ? { transform: 'scaleX(-1)' } : undefined}
+            playsInline
+            muted
+          />
 
           {error && (
             <div className="absolute inset-0 flex items-center justify-center px-8">
@@ -61,7 +69,14 @@ export const CameraOverlay = ({
               src={selectedCharacterData.src}
               alt="캐릭터 오버레이"
               className="pointer-events-none absolute"
-              style={selectedCharacterData.overlayStyle}
+              style={{
+                ...selectedCharacterData.overlayStyle,
+                transform:
+                  facingMode === 'user'
+                    ? (selectedCharacterData.overlayStyle.mirrorTransform ??
+                      `scaleX(-1)${selectedCharacterData.overlayStyle.transform ? ` ${selectedCharacterData.overlayStyle.transform}` : ''}`)
+                    : selectedCharacterData.overlayStyle.transform,
+              }}
               crossOrigin="anonymous"
             />
           )}

@@ -31,6 +31,7 @@ export const CHARACTER_LIST: {
       bottom: 'calc(6rem - 36vw)',
       width: '83.7%',
       transform: 'rotate(21.5deg)',
+      mirrorTransform: 'scaleX(-1) rotate(-21.5deg)',
     },
   },
 ];

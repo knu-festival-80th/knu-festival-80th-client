@@ -50,5 +50,5 @@ export const useCamera = () => {
     };
   }, [stopCamera]);
 
-  return { videoRef, isReady, error, startCamera, stopCamera, flipCamera };
+  return { videoRef, isReady, error, facingMode, startCamera, stopCamera, flipCamera };
 };

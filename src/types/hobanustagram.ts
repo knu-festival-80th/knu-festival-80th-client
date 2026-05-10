@@ -8,4 +8,5 @@ export type OverlayStyle = {
   top?: string;
   bottom?: string;
   transform?: string;
+  mirrorTransform?: string;
 };

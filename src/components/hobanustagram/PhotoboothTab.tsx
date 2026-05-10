@@ -15,7 +15,7 @@ export const PhotoboothTab = () => {
   const [capturedDataUrl, setCapturedDataUrl] = useState<string | null>(null);
   const [showFrameSelector, setShowFrameSelector] = useState(false);
 
-  const { videoRef, isReady, error, startCamera, stopCamera, flipCamera } = useCamera();
+  const { videoRef, isReady, error, facingMode, startCamera, stopCamera, flipCamera } = useCamera();
   const overlayRef = useRef<HTMLImageElement>(null);
   const bottomBarRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +35,13 @@ export const PhotoboothTab = () => {
     if (!videoRef.current || !overlayRef.current) return;
     const bottomInset = bottomBarRef.current?.offsetHeight ?? 0;
     const overlayRect = overlayRef.current.getBoundingClientRect();
-    const dataUrl = capturePhoto(videoRef.current, overlayRef.current, bottomInset, overlayRect);
+    const dataUrl = capturePhoto(
+      videoRef.current,
+      overlayRef.current,
+      bottomInset,
+      overlayRect,
+      facingMode === 'user',
+    );
     setCapturedDataUrl(dataUrl);
     setCameraState('review');
   };
@@ -68,6 +74,7 @@ export const PhotoboothTab = () => {
           videoRef={videoRef}
           overlayRef={overlayRef}
           bottomBarRef={bottomBarRef}
+          facingMode={facingMode}
           isReady={isReady}
           error={error}
           selectedCharacter={selectedCharacter}

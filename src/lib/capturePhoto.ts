@@ -3,6 +3,7 @@ export function capturePhoto(
   overlayImg: HTMLImageElement,
   bottomInset: number = 0,
   overlayScreenRect?: DOMRect,
+  isFrontCamera = false,
 ): string {
   const videoW = video.videoWidth;
   const videoH = video.videoHeight;
@@ -25,14 +26,38 @@ export function capturePhoto(
   canvas.height = canvasH;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.drawImage(video, srcX, srcY, fullSrcW, visibleSrcH, 0, 0, canvasW, canvasH);
+  if (isFrontCamera) {
+    ctx.save();
+    ctx.translate(canvasW, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, srcX, srcY, fullSrcW, visibleSrcH, 0, 0, canvasW, canvasH);
+    ctx.restore();
+  } else {
+    ctx.drawImage(video, srcX, srcY, fullSrcW, visibleSrcH, 0, 0, canvasW, canvasH);
+  }
 
   if (overlayScreenRect) {
-    const overlayX = overlayScreenRect.left * dpr;
-    const overlayY = overlayScreenRect.top * dpr;
-    const overlayW = overlayScreenRect.width * dpr;
-    const overlayH = overlayScreenRect.height * dpr;
-    ctx.drawImage(overlayImg, overlayX, overlayY, overlayW, overlayH);
+    const computedTransform = window.getComputedStyle(overlayImg).transform;
+    const cssMatrix =
+      computedTransform !== 'none' ? new DOMMatrix(computedTransform) : new DOMMatrix();
+
+    const layoutW = overlayImg.offsetWidth * dpr;
+    const layoutH = overlayImg.offsetHeight * dpr;
+
+    let centerX = (overlayScreenRect.left + overlayScreenRect.width / 2) * dpr;
+    const centerY = (overlayScreenRect.top + overlayScreenRect.height / 2) * dpr;
+    let drawMatrix = cssMatrix;
+
+    if (isFrontCamera) {
+      centerX = canvasW - centerX;
+      drawMatrix = new DOMMatrix('scaleX(-1)').multiply(cssMatrix);
+    }
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.transform(drawMatrix.a, drawMatrix.b, drawMatrix.c, drawMatrix.d, 0, 0);
+    ctx.drawImage(overlayImg, -layoutW / 2, -layoutH / 2, layoutW, layoutH);
+    ctx.restore();
   } else {
     const ratio = displayH / visibleH;
     const overlayX = canvasW * 0.083;
