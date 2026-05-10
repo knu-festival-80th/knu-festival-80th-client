@@ -53,7 +53,7 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
   },
   green: {
     centerX: '50%',
-    centerY: '40%',
+    centerY: '38%',
     width: '62%',
     height: '40%',
     aspectRatio: 361 / 253,
@@ -141,6 +141,26 @@ function getEstimatedLineCount(message: string, charsPerLine: number) {
   }, 0);
 }
 
+function getLineBreakFilledTextLength(message: string, charsPerLine: number) {
+  if (!message) {
+    return 0;
+  }
+
+  const lines = message.split('\n');
+
+  return Math.ceil(
+    lines.reduce((totalLength, line, lineIndex) => {
+      const lineLength = getWeightedTextLength(line);
+
+      if (lineIndex === lines.length - 1) {
+        return totalLength + lineLength;
+      }
+
+      return totalLength + Math.max(1, Math.ceil(lineLength / charsPerLine)) * charsPerLine;
+    }, 0),
+  );
+}
+
 function getRollingPaperStickerEstimatedLines(
   message: string,
   colorId: RollingPaperStickerColorId,
@@ -188,6 +208,15 @@ export function getRollingPaperStickerTextInputStyle(
   };
 }
 
+export function getRollingPaperStickerMessageLength(
+  message: string,
+  colorId: RollingPaperStickerColorId,
+) {
+  const textConfig = getRollingPaperStickerTextConfig(colorId);
+
+  return Math.max(message.length, getLineBreakFilledTextLength(message, textConfig.charsPerLine));
+}
+
 export function doesRollingPaperMessageFitSticker(
   message: string,
   colorId: RollingPaperStickerColorId,
@@ -204,7 +233,11 @@ export function limitRollingPaperMessageForSticker(
 ) {
   let nextMessage = message.slice(0, maxLength);
 
-  while (nextMessage.length > 0 && !doesRollingPaperMessageFitSticker(nextMessage, colorId)) {
+  while (
+    nextMessage.length > 0 &&
+    (!doesRollingPaperMessageFitSticker(nextMessage, colorId) ||
+      getRollingPaperStickerMessageLength(nextMessage, colorId) > maxLength)
+  ) {
     nextMessage = nextMessage.slice(0, -1);
   }
 
