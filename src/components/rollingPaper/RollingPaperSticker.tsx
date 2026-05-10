@@ -9,6 +9,10 @@ import {
   ROLLING_PAPER_STICKER_COLORS,
   type RollingPaperStickerColorId,
 } from '@/constants/rollingPaper';
+import {
+  getRollingPaperStickerTextBoxStyle,
+  getRollingPaperStickerTextStyle,
+} from './rollingPaperStickerText';
 
 type RollingPaperStickerProps = {
   colorId: RollingPaperStickerColorId;
@@ -16,36 +20,28 @@ type RollingPaperStickerProps = {
   children?: ReactNode;
   className?: string;
   hideText?: boolean;
+  placeholder?: string;
   style?: CSSProperties;
 };
 
-const rollingPaperAssets: Record<
-  RollingPaperStickerColorId,
-  { src: string; textBoxClassName: string }
-> = {
+const rollingPaperAssets: Record<RollingPaperStickerColorId, { src: string }> = {
   red: {
     src: paper1,
-    textBoxClassName: 'left-1/2 top-[53%] h-[34%] w-[52%] -translate-x-1/2 -translate-y-1/2',
   },
   yellow: {
     src: paper2,
-    textBoxClassName: 'left-1/2 top-1/2 h-[43%] w-[52%] -translate-x-1/2 -translate-y-1/2',
   },
   green: {
     src: paper3,
-    textBoxClassName: 'left-1/2 top-[34%] h-[24%] w-[58%] -translate-x-1/2 -translate-y-1/2',
   },
   blue: {
     src: paper4,
-    textBoxClassName: 'left-1/2 top-[53%] h-[38%] w-[70%] -translate-x-1/2 -translate-y-1/2',
   },
   purple: {
     src: paper5,
-    textBoxClassName: 'left-1/2 top-1/2 h-[42%] w-[54%] -translate-x-1/2 -translate-y-1/2',
   },
   pink: {
     src: paper6,
-    textBoxClassName: 'left-1/2 top-1/2 h-[34%] w-[43%] -translate-x-1/2 -translate-y-1/2',
   },
 };
 
@@ -62,10 +58,15 @@ export default function RollingPaperSticker({
   children,
   className = '',
   hideText = false,
+  placeholder,
   style,
 }: RollingPaperStickerProps) {
   const color = getRollingPaperStickerColor(colorId);
   const paper = rollingPaperAssets[color.id];
+  const textBoxStyle = getRollingPaperStickerTextBoxStyle(color.id);
+  const textStyle = getRollingPaperStickerTextStyle(message, color.id);
+  const text = message || placeholder || '';
+  const isPlaceholder = !message && Boolean(placeholder);
 
   return (
     <div className={`relative [container-type:inline-size] ${className}`} style={style}>
@@ -73,9 +74,17 @@ export default function RollingPaperSticker({
 
       {!hideText && (
         <div
-          className={`absolute z-10 flex items-center justify-center text-center font-wanted-sans text-[clamp(6px,5cqw,12px)] font-medium leading-[1.6] tracking-[-0.03em] text-black ${paper.textBoxClassName}`}
+          className="absolute z-10 flex items-center justify-center overflow-hidden text-center font-wanted-sans font-medium text-black"
+          style={textBoxStyle}
         >
-          {children ?? <p className="whitespace-pre-wrap">{message}</p>}
+          {children ?? (
+            <p
+              className={`whitespace-pre-wrap break-keep [overflow-wrap:anywhere] ${isPlaceholder ? 'text-black/35' : ''}`}
+              style={textStyle}
+            >
+              {text}
+            </p>
+          )}
         </div>
       )}
     </div>
