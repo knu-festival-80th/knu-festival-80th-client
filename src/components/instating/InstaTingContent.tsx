@@ -9,7 +9,7 @@ import step4Illust from '@/assets/instating/stepCard/step4_illust.svg';
 import forwardArrowIcon from '@/assets/instating/arrowIcon/forwardArrowIcon.svg';
 import OutlineButton from './OutlineButton';
 import ProcessCard from './ProcessCard';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 const steps = [
   {
