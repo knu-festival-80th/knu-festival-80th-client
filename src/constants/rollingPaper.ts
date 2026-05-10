@@ -1,6 +1,6 @@
 export const ROLLING_PAPER_DEFAULT_MESSAGE = '';
 
-export const ROLLING_PAPER_MAX_MESSAGE_LENGTH = 100;
+export const ROLLING_PAPER_MAX_MESSAGE_LENGTH = 80;
 
 export const ROLLING_PAPER_STICKER_COLORS = [
   { id: 'red', label: '레드', value: '#ff3d3d' },

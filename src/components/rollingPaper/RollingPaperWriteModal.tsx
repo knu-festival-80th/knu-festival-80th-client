@@ -27,6 +27,10 @@ import {
 } from '@/lib/rollingPaperLayout';
 import { rollingPaperBoardFrames } from './rollingPaperBoardAssets';
 import RollingPaperSticker from './RollingPaperSticker';
+import {
+  getRollingPaperStickerTextInputStyle,
+  limitRollingPaperMessageForSticker,
+} from './rollingPaperStickerText';
 
 type WriteStep = 'compose' | 'place';
 
@@ -177,23 +181,45 @@ function ComposeStep({
   onColorChange: (colorId: RollingPaperStickerColorId) => void;
   onNext: () => void;
 }) {
+  const textInputStyle = getRollingPaperStickerTextInputStyle(message, colorId);
+
+  const updateMessage = (nextMessage: string, nextColorId = colorId) => {
+    onMessageChange(
+      limitRollingPaperMessageForSticker(
+        nextMessage,
+        nextColorId,
+        ROLLING_PAPER_MAX_MESSAGE_LENGTH,
+      ),
+    );
+  };
+
+  const updateColor = (nextColorId: RollingPaperStickerColorId) => {
+    updateMessage(message, nextColorId);
+    onColorChange(nextColorId);
+  };
+
   return (
     <div className="flex flex-1 flex-col items-center">
       <div className="relative mt-4 h-[360px] w-[266px] overflow-hidden">
         <RollingPaperSticker
           colorId={colorId}
-          message={message}
+          message=""
           className="absolute left-1/2 top-1/2 w-[230px] -translate-x-1/2 -translate-y-1/2"
         >
           <textarea
             aria-label="롤링페이퍼 메시지"
             value={message}
-            maxLength={ROLLING_PAPER_MAX_MESSAGE_LENGTH}
-            className="h-full w-full resize-none bg-transparent p-0 text-center font-wanted-sans text-[inherit] font-medium leading-[inherit] tracking-[-0.03em] text-black outline-none placeholder:text-black/35"
             placeholder="축하 메시지를 남겨주세요"
-            onChange={(event) =>
-              onMessageChange(event.target.value.slice(0, ROLLING_PAPER_MAX_MESSAGE_LENGTH))
-            }
+            maxLength={ROLLING_PAPER_MAX_MESSAGE_LENGTH}
+            autoCapitalize="off"
+            autoCorrect="off"
+            data-enable-grammarly="false"
+            data-gramm="false"
+            data-gramm_editor="false"
+            spellCheck={false}
+            className="absolute inset-0 z-10 box-border h-full w-full resize-none overflow-hidden bg-transparent px-0 text-center font-wanted-sans font-medium tracking-[-0.03em] text-black caret-secondary-blue outline-none placeholder:text-black/35 selection:bg-secondary-blue/20 selection:text-black"
+            style={textInputStyle}
+            onChange={(event) => updateMessage(event.target.value)}
           />
         </RollingPaperSticker>
         <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 font-wanted-sans text-[12px] font-medium leading-none text-white">
@@ -202,7 +228,7 @@ function ComposeStep({
       </div>
 
       <div className="mt-3 w-full">
-        <StickerColorPicker selectedColorId={colorId} onSelect={onColorChange} />
+        <StickerColorPicker selectedColorId={colorId} onSelect={updateColor} />
       </div>
 
       <button
@@ -596,14 +622,11 @@ function PlaceStep({
         />
       </div>
 
-      <p className="mt-4 font-wanted-sans text-[13px] font-medium leading-none tracking-[-0.02em] text-gray">
-        남은 포스트잇 {remainingCount} / {ROLLING_PAPER_MAX_NOTES_PER_BOARD}
-      </p>
-      <p className="mt-2 font-wanted-sans text-[12px] font-medium leading-[1.4] tracking-[-0.02em] text-gray/80">
+      <p className="mt-1 px-15 font-wanted-sans text-[10px] font-medium leading-[1.4] tracking-[-0.02em] text-gray/80">
         한 손가락으로 포스트잇 위치를 정하고, 두 손가락으로 확대/축소와 화면 이동을 할 수 있어요
       </p>
 
-      <div className="mt-5 flex w-[287px] gap-3">
+      <div className="mt-3 flex w-[287px] gap-3">
         <PlacementControlButton
           icon={<Minus className="size-5" />}
           label="축소"

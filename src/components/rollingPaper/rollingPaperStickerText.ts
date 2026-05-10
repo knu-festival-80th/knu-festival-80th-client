@@ -23,9 +23,9 @@ type RollingPaperStickerTextConfig = {
   charsPerLine: number;
 };
 
-const FIGMA_MODAL_FONT_SIZE_PX = 12;
-const STICKER_TEXT_LINE_HEIGHT = 1.6;
-const BOARD_TEXT_FONT_SIZE_CQW = 5;
+const FIGMA_MODAL_FONT_SIZE_PX = 11;
+const STICKER_TEXT_LINE_HEIGHT = 1.5;
+const BOARD_TEXT_FONT_SIZE_CQW = 3.57;
 
 export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
   RollingPaperStickerColorId,
@@ -38,8 +38,8 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
     height: '55%',
     aspectRatio: 250 / 271,
     heightRatio: 0.55,
-    maxLines: 4,
-    charsPerLine: 13,
+    maxLines: 7,
+    charsPerLine: 15,
   },
   yellow: {
     centerX: '50%',
@@ -48,8 +48,8 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
     height: '65%',
     aspectRatio: 270 / 274,
     heightRatio: 0.45,
-    maxLines: 4,
-    charsPerLine: 13,
+    maxLines: 7,
+    charsPerLine: 17,
   },
   green: {
     centerX: '50%',
@@ -58,8 +58,8 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
     height: '40%',
     aspectRatio: 361 / 253,
     heightRatio: 0.38,
-    maxLines: 3,
-    charsPerLine: 12,
+    maxLines: 8,
+    charsPerLine: 13,
   },
   blue: {
     centerX: '50%',
@@ -68,8 +68,8 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
     height: '67%',
     aspectRatio: 230 / 326,
     heightRatio: 0.64,
-    maxLines: 3,
-    charsPerLine: 17,
+    maxLines: 6,
+    charsPerLine: 18,
   },
   purple: {
     centerX: '50%',
@@ -78,8 +78,8 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
     height: '50%',
     aspectRatio: 259 / 259,
     heightRatio: 0.44,
-    maxLines: 4,
-    charsPerLine: 13,
+    maxLines: 6,
+    charsPerLine: 17,
   },
   pink: {
     centerX: '50%',
@@ -88,8 +88,8 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
     height: '50%',
     aspectRatio: 271 / 271,
     heightRatio: 0.42,
-    maxLines: 4,
-    charsPerLine: 13,
+    maxLines: 6,
+    charsPerLine: 17,
   },
 };
 
@@ -124,7 +124,7 @@ function getCharacterWeight(character: string) {
     return 0.58;
   }
 
-  if (/[.,!?\'"“”‘’()[\]{}:;]/.test(character)) {
+  if (/[.,!?'"“”‘’()[\]{}:;]/.test(character)) {
     return 0.38;
   }
 
@@ -162,7 +162,7 @@ export function getRollingPaperStickerTextStyle(
   void colorId;
 
   return {
-    fontSize: `clamp(6px, ${BOARD_TEXT_FONT_SIZE_CQW}cqw, 12px)`,
+    fontSize: `clamp(1.79px, ${BOARD_TEXT_FONT_SIZE_CQW}cqw, 12px)`,
     letterSpacing: '-0.03em',
     lineHeight: String(STICKER_TEXT_LINE_HEIGHT),
   };
