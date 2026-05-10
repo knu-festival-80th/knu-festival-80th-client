@@ -22,6 +22,7 @@ export default function RollingPaperBoard() {
   const [placedNotes, setPlacedNotes] = useState<PlacedRollingPaperNote[]>([]);
   const [boardScale, setBoardScale] = useState<number>(ROLLING_PAPER_ZOOM.default);
   const [boardPan, setBoardPan] = useState<RollingPaperPan>(INITIAL_BOARD_PAN);
+  const [focusedNoteId, setFocusedNoteId] = useState<string | null>(null);
 
   const currentBoardNotes = getPlacedNotesForBoard(placedNotes, boardIndex);
   const isCurrentBoardFull = currentBoardNotes.length >= ROLLING_PAPER_MAX_NOTES_PER_BOARD;
@@ -29,6 +30,7 @@ export default function RollingPaperBoard() {
   const resetBoardViewport = () => {
     setBoardScale(ROLLING_PAPER_ZOOM.default);
     setBoardPan(INITIAL_BOARD_PAN);
+    setFocusedNoteId(null);
   };
 
   const showPreviousBoard = () => {
@@ -119,8 +121,10 @@ export default function RollingPaperBoard() {
             scale={boardScale}
             pan={boardPan}
             placedNotes={placedNotes}
+            focusedNoteId={focusedNoteId}
             onPanChange={setBoardPan}
             onScaleChange={setBoardScale}
+            onFocusedNoteChange={setFocusedNoteId}
           />
 
           <div className="pointer-events-none absolute inset-x-0 top-[30px] z-40 flex justify-between px-4">
@@ -148,6 +152,7 @@ export default function RollingPaperBoard() {
           pan={boardPan}
           onScaleChange={setBoardScale}
           onPanChange={setBoardPan}
+          onResetView={resetBoardViewport}
         />
       </section>
 

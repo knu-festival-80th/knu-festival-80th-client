@@ -11,6 +11,7 @@ type RollingPaperZoomControlsProps = {
   pan: RollingPaperPan;
   onScaleChange: Dispatch<SetStateAction<number>>;
   onPanChange: (pan: RollingPaperPan) => void;
+  onResetView?: () => void;
 };
 
 type ControlButtonProps = {
@@ -43,10 +44,11 @@ export default function RollingPaperZoomControls({
   pan,
   onScaleChange,
   onPanChange,
+  onResetView,
 }: RollingPaperZoomControlsProps) {
   return (
     <>
-      <div className="mt-[-40px] flex justify-center gap-3 px-5">
+      <div className="mt-[20px] flex justify-center gap-3 px-5">
         <ControlButton
           icon={<Minus className="size-5" />}
           label="축소"
@@ -62,6 +64,11 @@ export default function RollingPaperZoomControls({
           label="원점"
           disabled={scale === ROLLING_PAPER_ZOOM.default && pan.x === 0 && pan.y === 0}
           onClick={() => {
+            if (onResetView) {
+              onResetView();
+              return;
+            }
+
             onScaleChange(ROLLING_PAPER_ZOOM.default);
             onPanChange({ x: 0, y: 0 });
           }}
@@ -78,7 +85,7 @@ export default function RollingPaperZoomControls({
         />
       </div>
       <p className="mt-3 px-5 text-center font-wanted-sans text-[12px] font-medium leading-[1.4] tracking-[-0.02em] text-gray/80">
-        두 손가락으로 확대/축소하고, 확대된 상태에서는 드래그로 보드를 이동할 수 있어요
+        포스트잇을 누르면 해당 메시지로 확대되고, 두 손가락으로 확대/축소할 수 있어요
       </p>
     </>
   );

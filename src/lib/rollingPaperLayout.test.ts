@@ -1,12 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
   ROLLING_PAPER_BOARD_VIEWPORT,
+  ROLLING_PAPER_CANVAS_DIMENSIONS,
   ROLLING_PAPER_MAX_NOTES_PER_BOARD,
+  ROLLING_PAPER_NOTE_FOCUS_ZOOM,
   clampRollingPaperPan,
   clampRollingPaperPlacement,
   clampRollingPaperScale,
   findNearestAvailableRollingPaperPlacement,
   getPlacedNotesForBoard,
+  getRollingPaperNoteFocusScale,
+  getRollingPaperNoteSize,
+  getRollingPaperPlacementFocusPan,
+  getRollingPaperRenderedScale,
   getRollingPaperBlockedFrameRect,
   getRollingPaperFrameRect,
   isRollingPaperPlacementAvailable,
@@ -96,7 +102,8 @@ describe('rollingPaperLayout', () => {
   it('clamps zoom to the mobile-supported range', () => {
     expect(clampRollingPaperScale(0.2)).toBe(0.7);
     expect(clampRollingPaperScale(1.18)).toBe(1.18);
-    expect(clampRollingPaperScale(2.8)).toBe(2.2);
+    expect(clampRollingPaperScale(2.8)).toBe(2.8);
+    expect(clampRollingPaperScale(12.8)).toBe(12);
   });
 
   it('clamps pan to the rendered board bounds after zoom changes', () => {
@@ -161,6 +168,66 @@ describe('rollingPaperLayout', () => {
         'cover',
       ),
     ).toEqual({ x: 0, y: 0 });
+  });
+
+  it('calculates pan that centers the selected note at focus zoom', () => {
+    const placement = { x: 55, y: 45 };
+    const viewportWidth = 600;
+    const viewportHeight = ROLLING_PAPER_BOARD_VIEWPORT.height;
+    const renderedScale = getRollingPaperRenderedScale(
+      viewportWidth,
+      viewportHeight,
+      ROLLING_PAPER_NOTE_FOCUS_ZOOM,
+      'cover',
+    );
+    const focusPan = getRollingPaperPlacementFocusPan(
+      placement,
+      viewportWidth,
+      viewportHeight,
+      ROLLING_PAPER_NOTE_FOCUS_ZOOM,
+      'cover',
+    );
+    const screenOffsetX =
+      ((placement.x / 100) * ROLLING_PAPER_CANVAS_DIMENSIONS.width -
+        ROLLING_PAPER_CANVAS_DIMENSIONS.width / 2) *
+        renderedScale +
+      focusPan.x;
+    const screenOffsetY =
+      ((placement.y / 100) * ROLLING_PAPER_CANVAS_DIMENSIONS.height -
+        ROLLING_PAPER_CANVAS_DIMENSIONS.height / 2) *
+        renderedScale +
+      focusPan.y;
+
+    expect(screenOffsetX).toBeCloseTo(0);
+    expect(screenOffsetY).toBeCloseTo(0);
+  });
+
+  it('reduces focus zoom for the taller paper3 sticker so it has viewport margin', () => {
+    const greenFocusScale = getRollingPaperNoteFocusScale(
+      'green',
+      ROLLING_PAPER_BOARD_VIEWPORT.width,
+      ROLLING_PAPER_BOARD_VIEWPORT.height,
+      'cover',
+    );
+    const redFocusScale = getRollingPaperNoteFocusScale(
+      'red',
+      ROLLING_PAPER_BOARD_VIEWPORT.width,
+      ROLLING_PAPER_BOARD_VIEWPORT.height,
+      'cover',
+    );
+    const greenRenderedScale = getRollingPaperRenderedScale(
+      ROLLING_PAPER_BOARD_VIEWPORT.width,
+      ROLLING_PAPER_BOARD_VIEWPORT.height,
+      greenFocusScale,
+      'cover',
+    );
+    const greenNoteSize = getRollingPaperNoteSize('green');
+
+    expect(greenFocusScale).toBeLessThan(ROLLING_PAPER_NOTE_FOCUS_ZOOM);
+    expect(redFocusScale).toBe(ROLLING_PAPER_NOTE_FOCUS_ZOOM);
+    expect(greenNoteSize.height * greenRenderedScale).toBeLessThanOrEqual(
+      ROLLING_PAPER_BOARD_VIEWPORT.height * 0.74 + 1,
+    );
   });
 
   it('keeps the blocked frame rectangle aligned with the shifted mascot frame', () => {

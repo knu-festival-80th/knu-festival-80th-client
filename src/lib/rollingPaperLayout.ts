@@ -79,9 +79,15 @@ export const ROLLING_PAPER_NOTE_WIDTH = 50;
 export const ROLLING_PAPER_MAX_NOTES_PER_BOARD = 50;
 export const ROLLING_PAPER_ZOOM = {
   min: 0.7,
-  max: 2.2,
+  max: 12,
   default: 1,
-  step: 0.1,
+  step: 0.5,
+} as const;
+export const ROLLING_PAPER_NOTE_FOCUS_ZOOM = 10.5;
+
+const NOTE_FOCUS_VIEWPORT_RATIO = {
+  width: 0.86,
+  height: 0.74,
 } as const;
 
 const toPercent = (value: number, total: number) => Number(((value / total) * 100).toFixed(2));
@@ -231,6 +237,45 @@ export function clampRollingPaperPan(
     x: clamp(pan.x, -maxX, maxX),
     y: clamp(pan.y, -maxY, maxY),
   });
+}
+
+export function getRollingPaperPlacementFocusPan(
+  placement: RollingPaperPlacement,
+  viewportWidth: number,
+  viewportHeight: number,
+  scale = ROLLING_PAPER_NOTE_FOCUS_ZOOM,
+  mode: RollingPaperScaleMode = 'contain',
+) {
+  const renderedScale = getRollingPaperRenderedScale(viewportWidth, viewportHeight, scale, mode);
+  const canvasX = toPixels(placement.x, ROLLING_PAPER_CANVAS_DIMENSIONS.width);
+  const canvasY = toPixels(placement.y, ROLLING_PAPER_CANVAS_DIMENSIONS.height);
+
+  return clampRollingPaperPan(
+    {
+      x: (ROLLING_PAPER_CANVAS_DIMENSIONS.width / 2 - canvasX) * renderedScale,
+      y: (ROLLING_PAPER_CANVAS_DIMENSIONS.height / 2 - canvasY) * renderedScale,
+    },
+    viewportWidth,
+    viewportHeight,
+    scale,
+    mode,
+  );
+}
+
+export function getRollingPaperNoteFocusScale(
+  colorId: RollingPaperStickerColorId,
+  viewportWidth: number,
+  viewportHeight: number,
+  mode: RollingPaperScaleMode = 'contain',
+) {
+  const noteSize = getRollingPaperNoteSize(colorId);
+  const fitScale = getRollingPaperFitScale(viewportWidth, viewportHeight, mode);
+  const widthScale =
+    (viewportWidth * NOTE_FOCUS_VIEWPORT_RATIO.width) / (noteSize.width * fitScale);
+  const heightScale =
+    (viewportHeight * NOTE_FOCUS_VIEWPORT_RATIO.height) / (noteSize.height * fitScale);
+
+  return clampRollingPaperScale(Math.min(ROLLING_PAPER_NOTE_FOCUS_ZOOM, widthScale, heightScale));
 }
 
 export function clampRollingPaperPlacement(
