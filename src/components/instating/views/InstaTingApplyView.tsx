@@ -36,7 +36,7 @@ const InstaTingApplyView = () => {
       )}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col gap-7 bg-white px-5 py-6 bg-white"
+        className="flex flex-col gap-7 bg-white px-5 py-6 min-h-[calc(100dvh-6.75rem)]"
       >
         {/* Header */}
         <div className="flex flex-col gap-2.5">

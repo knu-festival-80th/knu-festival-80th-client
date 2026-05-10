@@ -27,6 +27,7 @@ import StampBoothListPage from './pages/stampTour/StampBoothListPage';
 import InstaTingPage from './pages/InstaTingPage';
 import InstaTingIntroView from '@/components/instating/views/InstaTingIntroView';
 import InstaTingApplyView from '@/components/instating/views/InstaTingApplyView';
+import InstaTingResultView from '@/components/instating/views/InstaTingResultView';
 
 export default function App() {
   return (
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="/instating" element={<InstaTingPage />}>
             <Route index element={<InstaTingIntroView />} />
             <Route path="apply" element={<InstaTingApplyView />} />
+            <Route path="result" element={<InstaTingResultView />} />
           </Route>
           <Route path="/congrat-video" element={<CongratVideoPage />} />
           <Route path="/404" element={<NotFoundPage />} />

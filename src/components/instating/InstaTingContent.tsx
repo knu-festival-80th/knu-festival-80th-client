@@ -45,6 +45,8 @@ const steps = [
 const InstaTingContent = () => {
   const navigate = useNavigate();
   const goApplyPage = () => navigate('/instating/apply');
+  const goResultPage = () => navigate('/instating/result');
+
   return (
     <section className="w-full bg-white">
       <div className="mx-auto flex w-full flex-col items-center gap-12 px-5 pb-16 pt-16">
@@ -85,7 +87,7 @@ const InstaTingContent = () => {
           </div>
           <div className="flex items-center gap-4">
             <OutlineButton label="신청하기" icon={forwardArrowIcon} onClick={goApplyPage} />
-            <OutlineButton label="결과 확인하기" dark />
+            <OutlineButton label="결과 확인하기" dark onClick={goResultPage} />
           </div>
         </div>
       </div>
