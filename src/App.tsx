@@ -25,13 +25,10 @@ import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import StampTourPage from './pages/stampTour/StampTourPage';
 import StampBoothListPage from './pages/stampTour/StampBoothListPage';
 import InstaTingPage from './pages/InstaTingPage';
-<<<<<<< HEAD
 import InstaTingIntroView from '@/components/instating/views/InstaTingIntroView';
 import InstaTingApplyView from '@/components/instating/views/InstaTingApplyView';
 import InstaTingResultView from '@/components/instating/views/InstaTingResultView';
-=======
-import InstaTingResultModalPage from './pages/InstaTingResultModalPage';
->>>>>>> c0c46aa ([#15]Refactor: InstaTingResultPage -> InstaTingResultModalPage로 네이밍 수정)
+import InstaTingResultModalProto from './pages/InstaTingResultModalProto';
 
 export default function App() {
   return (
@@ -87,12 +84,9 @@ export default function App() {
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Route>
-<<<<<<< HEAD
-=======
-        <Route path="/instating/result" element={<InstaTingResultModalPage />} />
+        <Route path="/instating/result-proto" element={<InstaTingResultModalProto />} />
         <Route path="/404" element={<NotFoundPage />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
->>>>>>> c0c46aa ([#15]Refactor: InstaTingResultPage -> InstaTingResultModalPage로 네이밍 수정)
       </Routes>
       <Analytics />
     </>
