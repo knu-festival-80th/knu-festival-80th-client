@@ -1,5 +1,6 @@
 import { CheckIcon } from 'lucide-react';
 import copyIcon from '@/assets/instaTing/icon/copyIcon.svg';
+import happyHobanwoo from '@/assets/instaTing/Hobanwoo/happyHobanwoo.svg';
 
 interface ResultCardProps {
   instagramId: string;
@@ -29,9 +30,7 @@ const ResultCard = ({ instagramId, copied, onCopy }: ResultCardProps) => (
       className="absolute overflow-hidden"
       style={{ left: 63, top: 78, width: 201, height: 190 }}
     >
-      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-pink-50 to-rose-50">
-        <span className="text-7xl">🐯</span>
-      </div>
+      <img src={happyHobanwoo} alt="호반우" className="h-full w-full object-contain" />
     </div>
 
     <div

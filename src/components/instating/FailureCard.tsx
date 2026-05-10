@@ -1,3 +1,5 @@
+import sadHobanwoo from '@/assets/instaTing/Hobanwoo/sadHobanwoo.svg';
+
 const FailureCard = () => (
   <div
     className="relative w-[325px] shrink-0 overflow-hidden rounded-[12px] bg-white"
@@ -11,9 +13,7 @@ const FailureCard = () => (
       className="absolute overflow-hidden"
       style={{ left: 63, top: 73, width: 202, height: 210 }}
     >
-      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-pink-50 to-rose-50">
-        <span className="text-7xl">🐯</span>
-      </div>
+      <img src={sadHobanwoo} alt="호반우" className="h-full w-full object-contain" />
     </div>
 
     <p
