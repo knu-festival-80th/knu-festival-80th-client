@@ -28,7 +28,7 @@ import InstaTingPage from './pages/InstaTingPage';
 import InstaTingIntroView from '@/components/instating/views/InstaTingIntroView';
 import InstaTingApplyView from '@/components/instating/views/InstaTingApplyView';
 import InstaTingResultView from '@/components/instating/views/InstaTingResultView';
-import InstaTingResultModalProto from './pages/InstaTingResultModalProto';
+import InstaTingResultModalProto from './components/instating/InstaTingResultModalProto';
 
 export default function App() {
   return (
