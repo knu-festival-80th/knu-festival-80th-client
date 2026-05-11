@@ -100,11 +100,24 @@ export const CameraOverlay = ({
                     className="flex flex-col items-center gap-2"
                   >
                     <div
-                      className={`size-12 overflow-hidden rounded-lg border-4 ${
-                        selectedCharacter === char.key ? 'border-sub-red' : 'border-transparent'
+                      className={`size-13 overflow-hidden rounded-2xl bg-white ${
+                        selectedCharacter === char.key
+                          ? 'border-2 border-sub-red'
+                          : 'border border-gray-300'
                       }`}
                     >
-                      <img src={char.src} alt={char.label} className="size-full object-cover" />
+                      <img
+                        src={char.src}
+                        alt={char.label}
+                        className="size-full object-cover"
+                        style={
+                          char.overlayStyle.transform
+                            ? {
+                                transform: `${char.overlayStyle.transform} scale(1.0) translateY(10px)`,
+                              }
+                            : { transform: 'translateY(10px)' }
+                        }
+                      />
                     </div>
                     <span className="font-wanted-sans text-xs tracking-[-0.24px] text-gray">
                       {char.label}
