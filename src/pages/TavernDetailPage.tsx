@@ -25,7 +25,7 @@ export default function TavernDetailPage() {
 
   if (boothsQuery.isLoading) {
     return (
-      <div className="flex min-h-[50dvh] items-center justify-center text-[16px] text-[#808080]">
+      <div className="flex min-h-dvh items-center justify-center bg-white text-[16px] text-[#808080]">
         주막 정보를 불러오는 중...
       </div>
     );
@@ -34,7 +34,7 @@ export default function TavernDetailPage() {
   const booth = boothsQuery.data?.find((b) => b.boothId === boothId);
   if (!booth) {
     return (
-      <div className="flex min-h-[50dvh] flex-col items-center justify-center gap-4 px-5">
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-white px-5">
         <p className="text-[16px] text-[#808080]">주막을 찾을 수 없습니다.</p>
         <button
           type="button"
@@ -50,7 +50,7 @@ export default function TavernDetailPage() {
   const tavern = boothToTavern(booth);
 
   return (
-    <>
+    <div className="min-h-dvh bg-white">
       <TavernDetailView tavern={tavern} onRegister={() => setRegistrationTarget(true)} />
 
       {registrationTarget && (
@@ -70,6 +70,6 @@ export default function TavernDetailPage() {
           onClose={() => setWaitingReservation(null)}
         />
       )}
-    </>
+    </div>
   );
 }
