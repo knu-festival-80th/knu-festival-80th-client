@@ -28,7 +28,7 @@ export default function MapLocationPicker({ xRatio, yRatio, onChange }: MapLocat
       </p>
       <div
         ref={mapRef}
-        className="relative cursor-crosshair overflow-hidden rounded-lg border border-[var(--admin-border)]"
+        className="relative max-w-md cursor-crosshair overflow-hidden rounded-lg border border-[var(--admin-border)]"
         style={{ aspectRatio: `${festivalMap.width} / ${festivalMap.height}` }}
         onClick={handleClick}
       >
