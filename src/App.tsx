@@ -19,6 +19,7 @@ import CongratVideoPage from '@/pages/CongratVideoPage';
 import GoodsPage from '@/pages/GoodsPage';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import TavernDetailPage from '@/pages/TavernDetailPage';
 import TavernMapPage from '@/pages/TavernMapPage';
 import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
@@ -70,6 +71,7 @@ export default function App() {
         <Route element={<DefaultLayout />}>
           <Route path="/map" element={<TavernMapPage />} />
           <Route path="/taverns" element={<TavernMapPage />} />
+          <Route path="/taverns/:boothId" element={<TavernDetailPage />} />
           <Route path="/timetable" element={<TimeTablePage />} />
           <Route path="/goods" element={<GoodsPage />} />
           <Route path="/stamptour" element={<StampTourPage />} />

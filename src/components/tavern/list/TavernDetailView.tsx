@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+import { FiArrowLeft } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 import CampusMap from '@/components/tavern/map/CampusMap';
 import TavernMetric from '@/components/tavern/shared/TavernMetric';
@@ -10,10 +12,20 @@ type TavernDetailViewProps = {
 };
 
 export default function TavernDetailView({ tavern, onRegister }: TavernDetailViewProps) {
+  const navigate = useNavigate();
   const singleTavernList = useMemo(() => [tavern], [tavern]);
 
   return (
     <section className="flex flex-col gap-5 px-5 py-5">
+      <button
+        type="button"
+        className="flex items-center gap-1 self-start text-[14px] font-medium text-[#808080]"
+        onClick={() => navigate('/taverns')}
+      >
+        <FiArrowLeft size={16} />
+        주막 목록
+      </button>
+
       <article className="bg-white">
         <div className="flex flex-col gap-4 pb-2.5">
           <div className="flex flex-col gap-1">

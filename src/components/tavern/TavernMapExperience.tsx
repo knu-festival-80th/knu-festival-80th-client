@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { boothApi } from '@/apis';
 import IntroOverview from '@/components/tavern/intro/IntroOverview';
-import TavernDetailView from '@/components/tavern/list/TavernDetailView';
 import TavernListView from '@/components/tavern/list/TavernListView';
 import MapOverview from '@/components/tavern/map/MapOverview';
 import ReservationLimitModal from '@/components/tavern/modals/ReservationLimitModal';
@@ -43,7 +42,6 @@ export default function TavernMapExperience() {
   );
   const [sortKey, setSortKey] = useState<TavernSortKey>('shortWait');
   const [selectedTavern, setSelectedTavern] = useState<Tavern | null>(null);
-  const [detailTavern, setDetailTavern] = useState<Tavern | null>(null);
   const [expandedMenuId, setExpandedMenuId] = useState<string | null>(null);
   const [registrationTarget, setRegistrationTarget] = useState<Tavern | null>(null);
   const [waitingReservation, setWaitingReservation] = useState<WaitingReservation | null>(null);
@@ -60,12 +58,9 @@ export default function TavernMapExperience() {
     return list.sort((a, b) => b.popularity - a.popularity);
   }, [taverns, sortKey]);
 
-  const detailTavernId = (location.state as { detailTavernId?: string } | null)?.detailTavernId;
-  const shouldShowDetail = detailTavern && detailTavernId === detailTavern.id;
-
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, [activeTab, location.key, shouldShowDetail]);
+  }, [activeTab, location.key]);
 
   const handleRegister = (tavern: Tavern) => {
     setSelectedTavern(tavern);
@@ -73,13 +68,10 @@ export default function TavernMapExperience() {
   };
 
   const handleOpenTavernDetail = (tavern: Tavern) => {
-    setSelectedTavern(tavern);
-    setDetailTavern(tavern);
-    navigate('/taverns?tab=list', { replace: true, state: { detailTavernId: tavern.id } });
+    navigate(`/taverns/${tavern.boothId}`);
   };
 
   const handleTabChange = (tab: TopTab) => {
-    setDetailTavern(null);
     navigate(tab === 'list' || tab === 'reservation' ? `/taverns?tab=${tab}` : `/map?tab=${tab}`, {
       replace: true,
     });
@@ -103,19 +95,15 @@ export default function TavernMapExperience() {
       {activeTab === 'intro' ? (
         <IntroOverview onTabChange={handleTabChange} />
       ) : activeTab === 'list' ? (
-        shouldShowDetail ? (
-          <TavernDetailView tavern={detailTavern} onRegister={handleRegister} />
-        ) : (
-          <TavernListView
-            expandedMenuId={expandedMenuId}
-            sortKey={sortKey}
-            taverns={sortedTaverns}
-            onMenuToggle={setExpandedMenuId}
-            onRegister={handleRegister}
-            onSelectTavern={handleOpenTavernDetail}
-            onSortChange={setSortKey}
-          />
-        )
+        <TavernListView
+          expandedMenuId={expandedMenuId}
+          sortKey={sortKey}
+          taverns={sortedTaverns}
+          onMenuToggle={setExpandedMenuId}
+          onRegister={handleRegister}
+          onSelectTavern={handleOpenTavernDetail}
+          onSortChange={setSortKey}
+        />
       ) : activeTab === 'reservation' ? (
         <ReservationLookup />
       ) : (
