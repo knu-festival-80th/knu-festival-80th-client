@@ -1,4 +1,5 @@
-import menuImage from '@/assets/images/menu.jpg';
+import { useMemo } from 'react';
+
 import CampusMap from '@/components/tavern/map/CampusMap';
 import TavernMetric from '@/components/tavern/shared/TavernMetric';
 import type { Tavern } from '@/constants/taverns';
@@ -9,6 +10,8 @@ type TavernDetailViewProps = {
 };
 
 export default function TavernDetailView({ tavern, onRegister }: TavernDetailViewProps) {
+  const singleTavernList = useMemo(() => [tavern], [tavern]);
+
   return (
     <section className="flex flex-col gap-5 px-5 py-5">
       <article className="bg-white">
@@ -47,26 +50,33 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
         </div>
       </article>
 
-      <div className="h-px bg-[#e5e5e5]" />
-
-      <div className="flex flex-col gap-2">
-        <h2 className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
-          메뉴
-        </h2>
-        <div className="h-[353px] w-full overflow-hidden bg-[#f9f9f9]">
-          <img
-            src={menuImage}
-            alt={`${tavern.name} 메뉴 이미지`}
-            className="size-full object-contain"
-          />
-        </div>
-      </div>
+      {tavern.menuBoardImageUrl && (
+        <>
+          <div className="h-px bg-[#e5e5e5]" />
+          <div className="flex flex-col gap-2">
+            <h2 className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
+              메뉴
+            </h2>
+            <div className="w-full overflow-hidden bg-[#f9f9f9]">
+              <img
+                src={tavern.menuBoardImageUrl}
+                alt={`${tavern.name} 메뉴 이미지`}
+                className="size-full object-contain"
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="flex flex-col gap-2">
         <h2 className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
           위치
         </h2>
-        <CampusMap selectedTavern={tavern} onSelectTavern={() => undefined} />
+        <CampusMap
+          taverns={singleTavernList}
+          selectedTavern={tavern}
+          onSelectTavern={() => undefined}
+        />
       </div>
     </section>
   );

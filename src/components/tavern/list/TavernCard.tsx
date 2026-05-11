@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
-import menuImage from '@/assets/images/menu.jpg';
 import TavernMetric from '@/components/tavern/shared/TavernMetric';
 import type { Tavern } from '@/constants/taverns';
 
@@ -86,26 +85,30 @@ export default function TavernCard({
             </button>
           )}
         </div>
-        <button
-          type="button"
-          className="flex items-center gap-1 text-[14px] font-medium leading-[1.6] tracking-[-0.28px] text-[#808080]"
-          aria-expanded={expanded}
-          onClick={onMenuToggle}
-        >
-          메뉴
-          <FiChevronDown className={expanded ? 'rotate-180' : ''} size={18} />
-        </button>
-        {expanded && (
-          <div
-            ref={menuRef}
-            className="h-[260px] w-full scroll-mt-28 border-t border-[#e5e5e5] pt-3"
-          >
-            <img
-              src={menuImage}
-              alt={`${tavern.name} 메뉴판`}
-              className="size-full rounded-[8px] bg-[#f9f9f9] object-contain"
-            />
-          </div>
+        {tavern.menuBoardImageUrl && (
+          <>
+            <button
+              type="button"
+              className="flex items-center gap-1 text-[14px] font-medium leading-[1.6] tracking-[-0.28px] text-[#808080]"
+              aria-expanded={expanded}
+              onClick={onMenuToggle}
+            >
+              메뉴
+              <FiChevronDown className={expanded ? 'rotate-180' : ''} size={18} />
+            </button>
+            {expanded && (
+              <div
+                ref={menuRef}
+                className="h-[260px] w-full scroll-mt-28 border-t border-[#e5e5e5] pt-3"
+              >
+                <img
+                  src={tavern.menuBoardImageUrl}
+                  alt={`${tavern.name} 메뉴판`}
+                  className="size-full rounded-[8px] bg-[#f9f9f9] object-contain"
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     </article>

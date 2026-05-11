@@ -5,6 +5,7 @@ import type { Tavern } from '@/constants/taverns';
 type MapOverviewProps = {
   expandedMenuId: string | null;
   selectedTavern: Tavern | null;
+  taverns: Tavern[];
   onMenuToggle: (id: string | null) => void;
   onOpenDetail: (tavern: Tavern) => void;
   onRegister: (tavern: Tavern) => void;
@@ -14,6 +15,7 @@ type MapOverviewProps = {
 export default function MapOverview({
   expandedMenuId,
   selectedTavern,
+  taverns,
   onMenuToggle,
   onOpenDetail,
   onRegister,
@@ -28,7 +30,11 @@ export default function MapOverview({
         </p>
       </div>
 
-      <CampusMap selectedTavern={selectedTavern} onSelectTavern={onSelectTavern} />
+      <CampusMap
+        taverns={taverns}
+        selectedTavern={selectedTavern}
+        onSelectTavern={onSelectTavern}
+      />
 
       {selectedTavern && (
         <TavernCard

@@ -55,6 +55,13 @@ export interface BoothPasswordChangeRequest {
   newPassword: string;
 }
 
+export async function listBooths(sort: BoothSort = 'likes'): Promise<BoothListItem[]> {
+  const response = await http.get<ApiResponse<BoothListItem[]>>(ENDPOINTS.booths.list, {
+    params: { sort },
+  });
+  return unwrapApiResponse(response.data);
+}
+
 export async function listAdminBooths(sort: BoothSort = 'likes'): Promise<BoothListItem[]> {
   const response = await http.get<ApiResponse<BoothListItem[]>>(ENDPOINTS.admin.booths, {
     params: { sort },

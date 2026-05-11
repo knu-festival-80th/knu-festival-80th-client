@@ -1,6 +1,8 @@
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import { boothApi } from '@/apis';
 import IntroOverview from '@/components/tavern/intro/IntroOverview';
 import TavernDetailView from '@/components/tavern/list/TavernDetailView';
 import TavernListView from '@/components/tavern/list/TavernListView';
@@ -11,7 +13,7 @@ import WaitingRegistrationModal from '@/components/tavern/modals/WaitingRegistra
 import ReservationLookup from '@/components/tavern/reservation/ReservationLookup';
 import TavernTabBar from '@/components/tavern/TavernTabBar';
 import type { TopTab, WaitingReservation } from '@/components/tavern/types';
-import { taverns, type Tavern, type TavernSortKey } from '@/constants/taverns';
+import { boothToTavern, type Tavern, type TavernSortKey } from '@/constants/taverns';
 
 const TAVERN_TABS = ['intro', 'map', 'list', 'reservation'] as const satisfies readonly TopTab[];
 
@@ -22,23 +24,18 @@ const resolveTavernTabFromUrl = (pathname: string, search: string): TopTab => {
   if (pathname === '/map') return 'map';
   return 'intro';
 };
-const sortTaverns = (sortKey: TavernSortKey) => {
-  const list = [...taverns];
-
-  if (sortKey === 'shortWait') {
-    return list.sort((first, second) => first.waitTeams - second.waitTeams);
-  }
-
-  if (sortKey === 'simple') {
-    return list;
-  }
-
-  return list.sort((first, second) => second.popularity - first.popularity);
-};
 
 export default function TavernMapExperience() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const boothsQuery = useQuery({
+    queryKey: ['booths'],
+    queryFn: () => boothApi.listBooths('likes'),
+    staleTime: 30_000,
+  });
+
+  const taverns = useMemo(() => (boothsQuery.data ?? []).map(boothToTavern), [boothsQuery.data]);
 
   const activeTab = useMemo(
     () => resolveTavernTabFromUrl(location.pathname, location.search),
@@ -52,7 +49,17 @@ export default function TavernMapExperience() {
   const [waitingReservation, setWaitingReservation] = useState<WaitingReservation | null>(null);
   const [showReservationLimitModal, setShowReservationLimitModal] = useState(false);
 
-  const sortedTaverns = useMemo(() => sortTaverns(sortKey), [sortKey]);
+  const sortedTaverns = useMemo(() => {
+    const list = [...taverns];
+    if (sortKey === 'shortWait') {
+      return list.sort((a, b) => a.waitTeams - b.waitTeams);
+    }
+    if (sortKey === 'simple') {
+      return list;
+    }
+    return list.sort((a, b) => b.popularity - a.popularity);
+  }, [taverns, sortKey]);
+
   const detailTavernId = (location.state as { detailTavernId?: string } | null)?.detailTavernId;
   const shouldShowDetail = detailTavern && detailTavernId === detailTavern.id;
 
@@ -77,6 +84,17 @@ export default function TavernMapExperience() {
       replace: true,
     });
   };
+
+  if (boothsQuery.isLoading && activeTab !== 'intro') {
+    return (
+      <div className="min-h-dvh bg-white font-wanted-sans text-black">
+        <TavernTabBar activeTab={activeTab} onTabChange={handleTabChange} />
+        <div className="flex items-center justify-center py-20 text-[16px] text-[#808080]">
+          주막 정보를 불러오는 중...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-white font-wanted-sans text-black">
@@ -104,6 +122,7 @@ export default function TavernMapExperience() {
         <MapOverview
           expandedMenuId={expandedMenuId}
           selectedTavern={selectedTavern}
+          taverns={taverns}
           onMenuToggle={setExpandedMenuId}
           onOpenDetail={handleOpenTavernDetail}
           onRegister={handleRegister}
