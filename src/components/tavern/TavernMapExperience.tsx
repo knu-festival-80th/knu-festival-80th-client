@@ -13,8 +13,6 @@ import TavernTabBar from '@/components/tavern/TavernTabBar';
 import type { TopTab, WaitingReservation } from '@/components/tavern/types';
 import { taverns, type Tavern, type TavernSortKey } from '@/constants/taverns';
 
-const MAX_WAITING_RESERVATION_COUNT = 3;
-const INITIAL_MOCK_WAITING_RESERVATION_COUNT = 2;
 const TAVERN_TABS = ['intro', 'map', 'list', 'reservation'] as const satisfies readonly TopTab[];
 
 const resolveTavernTabFromUrl = (pathname: string, search: string): TopTab => {
@@ -24,7 +22,6 @@ const resolveTavernTabFromUrl = (pathname: string, search: string): TopTab => {
   if (pathname === '/map') return 'map';
   return 'intro';
 };
-
 const sortTaverns = (sortKey: TavernSortKey) => {
   const list = [...taverns];
 
@@ -53,9 +50,6 @@ export default function TavernMapExperience() {
   const [expandedMenuId, setExpandedMenuId] = useState<string | null>(null);
   const [registrationTarget, setRegistrationTarget] = useState<Tavern | null>(null);
   const [waitingReservation, setWaitingReservation] = useState<WaitingReservation | null>(null);
-  const [waitingReservationCount, setWaitingReservationCount] = useState(
-    INITIAL_MOCK_WAITING_RESERVATION_COUNT,
-  );
   const [showReservationLimitModal, setShowReservationLimitModal] = useState(false);
 
   const sortedTaverns = useMemo(() => sortTaverns(sortKey), [sortKey]);
@@ -68,12 +62,6 @@ export default function TavernMapExperience() {
 
   const handleRegister = (tavern: Tavern) => {
     setSelectedTavern(tavern);
-
-    if (waitingReservationCount >= MAX_WAITING_RESERVATION_COUNT) {
-      setShowReservationLimitModal(true);
-      return;
-    }
-
     setRegistrationTarget(tavern);
   };
 
@@ -129,9 +117,6 @@ export default function TavernMapExperience() {
           onClose={() => setRegistrationTarget(null)}
           onSubmit={(reservation) => {
             setRegistrationTarget(null);
-            setWaitingReservationCount((count) =>
-              Math.min(count + 1, MAX_WAITING_RESERVATION_COUNT),
-            );
             setWaitingReservation(reservation);
           }}
         />

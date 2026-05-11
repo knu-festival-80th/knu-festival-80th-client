@@ -48,14 +48,9 @@ export default function TavernCard({
         </p>
         <h3 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">{tavern.name}</h3>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      {tavern.waitingOpen && (
         <TavernMetric label="웨이팅" value={tavern.waitTeams} suffix="팀 대기중" />
-        <TavernMetric
-          label="잔여좌석"
-          value={tavern.availableSeats}
-          suffix={`/ ${tavern.totalSeats} 석`}
-        />
-      </div>
+      )}
     </>
   );
 
@@ -73,13 +68,23 @@ export default function TavernCard({
           ) : (
             <div className="flex flex-col gap-4">{cardSummary}</div>
           )}
-          <button
-            type="button"
-            className="h-[51px] w-full rounded-[8px] bg-[#ff3d3d] text-[16px] font-semibold tracking-[-0.32px] text-white"
-            onClick={onRegister}
-          >
-            대기 등록하기
-          </button>
+          {tavern.waitingOpen ? (
+            <button
+              type="button"
+              className="h-[51px] w-full rounded-[8px] bg-[#ff3d3d] text-[16px] font-semibold tracking-[-0.32px] text-white"
+              onClick={onRegister}
+            >
+              대기 등록하기
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="h-[51px] w-full rounded-[8px] bg-[#e5e5e5] text-[16px] font-semibold tracking-[-0.32px] text-[#808080]"
+              disabled
+            >
+              현장 방문해 주세요
+            </button>
+          )}
         </div>
         <button
           type="button"

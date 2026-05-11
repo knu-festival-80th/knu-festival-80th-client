@@ -108,3 +108,50 @@ export async function toggleBoothWaiting(
   );
   unwrapVoidApiResponse(response.data);
 }
+
+/* ── 사용자 API ── */
+
+export interface WaitingCreateRequest {
+  name: string;
+  partySize: number;
+  phoneNumber: string;
+}
+
+export interface MyWaitingItem {
+  waitingId: number;
+  boothId: number;
+  boothName: string;
+  waitingNumber: number;
+  status: string;
+  aheadCount: number;
+  estimatedWaitMinutes: number;
+}
+
+export async function registerWaiting(
+  boothId: number,
+  payload: WaitingCreateRequest,
+): Promise<WaitingRegisterResponse> {
+  const response = await http.post<ApiResponse<WaitingRegisterResponse>>(
+    ENDPOINTS.booths.registerWaiting(boothId),
+    payload,
+  );
+  return unwrapApiResponse(response.data);
+}
+
+export async function lookupMyWaitings(
+  name: string,
+  phoneNumber: string,
+): Promise<MyWaitingItem[]> {
+  const response = await http.post<ApiResponse<MyWaitingItem[]>>(ENDPOINTS.waitings.my, {
+    name,
+    phoneNumber,
+  });
+  return unwrapApiResponse(response.data);
+}
+
+export async function cancelMyWaiting(waitingId: number, phoneLast4: string): Promise<void> {
+  const response = await http.delete<ApiResponse<null>>(ENDPOINTS.waitings.detail(waitingId), {
+    params: { phoneLast4 },
+  });
+  unwrapVoidApiResponse(response.data);
+}

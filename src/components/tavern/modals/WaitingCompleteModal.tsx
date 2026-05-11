@@ -8,7 +8,7 @@ type WaitingCompleteModalProps = {
 };
 
 export default function WaitingCompleteModal({ reservation, onClose }: WaitingCompleteModalProps) {
-  const { tavern } = reservation;
+  const { response } = reservation;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center bg-black/30">
@@ -40,16 +40,20 @@ export default function WaitingCompleteModal({ reservation, onClose }: WaitingCo
             <div className="pb-2.5">
               <div className="flex items-center gap-1">
                 <h3 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">
-                  {tavern.name}
+                  {response.boothName}
                 </h3>
                 <FiChevronRight size={28} className="text-[#808080]" />
               </div>
+              <p className="mt-1 text-[14px] font-medium tracking-[-0.28px] text-[#808080]">
+                대기번호 <span className="font-bold text-[#ff3d3d]">{response.waitingNumber}</span>
+                번
+              </p>
               <p className="mt-2.5 text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
                 현재 내 앞에
               </p>
               <div className="flex items-end gap-1">
                 <strong className="text-[28px] font-bold leading-[1.4] tracking-[-0.56px] text-[#ff3d3d]">
-                  {Math.max(tavern.waitTeams, 1)}
+                  {Math.max(response.currentWaitingTeams - 1, 0)}
                 </strong>
                 <span className="pb-1 text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
                   팀 대기중
@@ -73,9 +77,9 @@ export default function WaitingCompleteModal({ reservation, onClose }: WaitingCo
             </dl>
             <div className="my-4 h-px bg-[#e5e5e5]" />
             <p className="rounded-[8px] bg-[#f9f9f9] p-4 text-[14px] font-medium leading-[1.5] tracking-[-0.28px] text-[#808080]">
-              차례가 오면 전화를 걸어 알려드립니다.
+              차례가 오면 문자로 알려드립니다.
               <br />
-              전화를 받지 않을 시 예약이 취소될 수 있습니다.
+              10분 내 미방문 시 예약이 자동 취소됩니다.
             </p>
           </div>
         </section>

@@ -90,17 +90,25 @@ function TavernSimpleCard({ tavern, onSelect }: { tavern: Tavern; onSelect: () =
           자세히 보기
           <FiChevronRight size={24} />
         </span>
-        <span className="text-[14px] font-medium leading-[1.6] tracking-[-0.28px] text-[#808080]">
-          웨이팅
-        </span>
+        {tavern.waitingOpen && (
+          <span className="text-[14px] font-medium leading-[1.6] tracking-[-0.28px] text-[#808080]">
+            웨이팅
+          </span>
+        )}
       </div>
       <div className="flex w-full items-start justify-between gap-4 text-[16px] tracking-[-0.32px]">
         <strong className="min-w-0 truncate font-bold leading-[1.4] text-black">
           {tavern.name}
         </strong>
-        <span className="shrink-0 font-medium leading-[1.6] text-[#808080]">
-          <span className="text-[#ff3d3d]">{tavern.waitTeams}</span>팀
-        </span>
+        {tavern.waitingOpen ? (
+          <span className="shrink-0 font-medium leading-[1.6] text-[#808080]">
+            <span className="text-[#ff3d3d]">{tavern.waitTeams}</span>팀
+          </span>
+        ) : (
+          <span className="shrink-0 text-[14px] font-medium leading-[1.6] text-[#cccccc]">
+            현장 방문
+          </span>
+        )}
       </div>
     </button>
   );
