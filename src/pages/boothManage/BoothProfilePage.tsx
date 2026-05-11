@@ -88,7 +88,6 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
     if (field === 'name') payload.name = value.trim() || undefined;
     else if (field === 'description') payload.description = value.trim();
     else if (field === 'department') payload.department = value.trim();
-    else if (field === 'location') payload.location = value.trim();
     updateMutation.mutate(payload);
   };
 
@@ -159,19 +158,6 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
           onSave={() => saveField('description', editValue)}
           saving={updateMutation.isPending}
           multiline
-        />
-        <RowDivider />
-        <InlineRow
-          label="위치 안내"
-          value={booth.location ?? ''}
-          placeholder="예: IT대학 2호관 앞"
-          editing={editingField === 'location'}
-          editValue={editValue}
-          onEdit={() => startEdit('location', booth.location ?? '')}
-          onCancel={cancelEdit}
-          onChange={setEditValue}
-          onSave={() => saveField('location', editValue)}
-          saving={updateMutation.isPending}
         />
       </SectionCard>
 
