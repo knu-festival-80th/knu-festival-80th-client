@@ -13,6 +13,8 @@ export interface BoothListItem {
   menuBoardImageUrl: string | null;
   waitingOpen: boolean;
   currentWaitingTeams: number;
+  department: string | null;
+  location: string | null;
 }
 
 export interface BoothSummary {
@@ -24,6 +26,8 @@ export interface BoothSummary {
   likeCount: number;
   menuBoardImageUrl: string | null;
   waitingOpen: boolean;
+  department: string | null;
+  location: string | null;
 }
 
 export interface BoothCreateRequest {
@@ -33,6 +37,8 @@ export interface BoothCreateRequest {
   yRatio?: number;
   menuBoardImageUrl?: string;
   adminPassword: string;
+  department?: string;
+  location?: string;
 }
 
 export interface BoothUpdateRequest {
@@ -41,6 +47,8 @@ export interface BoothUpdateRequest {
   xRatio?: number;
   yRatio?: number;
   menuBoardImageUrl?: string;
+  department?: string;
+  location?: string;
 }
 
 export interface BoothPasswordChangeRequest {
