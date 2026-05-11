@@ -44,7 +44,7 @@ export default function TavernCard({
     <>
       <div>
         <p className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
-          {tavern.department} · {tavern.category}
+          {tavern.department}
         </p>
         <h3 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">{tavern.name}</h3>
       </div>

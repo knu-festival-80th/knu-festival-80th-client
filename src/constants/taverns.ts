@@ -19,7 +19,6 @@ export type Tavern = {
   id: string;
   boothId: number;
   department: string;
-  category: string;
   name: string;
   description: string;
   location: string;
@@ -40,7 +39,6 @@ export const taverns: Tavern[] = [
     id: 'itaewon-class',
     boothId: 1,
     department: '전자 E반',
-    category: '일식',
     name: 'E태원 클라쓰',
     description: '바삭한 야키소바와 시원한 하이볼을 준비했어요.',
     location: '공대 9호관 앞',
@@ -59,7 +57,6 @@ export const taverns: Tavern[] = [
     id: 'startup',
     boothId: 2,
     department: '컴퓨터학부',
-    category: '분식',
     name: 'Start-up',
     description: '떡볶이와 튀김, 간단한 안주를 빠르게 즐길 수 있어요.',
     location: 'IT대학 2호관 앞',
@@ -78,7 +75,6 @@ export const taverns: Tavern[] = [
     id: 'stationery',
     boothId: 3,
     department: '자율학부1',
-    category: '분식',
     name: '문방구 옆 분식집',
     description: '학교 앞 분식집 감성의 메뉴를 모았습니다.',
     location: '복현회관 잔디광장',
@@ -97,7 +93,6 @@ export const taverns: Tavern[] = [
     id: 'sim-mong',
     boothId: 4,
     department: '심리학과',
-    category: '중식',
     name: '심몽시공',
     description: '매콤한 중식 안주와 함께 축제 분위기를 즐겨보세요.',
     location: '사회과학대학 앞',
@@ -116,7 +111,6 @@ export const taverns: Tavern[] = [
     id: 'nursing-pub',
     boothId: 5,
     department: '간호대학',
-    category: '분식',
     name: '간호대에서 술먹자',
     description: '든든한 분식 메뉴와 논알콜 음료도 준비했습니다.',
     location: '간호대학 입구',
@@ -135,7 +129,6 @@ export const taverns: Tavern[] = [
     id: 'gosu-restaurant',
     boothId: 6,
     department: '고고학과',
-    category: '한식',
     name: '고스토랑',
     description: '따뜻한 국물 안주와 구이 메뉴를 준비했어요.',
     location: '글로벌플라자 앞',
@@ -154,7 +147,6 @@ export const taverns: Tavern[] = [
     id: 'hobanu-pocha',
     boothId: 7,
     department: '농업생명과학대학',
-    category: '포차',
     name: '호반우포차',
     description: '포차 감성의 안주와 음료를 가볍게 즐길 수 있어요.',
     location: '농대 운동장 앞',
@@ -173,7 +165,6 @@ export const taverns: Tavern[] = [
     id: 'come-eat',
     boothId: 8,
     department: '식품공학부',
-    category: '양식',
     name: '밥먹으러오세요',
     description: '든든한 식사 메뉴와 축제용 간식을 함께 판매합니다.',
     location: '학생주차장 옆',

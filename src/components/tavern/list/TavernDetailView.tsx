@@ -15,7 +15,7 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
         <div className="flex flex-col gap-4 pb-2.5">
           <div className="flex flex-col gap-1">
             <p className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
-              {tavern.department} · {tavern.category}
+              {tavern.department}
             </p>
             <h1 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">
               {tavern.name}
