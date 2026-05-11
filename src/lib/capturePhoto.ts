@@ -44,14 +44,9 @@ export function capturePhoto(
     const layoutW = overlayImg.offsetWidth * dpr;
     const layoutH = overlayImg.offsetHeight * dpr;
 
-    let centerX = (overlayScreenRect.left + overlayScreenRect.width / 2) * dpr;
+    const centerX = (overlayScreenRect.left + overlayScreenRect.width / 2) * dpr;
     const centerY = (overlayScreenRect.top + overlayScreenRect.height / 2) * dpr;
-    let drawMatrix = cssMatrix;
-
-    if (isFrontCamera) {
-      centerX = canvasW - centerX;
-      drawMatrix = new DOMMatrix('scaleX(-1)').multiply(cssMatrix);
-    }
+    const drawMatrix = cssMatrix;
 
     ctx.save();
     ctx.translate(centerX, centerY);
