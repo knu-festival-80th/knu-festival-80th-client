@@ -155,3 +155,17 @@ export async function cancelMyWaiting(waitingId: number, phoneLast4: string): Pr
   });
   unwrapVoidApiResponse(response.data);
 }
+
+export interface WaitingStatusResponse {
+  boothId: number;
+  waitingOpen: boolean;
+  currentWaitingTeams: number;
+  estimatedWaitMinutes: number;
+}
+
+export async function getBoothWaitingStatus(boothId: number): Promise<WaitingStatusResponse> {
+  const response = await http.get<ApiResponse<WaitingStatusResponse>>(
+    ENDPOINTS.booths.waitingStatus(boothId),
+  );
+  return unwrapApiResponse(response.data);
+}
