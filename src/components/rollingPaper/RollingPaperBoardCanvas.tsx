@@ -32,6 +32,41 @@ type RollingPaperBoardCanvasProps = {
   onFocusedNoteChange: (noteId: string | null) => void;
 };
 
+function logRollingPaperMeasure(measureName: string) {
+  if (!import.meta.env.DEV || typeof performance === 'undefined') {
+    return;
+  }
+
+  const measure = performance.getEntriesByName(measureName).at(-1);
+
+  if (!measure) {
+    return;
+  }
+
+  console.info(`[rolling-paper:performance] ${measureName}: ${measure.duration.toFixed(2)}ms`);
+}
+
+function getNoteScreenPosition(
+  note: PlacedRollingPaperNote,
+  viewport: BoardViewport,
+  pan: RollingPaperPan,
+  renderedScale: number,
+) {
+  const canvasX = (note.x / 100) * ROLLING_PAPER_CANVAS_DIMENSIONS.width;
+  const canvasY = (note.y / 100) * ROLLING_PAPER_CANVAS_DIMENSIONS.height;
+
+  return {
+    x:
+      viewport.width / 2 +
+      pan.x +
+      (canvasX - ROLLING_PAPER_CANVAS_DIMENSIONS.width / 2) * renderedScale,
+    y:
+      viewport.height / 2 +
+      pan.y +
+      (canvasY - ROLLING_PAPER_CANVAS_DIMENSIONS.height / 2) * renderedScale,
+  };
+}
+
 export default function RollingPaperBoardCanvas({
   variant,
   scale,
@@ -51,6 +86,13 @@ export default function RollingPaperBoardCanvas({
     scale,
     ROLLING_PAPER_BOARD_SCALE_MODE,
   );
+  const focusedNote = focusedNoteId
+    ? (boardNotes.find((note) => note.id === focusedNoteId) ?? null)
+    : null;
+  const focusedNotePosition = focusedNote
+    ? getNoteScreenPosition(focusedNote, viewport, pan, renderedScale)
+    : null;
+  const focusedNoteWidth = focusedNote ? ROLLING_PAPER_NOTE_WIDTH * renderedScale : 0;
   const frameRect = getRollingPaperFrameRect(variant);
   const frameImage = rollingPaperBoardFrames[variant] ?? rollingPaperBoardFrames[0];
   const { handlePointerDown, handlePointerMove, handlePointerRelease } =
@@ -96,6 +138,24 @@ export default function RollingPaperBoardCanvas({
   }, []);
 
   useEffect(() => {
+    if (!import.meta.env.DEV || boardNotes.length === 0 || typeof performance === 'undefined') {
+      return;
+    }
+
+    const startMark = `rolling-paper-render-start-${variant}-${boardNotes.length}`;
+    const endMark = `rolling-paper-render-end-${variant}-${boardNotes.length}`;
+    const measureName = `render-${boardNotes.length}-notes`;
+
+    performance.mark(startMark);
+
+    requestAnimationFrame(() => {
+      performance.mark(endMark);
+      performance.measure(measureName, startMark, endMark);
+      logRollingPaperMeasure(measureName);
+    });
+  }, [boardNotes.length, variant]);
+
+  useEffect(() => {
     const nextPan = clampRollingPaperPan(
       pan,
       viewport.width,
@@ -110,6 +170,14 @@ export default function RollingPaperBoardCanvas({
   }, [onPanChange, pan, scale, viewport.height, viewport.width]);
 
   const focusNote = (note: PlacedRollingPaperNote) => {
+    const startMark = `rolling-paper-focus-start-${note.id}`;
+    const endMark = `rolling-paper-focus-end-${note.id}`;
+    const measureName = `focus-${boardNotes.length}-notes`;
+
+    if (import.meta.env.DEV && typeof performance !== 'undefined') {
+      performance.mark(startMark);
+    }
+
     const focusScale = getRollingPaperNoteFocusScale(
       note.colorId,
       viewport.width,
@@ -127,6 +195,16 @@ export default function RollingPaperBoardCanvas({
     onScaleChange(focusScale);
     onPanChange(nextPan);
     onFocusedNoteChange(note.id);
+
+    if (import.meta.env.DEV && typeof performance !== 'undefined') {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          performance.mark(endMark);
+          performance.measure(measureName, startMark, endMark);
+          logRollingPaperMeasure(measureName);
+        });
+      });
+    }
   };
 
   return (
@@ -139,7 +217,7 @@ export default function RollingPaperBoardCanvas({
       onPointerUp={handlePointerRelease}
     >
       <div
-        className="absolute left-1/2 top-1/2 transition-transform duration-200"
+        className="absolute left-1/2 top-1/2 z-10 transition-transform duration-200"
         style={{
           width: `${viewport.width}px`,
           height: `${viewport.height}px`,
@@ -177,7 +255,9 @@ export default function RollingPaperBoardCanvas({
                 type="button"
                 aria-label={`포스트잇 보기: ${note.message}`}
                 className={`absolute block touch-manipulation border-0 bg-transparent p-0 text-left transition-[filter,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub-red/80 ${
-                  isFocused ? 'z-30' : 'z-20 hover:drop-shadow-[0_10px_14px_rgba(0,0,0,0.12)]'
+                  isFocused
+                    ? 'pointer-events-none z-30 opacity-0'
+                    : 'z-20 hover:drop-shadow-[0_10px_14px_rgba(0,0,0,0.12)]'
                 }`}
                 style={{
                   width: `${ROLLING_PAPER_NOTE_WIDTH}px`,
@@ -200,6 +280,25 @@ export default function RollingPaperBoardCanvas({
           })}
         </div>
       </div>
+
+      {focusedNote && focusedNotePosition && (
+        <div
+          className="pointer-events-none absolute z-20 transition-[left,top,width] duration-200 [container-type:inline-size]"
+          style={{
+            left: `${focusedNotePosition.x}px`,
+            top: `${focusedNotePosition.y}px`,
+            width: `${focusedNoteWidth}px`,
+            transform: 'translate(-50%, -50%)',
+          }}
+          aria-hidden="true"
+        >
+          <RollingPaperSticker
+            colorId={focusedNote.colorId}
+            message={focusedNote.message}
+            className="w-full"
+          />
+        </div>
+      )}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-28 bg-gradient-to-b from-white/95 to-white/0" />
     </div>
