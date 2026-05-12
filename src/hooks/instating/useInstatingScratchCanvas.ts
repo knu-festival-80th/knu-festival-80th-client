@@ -12,11 +12,11 @@ const getCanvasPos = (canvas: HTMLCanvasElement, clientX: number, clientY: numbe
   return { x: clientX - rect.left, y: clientY - rect.top };
 };
 
-interface UseInstaTingScratchCanvasOptions {
+interface UseInstatingScratchCanvasOptions {
   onRevealed?: () => void;
 }
 
-export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCanvasOptions = {}) {
+export function useInstatingScratchCanvas({ onRevealed }: UseInstatingScratchCanvasOptions = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const isDown = useRef(false);

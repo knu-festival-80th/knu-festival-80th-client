@@ -1,5 +1,5 @@
 import { useForm, useWatch } from 'react-hook-form';
-import InstaTingResultModal, { type MatchResult } from '../result/InstaTingResultModal';
+import InstatingResultModal, { type MatchResult } from '../result/InstaTingResultModal';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,7 +8,7 @@ type FormValues = {
   phone: string;
 };
 
-const InstaTingResultView = () => {
+const InstatingResultView = () => {
   const {
     register,
     handleSubmit,
@@ -36,7 +36,7 @@ const InstaTingResultView = () => {
 
   return (
     <>
-      {result && <InstaTingResultModal onClose={handleCloseResult} result={result} />}
+      {result && <InstatingResultModal onClose={handleCloseResult} result={result} />}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-7 bg-white px-5 py-6 min-h-[calc(100dvh-6.75rem)]"
@@ -94,4 +94,4 @@ const InstaTingResultView = () => {
   );
 };
 
-export default InstaTingResultView;
+export default InstatingResultView;
