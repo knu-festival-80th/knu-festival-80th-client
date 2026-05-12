@@ -15,7 +15,9 @@ export const HobanustagramExperience = () => {
   return (
     <>
       <HobanustagramTabBar activeTab={activeTab} onTabChange={setActiveTab} />
-      {activeTab === 'intro' && <IntroTab />}
+      {activeTab === 'intro' && (
+        <IntroTab onNavigateToPhotobooth={() => setActiveTab('photobooth')} />
+      )}
       {activeTab === 'photobooth' && <PhotoboothTab />}
     </>
   );

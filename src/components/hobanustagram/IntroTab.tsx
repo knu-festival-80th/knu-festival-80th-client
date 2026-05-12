@@ -6,7 +6,11 @@ import { FaqAccordion } from '@/components/common/FaqAccordion';
 import { GradientBanner } from '@/components/common/GradientBanner';
 import { hobanustagramFaqItems } from '@/constants/hobanustagram';
 
-export const IntroTab = () => {
+export interface IntroTabProps {
+  onNavigateToPhotobooth: () => void;
+}
+
+export const IntroTab = ({ onNavigateToPhotobooth }: IntroTabProps) => {
   return (
     <>
       <GradientBanner title="호반우스타그램" />
@@ -29,6 +33,7 @@ export const IntroTab = () => {
           <button
             type="button"
             className="flex w-fit items-center gap-1.5 rounded-full border border-ink py-2.5 pl-5 pr-3.5"
+            onClick={onNavigateToPhotobooth}
           >
             <span className="font-wanted-sans text-sm font-medium leading-none tracking-[-0.02em] text-ink">
               호반우 필터로 사진찍기
