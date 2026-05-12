@@ -1,6 +1,7 @@
 import { useForm, useWatch } from 'react-hook-form';
-import InstaTingResultModal, { type MatchResult } from '../InstaTingResultModal';
+import InstaTingResultModal, { type MatchResult } from '../result/InstaTingResultModal';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type FormValues = {
   instagramId: string;
@@ -20,6 +21,7 @@ const InstaTingResultView = () => {
   const isValid = !!instagramId && !!phone && !errors.instagramId && !errors.phone;
 
   const [result, setResult] = useState<MatchResult | null>(null);
+  const navigate = useNavigate();
 
   const onSubmit = () => {
     // TODO: API 연동 후 setResult({ matched: true, instagramId: '...' }) 또는 setResult({ matched: false })
@@ -27,9 +29,14 @@ const InstaTingResultView = () => {
     // setResult({ matched: false });
   };
 
+  const handleCloseResult = () => {
+    navigate('/instating');
+    setResult(null);
+  };
+
   return (
     <>
-      {result && <InstaTingResultModal onClose={() => setResult(null)} result={result} />}
+      {result && <InstaTingResultModal onClose={handleCloseResult} result={result} />}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-7 bg-white px-5 py-6 min-h-[calc(100dvh-6.75rem)]"

@@ -7,7 +7,7 @@ import step3Illust from '@/assets/instating/stepCard/step3_illust.svg';
 import step4Bg from '@/assets/instating/stepCard/step4_bg.png';
 import step4Illust from '@/assets/instating/stepCard/step4_illust.svg';
 import forwardArrowIcon from '@/assets/instating/icon/forwardArrowIcon.svg';
-import OutlineButton from './OutlineButton';
+import OutlineButton from '../OutlineButton';
 import ProcessCard from './ProcessCard';
 import { useNavigate } from 'react-router-dom';
 

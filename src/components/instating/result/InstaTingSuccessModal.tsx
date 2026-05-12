@@ -2,8 +2,8 @@ import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import CountDownTimer from './CountDownTimer';
-import { REVEAL_DEADLINE } from '../../constants/instaTingDeadline';
+import CountDownTimer from '../intro/CountDownTimer';
+import { REVEAL_DEADLINE } from '../../../constants/instaTingDeadline';
 
 export type SubmittedData = {
   gender: 'male' | 'female';
