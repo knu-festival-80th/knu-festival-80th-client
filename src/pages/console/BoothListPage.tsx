@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { ApiClientError, boothApi } from '@/apis';
 import type { BoothListItem, BoothSort } from '@/apis';
-import { Button, Card } from '@/components/admin/ui';
+import { Button, Card, OverflowMenu } from '@/components/admin/ui';
 
 export default function BoothListPage() {
   const navigate = useNavigate();
@@ -222,15 +222,21 @@ function BoothRow({ booth, even, isPending, onEdit, onChangePassword, onDelete }
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 px-4 py-3 sm:hidden">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="tabular text-xs text-[var(--admin-text-faint)]">{idLabel}</span>
-            <span className="text-sm font-medium text-[var(--admin-text)]">{booth.name}</span>
-          </div>
+      <div className="flex flex-col gap-2 px-3 py-2.5 sm:hidden">
+        <div className="flex items-center gap-2">
+          <span className="tabular shrink-0 text-[11px] text-[var(--admin-text-faint)]">
+            {idLabel}
+          </span>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="min-w-0 flex-1 truncate text-left text-[14px] font-semibold text-[var(--admin-text)]"
+          >
+            {booth.name}
+          </button>
           <span
             className={[
-              'rounded-full px-2 py-0.5 text-xs font-medium',
+              'shrink-0 rounded-full px-1.5 py-0.5 text-[11px] font-medium',
               open
                 ? 'bg-[var(--admin-success-soft)] text-[var(--admin-success)]'
                 : 'bg-[var(--admin-surface-hover)] text-[var(--admin-text-muted)]',
@@ -238,35 +244,26 @@ function BoothRow({ booth, even, isPending, onEdit, onChangePassword, onDelete }
           >
             {open ? '접수중' : '중단'}
           </span>
+          <OverflowMenu
+            items={[
+              { label: '수정', onClick: onEdit },
+              { label: '비밀번호 변경', onClick: onChangePassword },
+              { label: '삭제', onClick: onDelete, danger: true, disabled: isPending },
+            ]}
+          />
         </div>
-        {booth.description && (
-          <p className="line-clamp-1 text-xs text-[var(--admin-text-muted)]">{booth.description}</p>
-        )}
-        <div className="flex items-center gap-4 text-xs text-[var(--admin-text-muted)]">
+        <div className="flex items-center gap-3 pl-7 text-[11px] text-[var(--admin-text-muted)]">
           <span className="tabular">
-            좋아요 <strong className="text-[var(--admin-text)]">{booth.likeCount}</strong>
+            ♥ <strong className="text-[var(--admin-text)]">{booth.likeCount}</strong>
           </span>
           <span className="tabular">
             대기 <strong className="text-[var(--admin-text)]">{booth.currentWaitingTeams}</strong>팀
           </span>
-        </div>
-        <div className="flex items-center gap-2 border-t border-[var(--admin-border)] pt-2">
-          <Button variant="secondary" size="sm" onClick={onEdit}>
-            수정
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onChangePassword}>
-            비번
-          </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={onDelete}
-            disabled={isPending}
-            iconLeft={<Trash2 size={13} />}
-            className="ml-auto"
-          >
-            삭제
-          </Button>
+          {booth.description && (
+            <span className="line-clamp-1 min-w-0 flex-1 text-[var(--admin-text-faint)]">
+              {booth.description}
+            </span>
+          )}
         </div>
       </div>
     </li>
