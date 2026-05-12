@@ -1,5 +1,5 @@
 import { useForm, useWatch } from 'react-hook-form';
-import InstatingResultModal, { type MatchResult } from '../result/InstaTingResultModal';
+import InstatingResultModal, { type MatchResult } from '../result/InstatingResultModal';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 

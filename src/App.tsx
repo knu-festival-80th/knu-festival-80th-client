@@ -24,10 +24,10 @@ import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import StampTourPage from './pages/stampTour/StampTourPage';
 import StampBoothListPage from './pages/stampTour/StampBoothListPage';
-import InstatingPage from './pages/InstaTingPage';
-import InstatingIntroView from './components/instating/views/InstaTingIntroView';
-import InstatingApplyView from './components/instating/views/InstaTingApplyView';
-import InstatingResultView from './components/instating/views/InstaTingResultView';
+import InstatingPage from './pages/InstatingPage';
+import InstatingIntroView from './components/instating/views/InstatingIntroView';
+import InstatingApplyView from './components/instating/views/InstatingApplyView';
+import InstatingResultView from './components/instating/views/InstatingResultView';
 
 export default function App() {
   return (
