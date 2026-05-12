@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { getRollingPaperPerformanceNotesFromSearch } from '@/mocks/rollingPaperPerformance';
 import {
   ROLLING_PAPER_MAX_NOTES_PER_BOARD,
   ROLLING_PAPER_ZOOM,
@@ -16,10 +17,18 @@ import RollingPaperZoomControls from './RollingPaperZoomControls';
 
 const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
 
+function getInitialPlacedNotes() {
+  if (!import.meta.env.DEV || typeof window === 'undefined') {
+    return [];
+  }
+
+  return getRollingPaperPerformanceNotesFromSearch(window.location.search);
+}
+
 export default function RollingPaperBoard() {
   const [boardIndex, setBoardIndex] = useState(0);
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
-  const [placedNotes, setPlacedNotes] = useState<PlacedRollingPaperNote[]>([]);
+  const [placedNotes, setPlacedNotes] = useState<PlacedRollingPaperNote[]>(getInitialPlacedNotes);
   const [boardScale, setBoardScale] = useState<number>(ROLLING_PAPER_ZOOM.default);
   const [boardPan, setBoardPan] = useState<RollingPaperPan>(INITIAL_BOARD_PAN);
   const [focusedNoteId, setFocusedNoteId] = useState<string | null>(null);
@@ -97,9 +106,6 @@ export default function RollingPaperBoard() {
               <p className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
                 <span className="text-sub-red">{boardIndex + 1}</span>/
                 {rollingPaperBoardFrames.length}
-              </p>
-              <p className="font-wanted-sans text-[13px] font-medium leading-none tracking-[-0.02em] text-gray">
-                포스트잇 {currentBoardNotes.length}/{ROLLING_PAPER_MAX_NOTES_PER_BOARD}
               </p>
             </div>
             <button

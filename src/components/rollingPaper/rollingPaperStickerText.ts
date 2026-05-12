@@ -25,7 +25,7 @@ type RollingPaperStickerTextConfig = {
 
 const FIGMA_MODAL_FONT_SIZE_PX = 11;
 const STICKER_TEXT_LINE_HEIGHT = 1.5;
-const BOARD_TEXT_FONT_SIZE_CQW = 3.57;
+const BOARD_TEXT_FONT_SIZE_CQW = 5.7;
 
 export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
   RollingPaperStickerColorId,
@@ -182,7 +182,7 @@ export function getRollingPaperStickerTextStyle(
   void colorId;
 
   return {
-    fontSize: `clamp(1.79px, ${BOARD_TEXT_FONT_SIZE_CQW}cqw, 12px)`,
+    fontSize: `clamp(2.8px, ${BOARD_TEXT_FONT_SIZE_CQW}cqw, 14px)`,
     letterSpacing: '-0.03em',
     lineHeight: String(STICKER_TEXT_LINE_HEIGHT),
   };

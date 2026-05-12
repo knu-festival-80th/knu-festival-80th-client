@@ -37,9 +37,9 @@ const BOARD_PADDING_PX = {
   left: 14,
 } as const;
 
-const COLLISION_SCALE = 0.72;
+const COLLISION_SCALE = 0.4;
 const SEARCH_STEP_PX = 8;
-const SEARCH_ANGLE_STEP = 30;
+const SEARCH_ANGLE_STEP = 15;
 const FRAME_VARIANT_OFFSETS = [
   { x: 0, y: 0 },
   { x: 0, y: 0 },
@@ -75,8 +75,8 @@ export const ROLLING_PAPER_FRAME_DIMENSIONS = {
   blockedPadding: 26,
 } as const;
 
-export const ROLLING_PAPER_NOTE_WIDTH = 50;
-export const ROLLING_PAPER_MAX_NOTES_PER_BOARD = 50;
+export const ROLLING_PAPER_NOTE_WIDTH = 80;
+export const ROLLING_PAPER_MAX_NOTES_PER_BOARD = 100;
 export const ROLLING_PAPER_ZOOM = {
   min: 0.7,
   max: 12,

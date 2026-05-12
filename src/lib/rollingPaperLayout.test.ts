@@ -80,7 +80,7 @@ describe('rollingPaperLayout', () => {
     expect(isRollingPaperPlacementAvailable(resolvedPlacement!, 'red', [], 0)).toBe(true);
   });
 
-  it('can place up to 50 notes on one board with the blocked frame area', () => {
+  it('can place up to the max notes on one board with the blocked frame area', () => {
     const notes: PlacedRollingPaperNote[] = [];
 
     for (let index = 0; index < ROLLING_PAPER_MAX_NOTES_PER_BOARD; index += 1) {
@@ -221,12 +221,23 @@ describe('rollingPaperLayout', () => {
       greenFocusScale,
       'cover',
     );
+    const redRenderedScale = getRollingPaperRenderedScale(
+      ROLLING_PAPER_BOARD_VIEWPORT.width,
+      ROLLING_PAPER_BOARD_VIEWPORT.height,
+      redFocusScale,
+      'cover',
+    );
     const greenNoteSize = getRollingPaperNoteSize('green');
+    const redNoteSize = getRollingPaperNoteSize('red');
 
     expect(greenFocusScale).toBeLessThan(ROLLING_PAPER_NOTE_FOCUS_ZOOM);
-    expect(redFocusScale).toBe(ROLLING_PAPER_NOTE_FOCUS_ZOOM);
+    expect(greenFocusScale).toBeLessThan(redFocusScale);
+    expect(redFocusScale).toBeLessThanOrEqual(ROLLING_PAPER_NOTE_FOCUS_ZOOM);
     expect(greenNoteSize.height * greenRenderedScale).toBeLessThanOrEqual(
       ROLLING_PAPER_BOARD_VIEWPORT.height * 0.74 + 1,
+    );
+    expect(redNoteSize.width * redRenderedScale).toBeLessThanOrEqual(
+      ROLLING_PAPER_BOARD_VIEWPORT.width * 0.86 + 1,
     );
   });
 
