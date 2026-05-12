@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import InstaTingSuccessModal, {
   type SubmittedData,
-} from '@/components/instating/InstaTingSuccessModal';
+} from '@/components/instating/result/InstaTingSuccessModal';
 
 type FormValues = {
   gender: 'male' | 'female';
