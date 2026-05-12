@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ImagePlus } from 'lucide-react';
+import { Download, ImagePlus, RotateCcw } from 'lucide-react';
 
 import { capturePhoto } from '@/lib/capturePhoto';
 import { CHARACTER_LIST } from '@/constants/hobanustagram';
@@ -129,29 +129,39 @@ export const PhotoboothTab = () => {
           <div className="flex flex-col gap-6">
             <div className="flex flex-col items-center gap-2.5">
               <p className="font-wanted-sans text-2xl font-bold leading-none tracking-[-0.48px] text-black">
-                완성된 사진이에요
+                완성!🎉
               </p>
               <p className="font-wanted-sans text-base font-normal leading-none tracking-[-0.32px] text-gray">
-                다운로드하거나 다시 찍어보세요
+                저장하거나 다시 찍어보세요!
               </p>
             </div>
 
             <img src={capturedDataUrl} alt="완성된 사진" className="w-full rounded-xl" />
 
-            <div className="flex gap-3">
+            <div className="flex justify-between">
               <button
                 type="button"
                 onClick={handleRestartFromResult}
-                className="flex-1 rounded-xl border border-border py-4 font-wanted-sans text-base font-medium text-[#333]"
+                className="flex flex-col items-center gap-2"
               >
-                다시 찍기
+                <div className="flex size-20 items-center justify-center rounded-full bg-[#EEEEEE]">
+                  <RotateCcw className="size-9 text-[#333]" />
+                </div>
+                <span className="font-wanted-sans text-sm font-medium text-[#808080]">
+                  다시 찍기
+                </span>
               </button>
               <a
                 href={capturedDataUrl}
                 download="hobanu-photo.png"
-                className="flex flex-1 items-center justify-center rounded-xl bg-sub-red py-4 font-wanted-sans text-base font-medium text-white"
+                className="flex flex-col items-center gap-2"
               >
-                다운로드
+                <div className="flex size-20 items-center justify-center rounded-full bg-[#EEEEEE]">
+                  <Download className="size-9 text-[#333]" />
+                </div>
+                <span className="font-wanted-sans text-sm font-medium text-[#808080]">
+                  기기에 저장
+                </span>
               </a>
             </div>
           </div>
