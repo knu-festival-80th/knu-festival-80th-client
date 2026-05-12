@@ -17,6 +17,7 @@ import BoothPasswordPage from '@/pages/console/BoothPasswordPage';
 import ConsoleLoginPage from '@/pages/console/ConsoleLoginPage';
 import CongratVideoPage from '@/pages/CongratVideoPage';
 import GoodsPage from '@/pages/GoodsPage';
+import HobanustagramPage from '@/pages/HobanustagramPage';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import TavernDetailPage from '@/pages/TavernDetailPage';
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="/goods" element={<GoodsPage />} />
           <Route path="/stamptour" element={<StampTourPage />} />
           <Route path="/stamptour/booths" element={<StampBoothListPage />} />
+          <Route path="/hobanustagram" element={<HobanustagramPage />} />
           <Route path="/instating" element={<InstatingPage />}>
             <Route index element={<InstatingIntroView />} />
             <Route path="apply" element={<InstatingApplyView />} />
