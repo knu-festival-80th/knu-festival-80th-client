@@ -5,30 +5,13 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ApiClientError, boothApi, imageUrlToPath } from '@/apis';
 import type { BoothListItem, BoothUpdateRequest } from '@/apis';
-import {
-  Button,
-  Card,
-  Field,
-  ImageUploadField,
-  Input,
-  MapLocationPicker,
-  Textarea,
-} from '@/components/admin/ui';
+import { Button } from '@/components/admin/ui';
 
-interface FormState {
-  name: string;
-  description: string;
-  department: string;
-  location: string;
-  xRatio: number | null;
-  yRatio: number | null;
-  menuBoardImageUrl: string;
-}
+import BoothFormFields, { type BoothFormState } from './booths/BoothFormFields';
 
-function toFormState(booth: BoothListItem): FormState {
+function toFormState(booth: BoothListItem): BoothFormState {
   return {
     name: booth.name,
-    description: booth.description ?? '',
     department: booth.department ?? '',
     location: booth.location ?? '',
     xRatio: booth.xRatio ?? null,
@@ -104,13 +87,13 @@ export default function BoothEditPage() {
 
 interface BoothEditFormProps {
   boothId: number;
-  initial: FormState;
+  initial: BoothFormState;
 }
 
 function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<FormState>(initial);
+  const [form, setForm] = useState<BoothFormState>(initial);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const updateMutation = useMutation({
@@ -124,11 +107,9 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
     },
   });
 
-  const handleChange =
-    (key: 'name' | 'description' | 'department' | 'location' | 'menuBoardImageUrl') =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev) => ({ ...prev, [key]: event.target.value }));
-    };
+  const updateForm = (patch: Partial<BoothFormState>) => {
+    setForm((prev) => ({ ...prev, ...patch }));
+  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -136,7 +117,6 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
 
     updateMutation.mutate({
       name: form.name.trim() || undefined,
-      description: form.description.trim() || undefined,
       xRatio: form.xRatio ?? undefined,
       yRatio: form.yRatio ?? undefined,
       menuBoardImageUrl: form.menuBoardImageUrl.trim() || undefined,
@@ -148,68 +128,7 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="flex flex-col gap-4">
-        <Card padding="md">
-          <h2 className="mb-4 text-base font-semibold text-[var(--admin-text)]">기본 정보</h2>
-          <div className="flex flex-col gap-4">
-            <Field label="부스 이름" htmlFor="booth-name">
-              <Input
-                id="booth-name"
-                type="text"
-                value={form.name}
-                onChange={handleChange('name')}
-                maxLength={100}
-              />
-            </Field>
-
-            <Field label="학과/단체" htmlFor="booth-department">
-              <Input
-                id="booth-department"
-                type="text"
-                value={form.department}
-                onChange={handleChange('department')}
-                maxLength={100}
-                placeholder="예: 컴퓨터학부"
-              />
-            </Field>
-
-            <Field label="설명" htmlFor="booth-description">
-              <Textarea
-                id="booth-description"
-                value={form.description}
-                onChange={handleChange('description')}
-              />
-            </Field>
-
-            <Field label="위치" htmlFor="booth-location">
-              <Input
-                id="booth-location"
-                type="text"
-                value={form.location}
-                onChange={handleChange('location')}
-                maxLength={200}
-                placeholder="예: IT대학 2호관 앞"
-              />
-            </Field>
-
-            <ImageUploadField
-              label="메뉴판 이미지"
-              hint="부스당 1장"
-              value={form.menuBoardImageUrl}
-              onChange={(next) => setForm((prev) => ({ ...prev, menuBoardImageUrl: next }))}
-              emptyMessage="메뉴판 사진을 업로드하세요."
-              previewClassName="max-h-72 w-full max-w-sm object-contain"
-            />
-          </div>
-        </Card>
-
-        <Card padding="md">
-          <h2 className="mb-4 text-base font-semibold text-[var(--admin-text)]">지도 위치</h2>
-          <MapLocationPicker
-            xRatio={form.xRatio}
-            yRatio={form.yRatio}
-            onChange={(x, y) => setForm((prev) => ({ ...prev, xRatio: x, yRatio: y }))}
-          />
-        </Card>
+        <BoothFormFields form={form} onChange={updateForm} />
       </div>
 
       {errorMessage && (

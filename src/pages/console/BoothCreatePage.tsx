@@ -4,42 +4,24 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { ApiClientError, boothApi } from '@/apis';
-import {
-  Button,
-  Card,
-  Field,
-  ImageUploadField,
-  Input,
-  MapLocationPicker,
-  Textarea,
-} from '@/components/admin/ui';
+import { Button, Card, Field, Input } from '@/components/admin/ui';
 
-interface FormState {
-  name: string;
-  description: string;
-  department: string;
-  location: string;
-  xRatio: number | null;
-  yRatio: number | null;
-  menuBoardImageUrl: string;
-  adminPassword: string;
-}
+import BoothFormFields, { type BoothFormState } from './booths/BoothFormFields';
 
-const INITIAL_STATE: FormState = {
+const INITIAL_FORM: BoothFormState = {
   name: '',
-  description: '',
   department: '',
   location: '',
   xRatio: null,
   yRatio: null,
   menuBoardImageUrl: '',
-  adminPassword: '',
 };
 
 export default function BoothCreatePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<FormState>(INITIAL_STATE);
+  const [form, setForm] = useState<BoothFormState>(INITIAL_FORM);
+  const [adminPassword, setAdminPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const createMutation = useMutation({
@@ -55,19 +37,9 @@ export default function BoothCreatePage() {
     },
   });
 
-  const handleChange =
-    (
-      key:
-        | 'name'
-        | 'description'
-        | 'department'
-        | 'location'
-        | 'menuBoardImageUrl'
-        | 'adminPassword',
-    ) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev) => ({ ...prev, [key]: event.target.value }));
-    };
+  const updateForm = (patch: Partial<BoothFormState>) => {
+    setForm((prev) => ({ ...prev, ...patch }));
+  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -77,18 +49,17 @@ export default function BoothCreatePage() {
       setErrorMessage('부스 이름은 필수입니다.');
       return;
     }
-    if (!form.adminPassword.trim()) {
+    if (!adminPassword.trim()) {
       setErrorMessage('관리 비밀번호는 필수입니다.');
       return;
     }
 
     createMutation.mutate({
       name: form.name.trim(),
-      description: form.description.trim() || undefined,
       xRatio: form.xRatio ?? undefined,
       yRatio: form.yRatio ?? undefined,
       menuBoardImageUrl: form.menuBoardImageUrl.trim() || undefined,
-      adminPassword: form.adminPassword,
+      adminPassword,
       department: form.department.trim() || undefined,
       location: form.location.trim() || undefined,
     });
@@ -116,71 +87,7 @@ export default function BoothCreatePage() {
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="flex flex-col gap-4">
-          <Card padding="md">
-            <h2 className="mb-4 text-base font-semibold text-[var(--admin-text)]">기본 정보</h2>
-            <div className="flex flex-col gap-4">
-              <Field label="부스 이름" required htmlFor="booth-name">
-                <Input
-                  id="booth-name"
-                  type="text"
-                  value={form.name}
-                  onChange={handleChange('name')}
-                  maxLength={100}
-                  required
-                  placeholder="예: 컴퓨터학부 주막"
-                />
-              </Field>
-
-              <Field label="학과/단체" htmlFor="booth-department">
-                <Input
-                  id="booth-department"
-                  type="text"
-                  value={form.department}
-                  onChange={handleChange('department')}
-                  maxLength={100}
-                  placeholder="예: 컴퓨터학부"
-                />
-              </Field>
-
-              <Field label="설명" htmlFor="booth-description">
-                <Textarea
-                  id="booth-description"
-                  value={form.description}
-                  onChange={handleChange('description')}
-                  placeholder="부스 소개 문구"
-                />
-              </Field>
-
-              <Field label="위치" htmlFor="booth-location">
-                <Input
-                  id="booth-location"
-                  type="text"
-                  value={form.location}
-                  onChange={handleChange('location')}
-                  maxLength={200}
-                  placeholder="예: IT대학 2호관 앞"
-                />
-              </Field>
-
-              <ImageUploadField
-                label="메뉴판 이미지"
-                hint="부스당 1장"
-                value={form.menuBoardImageUrl}
-                onChange={(next) => setForm((prev) => ({ ...prev, menuBoardImageUrl: next }))}
-                emptyMessage="메뉴판 사진을 업로드하세요."
-                previewClassName="max-h-72 w-full max-w-sm object-contain"
-              />
-            </div>
-          </Card>
-
-          <Card padding="md">
-            <h2 className="mb-4 text-base font-semibold text-[var(--admin-text)]">지도 위치</h2>
-            <MapLocationPicker
-              xRatio={form.xRatio}
-              yRatio={form.yRatio}
-              onChange={(x, y) => setForm((prev) => ({ ...prev, xRatio: x, yRatio: y }))}
-            />
-          </Card>
+          <BoothFormFields form={form} onChange={updateForm} nameRequired />
 
           <Card padding="md">
             <h2 className="mb-4 text-base font-semibold text-[var(--admin-text)]">운영진 인증</h2>
@@ -193,8 +100,8 @@ export default function BoothCreatePage() {
               <Input
                 id="booth-password"
                 type="password"
-                value={form.adminPassword}
-                onChange={handleChange('adminPassword')}
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
                 autoComplete="new-password"
                 required
                 placeholder="..........."

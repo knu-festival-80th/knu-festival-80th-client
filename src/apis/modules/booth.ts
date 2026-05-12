@@ -6,7 +6,6 @@ export type BoothSort = 'likes' | 'waiting-asc';
 export interface BoothListItem {
   boothId: number;
   name: string;
-  description: string;
   xRatio: number | null;
   yRatio: number | null;
   likeCount: number;
@@ -20,7 +19,6 @@ export interface BoothListItem {
 export interface BoothSummary {
   boothId: number;
   name: string;
-  description: string;
   xRatio: number | null;
   yRatio: number | null;
   likeCount: number;
@@ -32,7 +30,6 @@ export interface BoothSummary {
 
 export interface BoothCreateRequest {
   name: string;
-  description?: string;
   xRatio?: number;
   yRatio?: number;
   menuBoardImageUrl?: string;
@@ -43,7 +40,6 @@ export interface BoothCreateRequest {
 
 export interface BoothUpdateRequest {
   name?: string;
-  description?: string;
   xRatio?: number;
   yRatio?: number;
   menuBoardImageUrl?: string;

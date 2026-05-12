@@ -14,7 +14,6 @@ export type Tavern = {
   boothId: number;
   department: string;
   name: string;
-  description: string;
   location: string;
   waitTeams: number;
   waitingOpen: boolean;
@@ -30,7 +29,6 @@ export function boothToTavern(booth: BoothListItem): Tavern {
     boothId: booth.boothId,
     department: booth.department ?? '',
     name: booth.name,
-    description: booth.description ?? '',
     location: booth.location ?? '',
     waitTeams: booth.currentWaitingTeams,
     waitingOpen: booth.waitingOpen,

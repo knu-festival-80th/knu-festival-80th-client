@@ -35,9 +35,6 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
             <h1 className="text-[24px] font-bold leading-[1.4] tracking-[-0.48px]">
               {tavern.name}
             </h1>
-            <p className="text-[16px] font-medium leading-[1.6] tracking-[-0.32px] text-[#808080]">
-              {tavern.description}
-            </p>
           </div>
           {tavern.waitingOpen && (
             <TavernMetric label="웨이팅" value={tavern.waitTeams} suffix="팀 대기중" />
