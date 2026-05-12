@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import InstaTingSuccessModal, {
-  type SubmittedData,
-} from '@/components/instating/result/InstaTingSuccessModal';
+import type { SubmittedData } from '../result/InstatingSuccessModal';
+import InstatingSuccessModal from '../result/InstatingSuccessModal';
 
 type FormValues = {
   gender: 'male' | 'female';
@@ -11,7 +10,7 @@ type FormValues = {
   ageConfirm: boolean;
 };
 
-const InstaTingApplyView = () => {
+const InstatingApplyView = () => {
   const [submittedData, setSubmittedData] = useState<SubmittedData | null>(null);
 
   const {
@@ -32,7 +31,7 @@ const InstaTingApplyView = () => {
   return (
     <>
       {submittedData && (
-        <InstaTingSuccessModal data={submittedData} onClose={() => setSubmittedData(null)} />
+        <InstatingSuccessModal data={submittedData} onClose={() => setSubmittedData(null)} />
       )}
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -177,4 +176,4 @@ const InstaTingApplyView = () => {
   );
 };
 
-export default InstaTingApplyView;
+export default InstatingApplyView;

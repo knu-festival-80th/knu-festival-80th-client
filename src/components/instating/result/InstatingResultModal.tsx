@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useInstaTingScratchCanvas } from '@/hooks/instating/useInstaTingScratchCanvas';
-import closeIcon from '@/assets/instaTing/icon/closeIcon.svg';
+// import { useInstatingScratchCanvas } from '@/hooks/instating/useInstatingScratchCanvas';
+import closeIcon from '@/assets/instating/icon/closeIcon.svg';
 import ScratchCard from './ScratchCard';
 import ResultCard from './ResultCard';
 import FailureCard from './FailureCard';
+import { useInstatingScratchCanvas } from '@/hooks/instating/useInstatingScratchCanvas';
 
 export type MatchResult = { matched: true; instagramId: string } | { matched: false };
 
@@ -18,13 +19,13 @@ const PHASE_CONFIG: Record<Phase, { subtitle: string; bgColor: string }> = {
   failure: { subtitle: '이번엔 아쉽게도...', bgColor: '#fff6f7' },
 };
 
-interface InstaTingResultModalProps {
+interface InstatingResultModalProps {
   onClose: () => void;
   result: MatchResult;
 }
 
-const InstaTingResultModal = ({ onClose, result }: InstaTingResultModalProps) => {
-  const { canvasRef, revealed, handlers } = useInstaTingScratchCanvas();
+const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) => {
+  const { canvasRef, revealed, handlers } = useInstatingScratchCanvas();
   const [hasStartedScratching, setHasStartedScratching] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -139,4 +140,4 @@ const InstaTingResultModal = ({ onClose, result }: InstaTingResultModalProps) =>
   );
 };
 
-export default InstaTingResultModal;
+export default InstatingResultModal;

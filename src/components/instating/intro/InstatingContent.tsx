@@ -42,7 +42,7 @@ const steps = [
   },
 ];
 
-const InstaTingContent = () => {
+const InstatingContent = () => {
   const navigate = useNavigate();
   const goApplyPage = () => navigate('/instating/apply');
   const goResultPage = () => navigate('/instating/result');
@@ -95,4 +95,4 @@ const InstaTingContent = () => {
   );
 };
 
-export default InstaTingContent;
+export default InstatingContent;
