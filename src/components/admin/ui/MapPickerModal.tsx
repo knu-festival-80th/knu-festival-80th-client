@@ -1,5 +1,6 @@
 import { Minus, Plus, RotateCcw, X } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FiMapPin } from 'react-icons/fi';
 
 import tavernMapImage from '@/assets/images/tavern-map.svg';
@@ -164,7 +165,7 @@ function MapPickerModalInner({ initialX, initialY, onConfirm, onClose }: MapPick
   const pinLeft = pin ? tx + pin.x * size.w * scale : 0;
   const pinTop = pin ? ty + pin.y * size.h * scale : 0;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex flex-col bg-black/85 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
       <header className="flex shrink-0 items-center justify-between px-4 py-3 text-white">
         <button
@@ -259,6 +260,7 @@ function MapPickerModalInner({ initialX, initialY, onConfirm, onClose }: MapPick
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { History, Plus, Power, PowerOff } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import { ApiClientError, boothApi, waitingApi } from '@/apis';
 import type { WaitingItem } from '@/apis';
@@ -12,6 +11,7 @@ import KanbanBoard from './waiting/KanbanBoard';
 import PastRecordsSheet from './waiting/PastRecordsSheet';
 import { useWaitingActions } from './waiting/useWaitingActions';
 import type { WaitingActionType } from './waiting/WaitingCard';
+import WaitingInsertSheet from './waiting/WaitingInsertSheet';
 
 interface ConfirmState {
   type: 'call' | 'cancel' | 'skip';
@@ -45,6 +45,7 @@ export default function WaitingListPage() {
 
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const [pastOpen, setPastOpen] = useState(false);
+  const [insertOpen, setInsertOpen] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const showToast = useCallback((type: 'success' | 'error', message: string) => {
@@ -157,13 +158,14 @@ export default function WaitingListPage() {
           </button>
         )}
         <div className="ml-auto flex items-center gap-1">
-          <Link
-            to="/booth/manage/waitings/insert"
+          <button
+            type="button"
+            onClick={() => setInsertOpen(true)}
             className="flex h-9 items-center gap-1 rounded-lg bg-[var(--admin-surface)] px-3 text-[13px] font-semibold text-[var(--admin-text)] ring-1 ring-[var(--admin-border)] hover:bg-[var(--admin-surface-hover)]"
           >
             <Plus size={14} />
             중간 삽입
-          </Link>
+          </button>
           <button
             type="button"
             onClick={() => setPastOpen(true)}
@@ -212,6 +214,15 @@ export default function WaitingListPage() {
       )}
 
       <PastRecordsSheet open={pastOpen} onClose={() => setPastOpen(false)} waitings={allWaitings} />
+
+      <WaitingInsertSheet
+        open={insertOpen}
+        onClose={() => setInsertOpen(false)}
+        boothId={boothId}
+        waitings={allWaitings}
+        onSuccess={(msg) => showToast('success', msg)}
+        onError={(msg) => showToast('error', msg)}
+      />
 
       <BottomSheet
         open={confirm !== null}
