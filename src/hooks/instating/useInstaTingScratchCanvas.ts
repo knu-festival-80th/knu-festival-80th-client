@@ -108,7 +108,10 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
       if (isDown.current) return;
 
       const ctx = ctxRef.current;
-      if (!ctx) return;
+      if (!ctx) {
+        hintRafRef.current = requestAnimationFrame(animateHint);
+        return;
+      }
 
       const dpr = window.devicePixelRatio || 1;
       const w = canvas.width / dpr;
