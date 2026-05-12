@@ -2,6 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const BRUSH_RADIUS = 28;
 const REVEAL_THRESHOLD = 0.55;
+const HINT_STEPS = 120;
+const HINT_BRUSH = 13;
+const HINT_PAUSE = 30; // ~0.5s
+const FILL_SPEED = 2;
 
 const getCanvasPos = (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
   const rect = canvas.getBoundingClientRect();
@@ -14,13 +18,14 @@ interface UseInstaTingScratchCanvasOptions {
 
 export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCanvasOptions = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const isDown = useRef(false);
   const rafRef = useRef<number>(0);
   const hintRafRef = useRef<number>(0);
   const [revealed, setRevealed] = useState(false);
 
   const drawOverlay = useCallback((canvas: HTMLCanvasElement) => {
-    const ctx = canvas.getContext('2d');
+    const ctx = ctxRef.current;
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
@@ -72,8 +77,8 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
       const dpr = window.devicePixelRatio || 1;
       canvas.width = Math.floor(rect.width * dpr);
       canvas.height = Math.floor(rect.height * dpr);
-      const ctx = canvas.getContext('2d')!;
-      ctx.scale(dpr, dpr);
+      ctxRef.current = canvas.getContext('2d');
+      ctxRef.current?.scale(dpr, dpr);
       drawOverlay(canvas);
     };
 
@@ -81,10 +86,6 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
     ro.observe(canvas);
 
     // 하트 경로 힌트 애니메이션
-    const HINT_STEPS = 120;
-    const HINT_BRUSH = 13;
-    const HINT_PAUSE = 30; // ~0.5s
-
     const heartPoint = (t: number, w: number, h: number) => {
       // 하트 공식 x: ±16, y: -17~12 → scale은 카드 너비 기준으로 작게 설정
       const scale = w * 0.017; // scale=4.5 수준 (하트 너비 ~144px)
@@ -98,8 +99,6 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
       };
     };
 
-    const FILL_SPEED = 2;
-
     let step = 0;
     let pauseFrames = 0;
     let fillStep = 0;
@@ -108,7 +107,7 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
     const animateHint = () => {
       if (isDown.current) return;
 
-      const ctx = canvas.getContext('2d');
+      const ctx = ctxRef.current;
       if (!ctx) return;
 
       const dpr = window.devicePixelRatio || 1;
@@ -167,16 +166,14 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
     return () => {
       ro.disconnect();
       cancelAnimationFrame(hintRafRef.current);
+      cancelAnimationFrame(rafRef.current);
       canvas.removeEventListener('touchstart', blockScroll);
       canvas.removeEventListener('touchmove', blockScroll);
-      cancelAnimationFrame(rafRef.current);
     };
   }, [drawOverlay]);
 
   const scratch = useCallback((x: number, y: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = ctxRef.current;
     if (!ctx) return;
 
     ctx.globalCompositeOperation = 'destination-out';
@@ -188,9 +185,8 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
 
   const checkReveal = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas || revealed) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const ctx = ctxRef.current;
+    if (!canvas || !ctx || revealed) return;
 
     const { width, height } = canvas;
     const data = ctx.getImageData(0, 0, width, height).data;
@@ -246,7 +242,6 @@ export function useInstaTingScratchCanvas({ onRevealed }: UseInstaTingScratchCan
     onPointerDown,
     onPointerMove,
     onPointerUp,
-    onPointerLeave: onPointerUp,
     onContextMenu: (e: React.MouseEvent<HTMLCanvasElement>) => e.preventDefault(),
   };
 
