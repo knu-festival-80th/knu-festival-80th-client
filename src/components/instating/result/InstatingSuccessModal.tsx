@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CountDownTimer from '../intro/CountDownTimer';
-import { REVEAL_DEADLINE } from '../../../constants/instaTingDeadline';
+import { REVEAL_DEADLINE } from '../../../constants/instatingDeadline';
 
 export type SubmittedData = {
   gender: 'male' | 'female';
@@ -16,7 +16,7 @@ interface Props {
   onClose: () => void;
 }
 
-const InstaTingSuccessModal = ({ data, onClose }: Props) => {
+const InstatingSuccessModal = ({ data, onClose }: Props) => {
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -97,4 +97,4 @@ const InstaTingSuccessModal = ({ data, onClose }: Props) => {
   );
 };
 
-export default InstaTingSuccessModal;
+export default InstatingSuccessModal;

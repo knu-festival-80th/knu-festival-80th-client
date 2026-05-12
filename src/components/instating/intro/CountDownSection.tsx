@@ -4,7 +4,7 @@ import {
   APPLY_DEADLINE,
   REVEAL_DEADLINE,
   ZERO_DEADLINE,
-} from '../../../constants/instaTingDeadline';
+} from '../../../constants/instatingDeadline';
 
 type TimerMode = 'apply' | 'reveal' | 'zero';
 
