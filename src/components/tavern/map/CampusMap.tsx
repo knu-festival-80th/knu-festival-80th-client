@@ -2,7 +2,7 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { FiMapPin, FiMinus, FiPlus } from 'react-icons/fi';
 
 import tavernMapImage from '@/assets/images/tavern-map.svg';
-import { festivalMap, taverns, type Tavern } from '@/constants/taverns';
+import { festivalMap, type Tavern } from '@/constants/taverns';
 
 const MAP_CANVAS_WIDTH = 640;
 const MAP_MIN_SCALE = 1;
@@ -13,16 +13,17 @@ const clampRatio = (ratio: number) => Math.min(Math.max(ratio, 0), 1);
 const clampMapScale = (scale: number) => Math.min(Math.max(scale, MAP_MIN_SCALE), MAP_MAX_SCALE);
 
 const getMapMarkerStyle = (tavern: Tavern): CSSProperties => ({
-  left: `${clampRatio(tavern.mapPosition.xRatio) * 100}%`,
-  top: `${clampRatio(tavern.mapPosition.yRatio) * 100}%`,
+  left: `${clampRatio(tavern.xRatio) * 100}%`,
+  top: `${clampRatio(tavern.yRatio) * 100}%`,
 });
 
 type CampusMapProps = {
+  taverns: Tavern[];
   selectedTavern: Tavern | null;
   onSelectTavern: (tavern: Tavern) => void;
 };
 
-export default function CampusMap({ selectedTavern, onSelectTavern }: CampusMapProps) {
+export default function CampusMap({ taverns, selectedTavern, onSelectTavern }: CampusMapProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [mapScale, setMapScale] = useState(MAP_MIN_SCALE);
 
@@ -41,8 +42,8 @@ export default function CampusMap({ selectedTavern, onSelectTavern }: CampusMapP
       return;
     }
 
-    const targetX = clampRatio(selectedTavern.mapPosition.xRatio) * canvasWidth;
-    const targetY = clampRatio(selectedTavern.mapPosition.yRatio) * canvasHeight;
+    const targetX = clampRatio(selectedTavern.xRatio) * canvasWidth;
+    const targetY = clampRatio(selectedTavern.yRatio) * canvasHeight;
 
     viewport.scrollTo({
       left: Math.max(targetX - viewport.clientWidth / 2, 0),
@@ -109,7 +110,7 @@ export default function CampusMap({ selectedTavern, onSelectTavern }: CampusMapP
               <button
                 key={tavern.id}
                 type="button"
-                aria-label={`${tavern.name} 지도 위치: ${tavern.mapPosition.label}`}
+                aria-label={`${tavern.name} 지도 위치: ${tavern.location}`}
                 aria-pressed={selected}
                 className="absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1"
                 style={getMapMarkerStyle(tavern)}

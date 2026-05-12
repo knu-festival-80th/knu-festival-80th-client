@@ -86,21 +86,31 @@ function TavernSimpleCard({ tavern, onSelect }: { tavern: Tavern; onSelect: () =
       onClick={onSelect}
     >
       <div className="flex w-full items-start justify-between">
-        <span className="flex items-center text-[14px] font-medium leading-[1.6] tracking-[-0.28px] text-[#808080]">
-          자세히 보기
-          <FiChevronRight size={24} />
+        <span className="text-[13px] font-medium leading-[1.6] tracking-[-0.26px] text-[#808080]">
+          {tavern.department}
         </span>
-        <span className="text-[14px] font-medium leading-[1.6] tracking-[-0.28px] text-[#808080]">
-          웨이팅
-        </span>
+        {tavern.waitingOpen && (
+          <span className="text-[14px] font-medium leading-[1.6] tracking-[-0.28px] text-[#808080]">
+            웨이팅
+          </span>
+        )}
       </div>
       <div className="flex w-full items-start justify-between gap-4 text-[16px] tracking-[-0.32px]">
-        <strong className="min-w-0 truncate font-bold leading-[1.4] text-black">
-          {tavern.name}
-        </strong>
-        <span className="shrink-0 font-medium leading-[1.6] text-[#808080]">
-          <span className="text-[#ff3d3d]">{tavern.waitTeams}</span>팀
-        </span>
+        <div className="flex min-w-0 items-center gap-1">
+          <strong className="min-w-0 truncate font-bold leading-[1.4] text-black">
+            {tavern.name}
+          </strong>
+          <FiChevronRight size={16} className="shrink-0 text-[#cccccc]" />
+        </div>
+        {tavern.waitingOpen ? (
+          <span className="shrink-0 font-medium leading-[1.6] text-[#808080]">
+            <span className="text-[#ff3d3d]">{tavern.waitTeams}</span>팀
+          </span>
+        ) : (
+          <span className="shrink-0 text-[14px] font-medium leading-[1.6] text-[#cccccc]">
+            현장 방문
+          </span>
+        )}
       </div>
     </button>
   );

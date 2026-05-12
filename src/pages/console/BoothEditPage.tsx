@@ -5,13 +5,23 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ApiClientError, boothApi, imageUrlToPath } from '@/apis';
 import type { BoothListItem, BoothUpdateRequest } from '@/apis';
-import { Button, Card, Field, ImageUploadField, Input, Textarea } from '@/components/admin/ui';
+import {
+  Button,
+  Card,
+  Field,
+  ImageUploadField,
+  Input,
+  MapLocationPicker,
+  Textarea,
+} from '@/components/admin/ui';
 
 interface FormState {
   name: string;
   description: string;
-  xRatio: string;
-  yRatio: string;
+  department: string;
+  location: string;
+  xRatio: number | null;
+  yRatio: number | null;
   menuBoardImageUrl: string;
 }
 
@@ -19,19 +29,12 @@ function toFormState(booth: BoothListItem): FormState {
   return {
     name: booth.name,
     description: booth.description ?? '',
-    xRatio: booth.xRatio?.toString() ?? '',
-    yRatio: booth.yRatio?.toString() ?? '',
+    department: booth.department ?? '',
+    location: booth.location ?? '',
+    xRatio: booth.xRatio ?? null,
+    yRatio: booth.yRatio ?? null,
     menuBoardImageUrl: imageUrlToPath(booth.menuBoardImageUrl),
   };
-}
-
-function parseRatio(raw: string): { value: number | undefined; error: string | null } {
-  const trimmed = raw.trim();
-  if (!trimmed) return { value: undefined, error: null };
-  const num = Number(trimmed);
-  if (!Number.isFinite(num)) return { value: undefined, error: '숫자만 입력해 주세요.' };
-  if (num < 0 || num > 1) return { value: undefined, error: '0과 1 사이의 값이어야 합니다.' };
-  return { value: num, error: null };
 }
 
 export default function BoothEditPage() {
@@ -122,7 +125,7 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
   });
 
   const handleChange =
-    (key: keyof FormState) =>
+    (key: 'name' | 'description' | 'department' | 'location' | 'menuBoardImageUrl') =>
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setForm((prev) => ({ ...prev, [key]: event.target.value }));
     };
@@ -131,29 +134,20 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
     event.preventDefault();
     setErrorMessage(null);
 
-    const x = parseRatio(form.xRatio);
-    const y = parseRatio(form.yRatio);
-    if (x.error) {
-      setErrorMessage(`X 좌표: ${x.error}`);
-      return;
-    }
-    if (y.error) {
-      setErrorMessage(`Y 좌표: ${y.error}`);
-      return;
-    }
-
     updateMutation.mutate({
       name: form.name.trim() || undefined,
       description: form.description.trim() || undefined,
-      xRatio: x.value,
-      yRatio: y.value,
+      xRatio: form.xRatio ?? undefined,
+      yRatio: form.yRatio ?? undefined,
       menuBoardImageUrl: form.menuBoardImageUrl.trim() || undefined,
+      department: form.department.trim() || undefined,
+      location: form.location.trim() || undefined,
     });
   };
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <div className="flex flex-col gap-4 md:grid md:grid-cols-[2fr_1fr] md:items-start md:gap-6">
+      <div className="flex flex-col gap-4">
         <Card padding="md">
           <h2 className="mb-4 text-base font-semibold text-[var(--admin-text)]">기본 정보</h2>
           <div className="flex flex-col gap-4">
@@ -167,6 +161,17 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
               />
             </Field>
 
+            <Field label="학과/단체" htmlFor="booth-department">
+              <Input
+                id="booth-department"
+                type="text"
+                value={form.department}
+                onChange={handleChange('department')}
+                maxLength={100}
+                placeholder="예: 컴퓨터학부"
+              />
+            </Field>
+
             <Field label="설명" htmlFor="booth-description">
               <Textarea
                 id="booth-description"
@@ -175,28 +180,16 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
               />
             </Field>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="X 좌표" hint="0 ~ 1" htmlFor="booth-x-ratio">
-                <Input
-                  id="booth-x-ratio"
-                  type="text"
-                  inputMode="decimal"
-                  numericMono
-                  value={form.xRatio}
-                  onChange={handleChange('xRatio')}
-                />
-              </Field>
-              <Field label="Y 좌표" hint="0 ~ 1" htmlFor="booth-y-ratio">
-                <Input
-                  id="booth-y-ratio"
-                  type="text"
-                  inputMode="decimal"
-                  numericMono
-                  value={form.yRatio}
-                  onChange={handleChange('yRatio')}
-                />
-              </Field>
-            </div>
+            <Field label="위치" htmlFor="booth-location">
+              <Input
+                id="booth-location"
+                type="text"
+                value={form.location}
+                onChange={handleChange('location')}
+                maxLength={200}
+                placeholder="예: IT대학 2호관 앞"
+              />
+            </Field>
 
             <ImageUploadField
               label="메뉴판 이미지"
@@ -209,16 +202,14 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
           </div>
         </Card>
 
-        <div className="hidden md:block">
-          <Card padding="md">
-            <h3 className="text-sm font-semibold text-[var(--admin-text)]">안내</h3>
-            <ul className="mt-3 flex flex-col gap-2 text-xs leading-relaxed text-[var(--admin-text-muted)]">
-              <li>X/Y 좌표는 지도 위 부스 위치 비율 (0~1)입니다.</li>
-              <li>비밀번호는 이 화면에서 변경할 수 없습니다. 부스 목록에서 별도 변경하세요.</li>
-              <li>이미지는 정사각형 또는 가로형이 권장됩니다.</li>
-            </ul>
-          </Card>
-        </div>
+        <Card padding="md">
+          <h2 className="mb-4 text-base font-semibold text-[var(--admin-text)]">지도 위치</h2>
+          <MapLocationPicker
+            xRatio={form.xRatio}
+            yRatio={form.yRatio}
+            onChange={(x, y) => setForm((prev) => ({ ...prev, xRatio: x, yRatio: y }))}
+          />
+        </Card>
       </div>
 
       {errorMessage && (

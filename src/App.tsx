@@ -17,17 +17,19 @@ import BoothPasswordPage from '@/pages/console/BoothPasswordPage';
 import ConsoleLoginPage from '@/pages/console/ConsoleLoginPage';
 import CongratVideoPage from '@/pages/CongratVideoPage';
 import GoodsPage from '@/pages/GoodsPage';
+import HobanustagramPage from '@/pages/HobanustagramPage';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import TavernDetailPage from '@/pages/TavernDetailPage';
 import TavernMapPage from '@/pages/TavernMapPage';
 import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import StampTourPage from './pages/stampTour/StampTourPage';
 import StampBoothListPage from './pages/stampTour/StampBoothListPage';
-import InstaTingPage from './pages/InstaTingPage';
-import InstaTingIntroView from '@/components/instating/views/InstaTingIntroView';
-import InstaTingApplyView from '@/components/instating/views/InstaTingApplyView';
-import InstaTingResultView from '@/components/instating/views/InstaTingResultView';
+import InstatingPage from './pages/InstatingPage';
+import InstatingIntroView from './components/instating/views/InstatingIntroView';
+import InstatingApplyView from './components/instating/views/InstatingApplyView';
+import InstatingResultView from './components/instating/views/InstatingResultView';
 
 export default function App() {
   return (
@@ -70,19 +72,23 @@ export default function App() {
         <Route element={<DefaultLayout />}>
           <Route path="/map" element={<TavernMapPage />} />
           <Route path="/taverns" element={<TavernMapPage />} />
+          <Route path="/taverns/:boothId" element={<TavernDetailPage />} />
           <Route path="/timetable" element={<TimeTablePage />} />
           <Route path="/goods" element={<GoodsPage />} />
           <Route path="/stamptour" element={<StampTourPage />} />
           <Route path="/stamptour/booths" element={<StampBoothListPage />} />
-          <Route path="/instating" element={<InstaTingPage />}>
-            <Route index element={<InstaTingIntroView />} />
-            <Route path="apply" element={<InstaTingApplyView />} />
-            <Route path="result" element={<InstaTingResultView />} />
+          <Route path="/hobanustagram" element={<HobanustagramPage />} />
+          <Route path="/instating" element={<InstatingPage />}>
+            <Route index element={<InstatingIntroView />} />
+            <Route path="apply" element={<InstatingApplyView />} />
+            <Route path="result" element={<InstatingResultView />} />
           </Route>
           <Route path="/congrat-video" element={<CongratVideoPage />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Route>
+        <Route path="/404" element={<NotFoundPage />} />
+        <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
       <Analytics />
     </>

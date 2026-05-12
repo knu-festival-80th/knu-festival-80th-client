@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import CountDownTimer from './CountDownTimer';
-import { APPLY_DEADLINE, REVEAL_DEADLINE, ZERO_DEADLINE } from '../../constants/instaTingDeadline';
+import {
+  APPLY_DEADLINE,
+  REVEAL_DEADLINE,
+  ZERO_DEADLINE,
+} from '../../../constants/instatingDeadline';
 
 type TimerMode = 'apply' | 'reveal' | 'zero';
 

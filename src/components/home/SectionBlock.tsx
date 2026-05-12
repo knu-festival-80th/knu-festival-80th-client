@@ -10,7 +10,6 @@ type SectionBlockProps = {
   viewAllTo?: string;
   viewAllLabel?: string;
   viewAllClassName?: string;
-  direction?: 'left' | 'right';
   animate?: boolean;
   className?: string;
   headingClassName?: string;
@@ -29,7 +28,6 @@ export default function SectionBlock({
   viewAllTo,
   viewAllLabel,
   viewAllClassName,
-  direction = 'left',
   animate = true,
   className = 'flex flex-col gap-12',
   headingClassName = 'flex flex-col px-5',
@@ -42,8 +40,8 @@ export default function SectionBlock({
   return (
     <motion.div
       className={className}
-      initial={animate ? { opacity: 0, x: direction === 'left' ? -40 : 40 } : false}
-      whileInView={animate ? { opacity: 1, x: 0 } : undefined}
+      initial={animate ? { opacity: 0, y: 40 } : false}
+      whileInView={animate ? { opacity: 1, y: 0 } : undefined}
       viewport={animate ? { once: true, amount: 0.2 } : undefined}
       transition={animate ? { duration: 0.5, ease: 'easeOut' } : undefined}
     >

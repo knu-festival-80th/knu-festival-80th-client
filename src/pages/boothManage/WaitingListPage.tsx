@@ -222,35 +222,24 @@ export default function WaitingListPage() {
     reorderMutation.isPending;
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-3 gap-2.5">
-        <StatCard
-          label="대기"
-          desc="순서를 기다리는 중"
-          value={waitingCount}
-          color="var(--admin-text)"
-        />
-        <StatCard
-          label="호출"
-          desc="SMS 발송 완료"
-          value={calledCount}
-          color="var(--admin-primary)"
-        />
-        <StatCard
-          label="입장"
-          desc="부스에 도착"
-          value={enteredCount}
-          color="var(--admin-success)"
-        />
+    <div className="flex flex-col gap-2.5">
+      {/* 통계 인라인 바 */}
+      <div className="flex items-center gap-3 rounded-xl bg-[var(--admin-surface)] px-4 py-2.5">
+        <StatChip label="대기" value={waitingCount} color="var(--admin-text)" />
+        <div className="h-4 w-px bg-[var(--admin-border)]" />
+        <StatChip label="호출" value={calledCount} color="var(--admin-primary)" />
+        <div className="h-4 w-px bg-[var(--admin-border)]" />
+        <StatChip label="입장" value={enteredCount} color="var(--admin-success)" />
       </div>
 
+      {/* 접수 토글 */}
       {myBooth && (
         <button
           type="button"
           onClick={() => toggleMutation.mutate(!myBooth.waitingOpen)}
           disabled={toggleMutation.isPending}
           className={[
-            'flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-[15px] font-semibold transition-all disabled:opacity-60',
+            'flex w-full items-center justify-center gap-2 rounded-xl py-3 text-[14px] font-semibold transition-all disabled:opacity-60',
             myBooth.waitingOpen
               ? 'bg-[var(--admin-primary)] text-white'
               : 'bg-[var(--admin-surface)] text-[var(--admin-text)] ring-1 ring-[var(--admin-border)]',
@@ -258,7 +247,7 @@ export default function WaitingListPage() {
         >
           {myBooth.waitingOpen ? (
             <>
-              <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" />
               접수중 — 탭하여 중단
             </>
           ) : (
@@ -267,15 +256,16 @@ export default function WaitingListPage() {
         </button>
       )}
 
-      <div className="flex items-center gap-2">
-        <div className="flex flex-1 gap-1.5 overflow-x-auto">
+      {/* 필터 + 삽입 */}
+      <div className="flex items-center gap-1.5">
+        <div className="flex flex-1 gap-1 overflow-x-auto">
           {FILTERS.map((f) => (
             <button
               key={f.key}
               type="button"
               onClick={() => setFilter(f.key)}
               className={[
-                'inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-[13px] font-medium transition-colors',
+                'inline-flex h-7 shrink-0 items-center rounded-full px-3 text-[12px] font-medium transition-colors',
                 filter === f.key
                   ? 'bg-[var(--admin-text)] text-white'
                   : 'bg-[var(--admin-surface)] text-[var(--admin-text-muted)] ring-1 ring-[var(--admin-border)]',
@@ -288,18 +278,19 @@ export default function WaitingListPage() {
         <Link to="/booth/manage/waitings/insert">
           <button
             type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--admin-surface)] text-[var(--admin-text-muted)] ring-1 ring-[var(--admin-border)] transition-colors hover:bg-[var(--admin-surface-hover)]"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--admin-surface)] text-[var(--admin-text-muted)] ring-1 ring-[var(--admin-border)]"
             aria-label="중간 삽입"
           >
-            <Plus size={16} />
+            <Plus size={14} />
           </button>
         </Link>
       </div>
 
+      {/* 에러 */}
       {waitingsQuery.isError && (
         <div
           role="alert"
-          className="rounded-xl bg-[var(--admin-danger-soft)] px-4 py-3 text-sm text-[var(--admin-danger)]"
+          className="rounded-xl bg-[var(--admin-danger-soft)] px-3 py-2 text-[13px] text-[var(--admin-danger)]"
         >
           {waitingsQuery.error instanceof ApiClientError
             ? waitingsQuery.error.message
@@ -307,23 +298,26 @@ export default function WaitingListPage() {
         </div>
       )}
 
+      {/* 로딩 */}
       {waitingsQuery.isLoading && (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-1.5">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-2xl bg-[var(--admin-surface)]" />
+            <div key={i} className="h-14 animate-pulse rounded-xl bg-[var(--admin-surface)]" />
           ))}
         </div>
       )}
 
+      {/* 빈 상태 */}
       {waitingsQuery.data && visible.length === 0 && (
-        <div className="flex flex-col items-center gap-2 rounded-2xl bg-[var(--admin-surface)] px-4 py-14 text-center">
-          <Users size={36} className="text-[var(--admin-border-strong)]" />
-          <p className="text-sm text-[var(--admin-text-faint)]">{emptyMessage(filter)}</p>
+        <div className="flex flex-col items-center gap-1.5 rounded-xl bg-[var(--admin-surface)] px-4 py-10 text-center">
+          <Users size={28} className="text-[var(--admin-border-strong)]" />
+          <p className="text-[13px] text-[var(--admin-text-faint)]">{emptyMessage(filter)}</p>
         </div>
       )}
 
+      {/* 대기 목록 */}
       {waitingsQuery.data && visible.length > 0 && (
-        <ul className="flex flex-col gap-2.5">
+        <ul className="flex flex-col gap-1.5">
           {visible.map((w) => (
             <li key={w.waitingId}>
               <WaitingRow waiting={w} onAction={(type) => openSheet(type, w)} />
@@ -332,6 +326,7 @@ export default function WaitingListPage() {
         </ul>
       )}
 
+      {/* 바텀시트 */}
       <BottomSheet
         open={sheet !== null}
         onClose={() => !anyPending && setSheet(null)}
@@ -352,7 +347,7 @@ export default function WaitingListPage() {
                 type="button"
                 onClick={() => setSheet(null)}
                 disabled={anyPending}
-                className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-3.5 text-[15px] font-semibold text-[var(--admin-text)] transition-colors"
+                className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-3 text-[15px] font-semibold text-[var(--admin-text)]"
               >
                 닫기
               </button>
@@ -361,7 +356,7 @@ export default function WaitingListPage() {
                 onClick={handleConfirm}
                 disabled={anyPending}
                 className={[
-                  'flex-1 rounded-xl py-3.5 text-[15px] font-semibold text-white transition-colors disabled:opacity-60',
+                  'flex-1 rounded-xl py-3 text-[15px] font-semibold text-white disabled:opacity-60',
                   ACTION_META[sheet.type].danger
                     ? 'bg-[var(--admin-danger)]'
                     : 'bg-[var(--admin-primary)]',
@@ -386,7 +381,7 @@ export default function WaitingListPage() {
               min={1}
               value={reorderValue}
               onChange={(e) => setReorderValue(e.target.value)}
-              className="h-12 rounded-xl border-0 bg-[var(--admin-surface-hover)] px-4 text-center text-lg font-bold tabular text-[var(--admin-text)] outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
+              className="h-11 rounded-xl border-0 bg-[var(--admin-surface-hover)] px-4 text-center text-lg font-bold tabular text-[var(--admin-text)] outline-none focus:ring-2 focus:ring-[var(--admin-primary)]"
               autoFocus
             />
             <div className="flex gap-2">
@@ -394,7 +389,7 @@ export default function WaitingListPage() {
                 type="button"
                 onClick={() => setSheet(null)}
                 disabled={anyPending}
-                className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-3.5 text-[15px] font-semibold text-[var(--admin-text)]"
+                className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-3 text-[15px] font-semibold text-[var(--admin-text)]"
               >
                 닫기
               </button>
@@ -402,7 +397,7 @@ export default function WaitingListPage() {
                 type="button"
                 onClick={handleConfirm}
                 disabled={anyPending}
-                className="flex-1 rounded-xl bg-[var(--admin-primary)] py-3.5 text-[15px] font-semibold text-white disabled:opacity-60"
+                className="flex-1 rounded-xl bg-[var(--admin-primary)] py-3 text-[15px] font-semibold text-white disabled:opacity-60"
               >
                 {anyPending ? '처리 중...' : '변경'}
               </button>
@@ -414,24 +409,13 @@ export default function WaitingListPage() {
   );
 }
 
-function StatCard({
-  label,
-  desc,
-  value,
-  color,
-}: {
-  label: string;
-  desc: string;
-  value: number;
-  color: string;
-}) {
+function StatChip({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-2xl bg-[var(--admin-surface)] p-3.5">
-      <span className="tabular text-2xl font-bold" style={{ color }}>
+    <div className="flex items-center gap-1.5">
+      <span className="text-[12px] text-[var(--admin-text-muted)]">{label}</span>
+      <span className="tabular text-[18px] font-bold leading-none" style={{ color }}>
         {value}
       </span>
-      <span className="text-[13px] font-semibold text-[var(--admin-text)]">{label}</span>
-      <span className="text-[11px] leading-tight text-[var(--admin-text-faint)]">{desc}</span>
     </div>
   );
 }
@@ -446,114 +430,102 @@ function WaitingRow({ waiting, onAction }: WaitingRowProps) {
   const isCalled = waiting.status === 'CALLED';
 
   return (
-    <div className="rounded-2xl bg-[var(--admin-surface)] p-4">
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col gap-0.5">
-          <div className="flex items-center gap-2">
-            <span className="tabular text-lg font-bold text-[var(--admin-text)]">
-              #{waiting.waitingNumber}
-            </span>
-            <StatusBadge status={waiting.status} />
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[15px] font-medium text-[var(--admin-text)]">{waiting.name}</span>
-            <span className="tabular text-sm text-[var(--admin-text-faint)]">
-              {waiting.partySize}명
-            </span>
-          </div>
+    <div className="rounded-xl bg-[var(--admin-surface)] px-3.5 py-3">
+      {/* 상단: 번호 + 이름 + 상태 + 메인 액션 */}
+      <div className="flex items-center gap-2">
+        <span className="tabular text-[15px] font-bold text-[var(--admin-text)]">
+          #{waiting.waitingNumber}
+        </span>
+        <span className="min-w-0 truncate text-[14px] font-medium text-[var(--admin-text)]">
+          {waiting.name}
+        </span>
+        <span className="tabular text-[12px] text-[var(--admin-text-faint)]">
+          {waiting.partySize}명
+        </span>
+        <StatusBadge status={waiting.status} />
+
+        {/* 메인 액션 버튼 - 오른쪽 끝 */}
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          {isWaiting && (
+            <button
+              type="button"
+              onClick={() => onAction('call')}
+              className="flex h-8 items-center gap-1 rounded-lg bg-[var(--admin-primary)] px-3 text-[12px] font-semibold text-white active:opacity-90"
+            >
+              <Bell size={12} />
+              호출
+            </button>
+          )}
+          {isCalled && (
+            <button
+              type="button"
+              onClick={() => onAction('enter')}
+              className="flex h-8 items-center gap-1 rounded-lg bg-[var(--admin-success)] px-3 text-[12px] font-semibold text-white active:opacity-90"
+            >
+              <Check size={12} />
+              입장
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="tabular mt-1.5 flex items-center gap-1.5 text-xs text-[var(--admin-text-faint)]">
-        <span>{waiting.maskedPhoneNumber}</span>
-        {waiting.smsSent && <MessageSquare size={11} />}
-        <span>·</span>
-        <span>순서 {waiting.sortOrder}</span>
-      </div>
+      {/* 하단: 부가 정보 + 부가 액션 */}
+      <div className="mt-1.5 flex items-center justify-between">
+        <div className="tabular flex items-center gap-1.5 text-[11px] text-[var(--admin-text-faint)]">
+          <span>{waiting.maskedPhoneNumber}</span>
+          {waiting.smsSent && <MessageSquare size={10} />}
+          <span>·</span>
+          <span>순서 {waiting.sortOrder}</span>
+        </div>
 
-      {isWaiting && (
-        <div className="mt-3 flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => onAction('call')}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--admin-primary)] py-3 text-[15px] font-semibold text-white transition-colors active:opacity-90"
-          >
-            <Bell size={16} />
-            호출하기
-          </button>
-          <div className="flex gap-2">
+        {/* 부가 액션 텍스트 링크 */}
+        {(isWaiting || isCalled) && (
+          <div className="flex items-center gap-2 text-[11px] font-medium">
+            {isCalled && (
+              <button
+                type="button"
+                onClick={() => onAction('resend')}
+                className="text-[var(--admin-text-muted)]"
+              >
+                SMS재발송
+              </button>
+            )}
+            {isCalled && (
+              <button
+                type="button"
+                onClick={() => onAction('skip')}
+                className="text-[var(--admin-text-muted)]"
+              >
+                미방문
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onAction('reorder')}
-              className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-2.5 text-[13px] font-medium text-[var(--admin-text-muted)] transition-colors"
+              className="text-[var(--admin-text-muted)]"
             >
-              순서 변경
+              순서
             </button>
             <button
               type="button"
               onClick={() => onAction('cancel')}
-              className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-2.5 text-[13px] font-medium text-[var(--admin-danger)] transition-colors"
+              className="text-[var(--admin-danger)]"
             >
               취소
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {isCalled && (
-        <div className="mt-3 flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => onAction('enter')}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--admin-success)] py-3 text-[15px] font-semibold text-white transition-colors active:opacity-90"
-          >
-            <Check size={16} />
-            입장 확인
-          </button>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onAction('resend')}
-              className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-2.5 text-[13px] font-medium text-[var(--admin-text-muted)]"
-            >
-              SMS 재발송
-            </button>
-            <button
-              type="button"
-              onClick={() => onAction('skip')}
-              className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-2.5 text-[13px] font-medium text-[var(--admin-text-muted)]"
-            >
-              미방문
-            </button>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => onAction('reorder')}
-              className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-2.5 text-[13px] font-medium text-[var(--admin-text-muted)]"
-            >
-              순서 변경
-            </button>
-            <button
-              type="button"
-              onClick={() => onAction('cancel')}
-              className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-2.5 text-[13px] font-medium text-[var(--admin-danger)]"
-            >
-              취소
-            </button>
-          </div>
-        </div>
-      )}
-
-      {!isWaiting && !isCalled && (
-        <div className="mt-2 text-xs text-[var(--admin-text-faint)]">
-          {waiting.status === 'ENTERED' &&
-            waiting.enteredAt &&
-            `입장: ${new Date(waiting.enteredAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`}
-          {waiting.status === 'CANCELLED' && '취소됨'}
-          {waiting.status === 'SKIPPED' && '미방문'}
-        </div>
-      )}
+        {!isWaiting && !isCalled && (
+          <span className="text-[11px] text-[var(--admin-text-faint)]">
+            {waiting.status === 'ENTERED' &&
+              waiting.enteredAt &&
+              `입장 ${new Date(waiting.enteredAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}`}
+            {waiting.status === 'CANCELLED' && '취소됨'}
+            {waiting.status === 'SKIPPED' && '미방문'}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

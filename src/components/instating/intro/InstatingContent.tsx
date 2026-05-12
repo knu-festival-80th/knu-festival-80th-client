@@ -1,13 +1,13 @@
-import step1Bg from '@/assets/instaTing/stepCard/step1_bg.png';
-import step1Illust from '@/assets/instaTing/stepCard/step1_illust.svg';
-import step2Bg from '@/assets/instaTing/stepCard/step2_bg.png';
-import step2Illust from '@/assets/instaTing/stepCard/step2_illust.svg';
-import step3Bg from '@/assets/instaTing/stepCard/step3_bg.png';
-import step3Illust from '@/assets/instaTing/stepCard/step3_illust.svg';
-import step4Bg from '@/assets/instaTing/stepCard/step4_bg.png';
-import step4Illust from '@/assets/instaTing/stepCard/step4_illust.svg';
-import forwardArrowIcon from '@/assets/instaTing/arrowIcon/forwardArrowIcon.svg';
-import OutlineButton from './OutlineButton';
+import step1Bg from '@/assets/instating/stepCard/step1_bg.png';
+import step1Illust from '@/assets/instating/stepCard/step1_illust.svg';
+import step2Bg from '@/assets/instating/stepCard/step2_bg.png';
+import step2Illust from '@/assets/instating/stepCard/step2_illust.svg';
+import step3Bg from '@/assets/instating/stepCard/step3_bg.png';
+import step3Illust from '@/assets/instating/stepCard/step3_illust.svg';
+import step4Bg from '@/assets/instating/stepCard/step4_bg.png';
+import step4Illust from '@/assets/instating/stepCard/step4_illust.svg';
+import forwardArrowIcon from '@/assets/instating/icon/forwardArrowIcon.svg';
+import OutlineButton from '../OutlineButton';
 import ProcessCard from './ProcessCard';
 import { useNavigate } from 'react-router-dom';
 
@@ -42,7 +42,7 @@ const steps = [
   },
 ];
 
-const InstaTingContent = () => {
+const InstatingContent = () => {
   const navigate = useNavigate();
   const goApplyPage = () => navigate('/instating/apply');
   const goResultPage = () => navigate('/instating/result');
@@ -95,4 +95,4 @@ const InstaTingContent = () => {
   );
 };
 
-export default InstaTingContent;
+export default InstatingContent;

@@ -16,6 +16,7 @@ export const ENDPOINTS = {
   },
   waitings: {
     detail: (waitingId: number) => `/waitings/${waitingId}`,
+    my: '/waitings/my',
   },
 
   admin: {
