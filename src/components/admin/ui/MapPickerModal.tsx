@@ -6,6 +6,8 @@ import { FiMapPin } from 'react-icons/fi';
 import tavernMapImage from '@/assets/images/tavern-map.svg';
 import { festivalMap } from '@/constants/taverns';
 
+import { usePortalTheme } from './usePortalTheme';
+
 interface MapPickerModalProps {
   open: boolean;
   initialX: number | null;
@@ -24,6 +26,7 @@ export default function MapPickerModal(props: MapPickerModalProps) {
 }
 
 function MapPickerModalInner({ initialX, initialY, onConfirm, onClose }: MapPickerModalProps) {
+  const { markerRef, wrapperRef } = usePortalTheme<HTMLDivElement>();
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [scale, setScale] = useState(1);
@@ -165,102 +168,112 @@ function MapPickerModalInner({ initialX, initialY, onConfirm, onClose }: MapPick
   const pinLeft = pin ? tx + pin.x * size.w * scale : 0;
   const pinTop = pin ? ty + pin.y * size.h * scale : 0;
 
-  return createPortal(
-    <div className="fixed inset-0 z-50 flex flex-col bg-black/85 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
-      <header className="flex shrink-0 items-center justify-between px-4 py-3 text-white">
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
-          aria-label="닫기"
-        >
-          <X size={20} />
-        </button>
-        <h2 className="text-base font-semibold">위치 선택</h2>
-        <button
-          type="button"
-          onClick={() => {
-            if (pin) onConfirm(pin.x, pin.y);
-            else onClose();
-          }}
-          disabled={!pin}
-          className="flex h-9 items-center rounded-lg bg-white px-4 text-sm font-semibold text-black disabled:opacity-50"
-        >
-          완료
-        </button>
-      </header>
-
-      <div className="flex flex-1 items-center justify-center px-3">
+  return (
+    <>
+      <span ref={markerRef} aria-hidden style={{ display: 'none' }} />
+      {createPortal(
         <div
-          ref={containerRef}
-          className="relative w-full max-w-[1200px] cursor-grab overflow-hidden rounded-xl bg-white select-none active:cursor-grabbing"
-          style={{ aspectRatio: ASPECT, touchAction: 'none' }}
-          onWheel={handleWheel}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={() => {
-            dragRef.current = null;
-          }}
-          onDoubleClick={handleDoubleClick}
+          ref={wrapperRef}
+          className="fixed inset-0 z-50 flex flex-col bg-black/85 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
         >
-          <img
-            src={tavernMapImage}
-            alt="축제 지도"
-            draggable={false}
-            className="pointer-events-none origin-top-left select-none"
-            style={{
-              width: '100%',
-              height: '100%',
-              transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
-            }}
-          />
-          {pin && size.w > 0 && (
-            <div
-              className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full"
-              style={{ left: pinLeft, top: pinTop }}
+          <header className="flex shrink-0 items-center justify-between px-4 py-3 text-white">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
+              aria-label="닫기"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-[#ff3d3d] shadow-lg">
-                <FiMapPin className="text-white" size={18} />
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
+              <X size={20} />
+            </button>
+            <h2 className="text-base font-semibold">위치 선택</h2>
+            <button
+              type="button"
+              onClick={() => {
+                if (pin) onConfirm(pin.x, pin.y);
+                else onClose();
+              }}
+              disabled={!pin}
+              className="flex h-9 items-center rounded-lg bg-white px-4 text-sm font-semibold text-black disabled:opacity-50"
+            >
+              완료
+            </button>
+          </header>
 
-      <div className="flex shrink-0 items-center justify-between gap-3 px-4 pt-3 pb-3 text-white">
-        <div className="tabular text-xs text-white/70">
-          {pin ? `X ${pin.x.toFixed(3)} · Y ${pin.y.toFixed(3)}` : '지도를 탭해 위치를 지정하세요'}
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => zoomTo(scale * 0.85, size.w / 2, size.h / 2)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
-            aria-label="축소"
-          >
-            <Minus size={16} />
-          </button>
-          <span className="tabular w-12 text-center text-xs">{Math.round(scale * 100)}%</span>
-          <button
-            type="button"
-            onClick={() => zoomTo(scale * 1.18, size.w / 2, size.h / 2)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
-            aria-label="확대"
-          >
-            <Plus size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={handleResetView}
-            className="ml-1 flex h-9 items-center gap-1 rounded-lg bg-white/10 px-2.5 text-xs font-medium hover:bg-white/20"
-          >
-            <RotateCcw size={13} />
-            원본
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body,
+          <div className="flex flex-1 items-center justify-center px-3">
+            <div
+              ref={containerRef}
+              className="relative w-full max-w-[1200px] cursor-grab overflow-hidden rounded-xl bg-white select-none active:cursor-grabbing"
+              style={{ aspectRatio: ASPECT, touchAction: 'none' }}
+              onWheel={handleWheel}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={() => {
+                dragRef.current = null;
+              }}
+              onDoubleClick={handleDoubleClick}
+            >
+              <img
+                src={tavernMapImage}
+                alt="축제 지도"
+                draggable={false}
+                className="pointer-events-none origin-top-left select-none"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
+                }}
+              />
+              {pin && size.w > 0 && (
+                <div
+                  className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full"
+                  style={{ left: pinLeft, top: pinTop }}
+                >
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-[#ff3d3d] shadow-lg">
+                    <FiMapPin className="text-white" size={18} />
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center justify-between gap-3 px-4 pt-3 pb-3 text-white">
+            <div className="tabular text-xs text-white/70">
+              {pin
+                ? `X ${pin.x.toFixed(3)} · Y ${pin.y.toFixed(3)}`
+                : '지도를 탭해 위치를 지정하세요'}
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => zoomTo(scale * 0.85, size.w / 2, size.h / 2)}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
+                aria-label="축소"
+              >
+                <Minus size={16} />
+              </button>
+              <span className="tabular w-12 text-center text-xs">{Math.round(scale * 100)}%</span>
+              <button
+                type="button"
+                onClick={() => zoomTo(scale * 1.18, size.w / 2, size.h / 2)}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
+                aria-label="확대"
+              >
+                <Plus size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={handleResetView}
+                className="ml-1 flex h-9 items-center gap-1 rounded-lg bg-white/10 px-2.5 text-xs font-medium hover:bg-white/20"
+              >
+                <RotateCcw size={13} />
+                원본
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+    </>
   );
 }
