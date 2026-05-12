@@ -4,7 +4,6 @@ interface ScratchCardProps {
     onPointerDown: (e: React.PointerEvent<HTMLCanvasElement>) => void;
     onPointerMove: (e: React.PointerEvent<HTMLCanvasElement>) => void;
     onPointerUp: (e: React.PointerEvent<HTMLCanvasElement>) => void;
-    onPointerLeave: (e: React.PointerEvent<HTMLCanvasElement>) => void;
     onContextMenu: (e: React.MouseEvent<HTMLCanvasElement>) => void;
   };
   hideLabel?: boolean;
