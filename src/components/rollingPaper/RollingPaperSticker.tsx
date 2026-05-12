@@ -1,10 +1,10 @@
 import type { CSSProperties, ReactNode } from 'react';
-import paper1 from '@/assets/rollingPaper/paper1.svg';
-import paper2 from '@/assets/rollingPaper/paper2.svg';
-import paper3 from '@/assets/rollingPaper/paper3.svg';
-import paper4 from '@/assets/rollingPaper/paper4.svg';
-import paper5 from '@/assets/rollingPaper/paper5.svg';
-import paper6 from '@/assets/rollingPaper/paper6.svg';
+import paper1 from '@/assets/rollingPaper/paper1.svg?raw';
+import paper2 from '@/assets/rollingPaper/paper2.svg?raw';
+import paper3 from '@/assets/rollingPaper/paper3.svg?raw';
+import paper4 from '@/assets/rollingPaper/paper4.svg?raw';
+import paper5 from '@/assets/rollingPaper/paper5.svg?raw';
+import paper6 from '@/assets/rollingPaper/paper6.svg?raw';
 import {
   ROLLING_PAPER_STICKER_COLORS,
   type RollingPaperStickerColorId,
@@ -24,24 +24,24 @@ type RollingPaperStickerProps = {
   style?: CSSProperties;
 };
 
-const rollingPaperAssets: Record<RollingPaperStickerColorId, { src: string }> = {
+const rollingPaperAssets: Record<RollingPaperStickerColorId, { svg: string }> = {
   red: {
-    src: paper1,
+    svg: paper1,
   },
   yellow: {
-    src: paper2,
+    svg: paper2,
   },
   green: {
-    src: paper3,
+    svg: paper3,
   },
   blue: {
-    src: paper4,
+    svg: paper4,
   },
   purple: {
-    src: paper5,
+    svg: paper5,
   },
   pink: {
-    src: paper6,
+    svg: paper6,
   },
 };
 
@@ -70,7 +70,11 @@ export default function RollingPaperSticker({
 
   return (
     <div className={`relative [container-type:inline-size] ${className}`} style={style}>
-      <img src={paper.src} alt="" aria-hidden="true" className="block h-auto w-full select-none" />
+      <span
+        aria-hidden="true"
+        className="block w-full select-none [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
+        dangerouslySetInnerHTML={{ __html: paper.svg }}
+      />
 
       {!hideText && (
         <div
