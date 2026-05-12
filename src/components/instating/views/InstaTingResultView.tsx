@@ -26,12 +26,12 @@ const InstaTingResultView = () => {
   const onSubmit = () => {
     // TODO: API 연동 후 setResult({ matched: true, instagramId: '...' }) 또는 setResult({ matched: false })
     setResult({ matched: true, instagramId: 'lll_0311' });
+
     // setResult({ matched: false });
   };
 
   const handleCloseResult = () => {
     navigate('/instating');
-    setResult(null);
   };
 
   return (
