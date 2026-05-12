@@ -13,13 +13,13 @@ import { useWaitingActions } from './waiting/useWaitingActions';
 import type { WaitingActionType } from './waiting/WaitingCard';
 import WaitingInsertSheet from './waiting/WaitingInsertSheet';
 
-interface ConfirmState {
+interface ActionConfirmState {
   type: 'call' | 'cancel' | 'skip';
   waiting: WaitingItem;
 }
 
-const CONFIRM_META: Record<
-  ConfirmState['type'],
+const ACTION_CONFIRM_META: Record<
+  ActionConfirmState['type'],
   { title: string; desc: string; confirmLabel: string; danger?: boolean }
 > = {
   call: {
@@ -43,7 +43,8 @@ const CONFIRM_META: Record<
 export default function WaitingListPage() {
   const boothId = useAuthStore((s) => s.boothId);
 
-  const [confirm, setConfirm] = useState<ConfirmState | null>(null);
+  const [actionConfirm, setActionConfirm] = useState<ActionConfirmState | null>(null);
+  const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
   const [pastOpen, setPastOpen] = useState(false);
   const [insertOpen, setInsertOpen] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -82,7 +83,7 @@ export default function WaitingListPage() {
   const handleAction = useCallback(
     (type: WaitingActionType, waiting: WaitingItem) => {
       if (type === 'call' || type === 'cancel' || type === 'skip') {
-        setConfirm({ type, waiting });
+        setActionConfirm({ type, waiting });
         return;
       }
       if (type === 'enter') {
@@ -108,19 +109,27 @@ export default function WaitingListPage() {
     [actions],
   );
 
-  const handleConfirm = () => {
-    if (!confirm) return;
-    const id = confirm.waiting.waitingId;
-    if (confirm.type === 'call') actions.call.mutate(id);
-    else if (confirm.type === 'cancel') actions.cancel.mutate(id);
-    else if (confirm.type === 'skip') actions.skip.mutate(id);
-    setConfirm(null);
+  const handleActionConfirm = () => {
+    if (!actionConfirm) return;
+    const id = actionConfirm.waiting.waitingId;
+    if (actionConfirm.type === 'call') actions.call.mutate(id);
+    else if (actionConfirm.type === 'cancel') actions.cancel.mutate(id);
+    else if (actionConfirm.type === 'skip') actions.skip.mutate(id);
+    setActionConfirm(null);
+  };
+
+  const handleCloseConfirm = () => {
+    actions.toggle.mutate(false);
+    setCloseConfirmOpen(false);
   };
 
   if (boothId === null) return null;
 
   const isOpen = myBooth?.waitingOpen ?? false;
   const togglePending = actions.toggle.isPending;
+  const pendingCount = allWaitings.filter(
+    (w) => w.status === 'WAITING' || w.status === 'CALLED',
+  ).length;
 
   return (
     <div className="flex flex-col gap-3">
@@ -139,54 +148,70 @@ export default function WaitingListPage() {
         </div>
       )}
 
-      <div className="flex items-center gap-2">
-        {myBooth && (
-          <button
-            type="button"
-            onClick={() => actions.toggle.mutate(!isOpen)}
-            disabled={togglePending}
-            className={[
-              'flex h-9 items-center gap-1.5 rounded-lg px-3 text-[13px] font-semibold transition-colors disabled:opacity-60',
-              isOpen
-                ? 'bg-[var(--admin-success-soft)] text-[var(--admin-success)] ring-1 ring-[var(--admin-success)]/30'
-                : 'bg-[var(--admin-surface)] text-[var(--admin-text-muted)] ring-1 ring-[var(--admin-border)]',
-            ].join(' ')}
-            aria-pressed={isOpen}
-          >
-            {isOpen ? <Power size={14} /> : <PowerOff size={14} />}
-            {isOpen ? '접수중' : '중단'}
-          </button>
-        )}
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setInsertOpen(true)}
-            className="flex h-9 items-center gap-1 rounded-lg bg-[var(--admin-surface)] px-3 text-[13px] font-semibold text-[var(--admin-text)] ring-1 ring-[var(--admin-border)] hover:bg-[var(--admin-surface-hover)]"
-          >
-            <Plus size={14} />
-            중간 삽입
-          </button>
-          <button
-            type="button"
-            onClick={() => setPastOpen(true)}
-            className="flex h-9 items-center gap-1 rounded-lg px-2.5 text-[13px] font-medium text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-hover)] hover:text-[var(--admin-text)]"
-            aria-label="지난 기록 보기"
-          >
-            <History size={14} />
-            <span className="hidden sm:inline">지난 기록</span>
-          </button>
-        </div>
-      </div>
+      {!isOpen && !waitingsQuery.isLoading && (
+        <ClosedView
+          pendingCount={pendingCount}
+          onStart={() => actions.toggle.mutate(true)}
+          starting={togglePending}
+        />
+      )}
 
-      {waitingsQuery.isError && (
-        <div
-          role="alert"
-          className="rounded-xl bg-[var(--admin-danger-soft)] px-3 py-2 text-[13px] text-[var(--admin-danger)]"
-        >
-          {waitingsQuery.error instanceof ApiClientError
-            ? waitingsQuery.error.message
-            : '대기 목록을 불러오지 못했어요.'}
-        </div>
+      {isOpen && (
+        <>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setCloseConfirmOpen(true)}
+              disabled={togglePending}
+              className="flex h-9 items-center gap-1.5 rounded-lg bg-[var(--admin-success-soft)] px-3 text-[13px] font-semibold text-[var(--admin-success)] ring-1 ring-[var(--admin-success)]/30 transition-colors hover:bg-[var(--admin-success-soft)]/70 disabled:opacity-60"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--admin-success)] opacity-50" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--admin-success)]" />
+              </span>
+              접수중
+            </button>
+            <div className="ml-auto flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setInsertOpen(true)}
+                className="flex h-9 items-center gap-1 rounded-lg bg-[var(--admin-surface)] px-3 text-[13px] font-semibold text-[var(--admin-text)] ring-1 ring-[var(--admin-border)] hover:bg-[var(--admin-surface-hover)]"
+              >
+                <Plus size={14} />
+                중간 삽입
+              </button>
+              <button
+                type="button"
+                onClick={() => setPastOpen(true)}
+                className="flex h-9 items-center gap-1 rounded-lg px-2.5 text-[13px] font-medium text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-hover)] hover:text-[var(--admin-text)]"
+                aria-label="지난 기록 보기"
+              >
+                <History size={14} />
+                <span className="hidden sm:inline">지난 기록</span>
+              </button>
+            </div>
+          </div>
+
+          {waitingsQuery.isError && (
+            <div
+              role="alert"
+              className="rounded-xl bg-[var(--admin-danger-soft)] px-3 py-2 text-[13px] text-[var(--admin-danger)]"
+            >
+              {waitingsQuery.error instanceof ApiClientError
+                ? waitingsQuery.error.message
+                : '대기 목록을 불러오지 못했어요.'}
+            </div>
+          )}
+
+          {waitingsQuery.data && (
+            <KanbanBoard
+              boothId={boothId}
+              waitings={allWaitings}
+              onAction={handleAction}
+              onReorder={handleReorder}
+            />
+          )}
+        </>
       )}
 
       {waitingsQuery.isLoading && (
@@ -204,15 +229,6 @@ export default function WaitingListPage() {
         </div>
       )}
 
-      {waitingsQuery.data && (
-        <KanbanBoard
-          boothId={boothId}
-          waitings={allWaitings}
-          onAction={handleAction}
-          onReorder={handleReorder}
-        />
-      )}
-
       <PastRecordsSheet open={pastOpen} onClose={() => setPastOpen(false)} waitings={allWaitings} />
 
       <WaitingInsertSheet
@@ -225,24 +241,28 @@ export default function WaitingListPage() {
       />
 
       <BottomSheet
-        open={confirm !== null}
-        onClose={() => setConfirm(null)}
-        title={confirm ? `#${confirm.waiting.waitingNumber} ${confirm.waiting.name}` : undefined}
+        open={actionConfirm !== null}
+        onClose={() => setActionConfirm(null)}
+        title={
+          actionConfirm
+            ? `#${actionConfirm.waiting.waitingNumber} ${actionConfirm.waiting.name}`
+            : undefined
+        }
       >
-        {confirm && (
+        {actionConfirm && (
           <div className="flex flex-col gap-4">
             <div>
               <p className="text-[15px] font-semibold text-[var(--admin-text)]">
-                {CONFIRM_META[confirm.type].title}
+                {ACTION_CONFIRM_META[actionConfirm.type].title}
               </p>
               <p className="mt-1 text-sm text-[var(--admin-text-muted)]">
-                {CONFIRM_META[confirm.type].desc}
+                {ACTION_CONFIRM_META[actionConfirm.type].desc}
               </p>
             </div>
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setConfirm(null)}
+                onClick={() => setActionConfirm(null)}
                 disabled={actions.anyPending}
                 className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-3 text-[15px] font-semibold text-[var(--admin-text)]"
               >
@@ -250,21 +270,101 @@ export default function WaitingListPage() {
               </button>
               <button
                 type="button"
-                onClick={handleConfirm}
+                onClick={handleActionConfirm}
                 disabled={actions.anyPending}
                 className={[
                   'flex-1 rounded-xl py-3 text-[15px] font-semibold text-white disabled:opacity-60',
-                  CONFIRM_META[confirm.type].danger
+                  ACTION_CONFIRM_META[actionConfirm.type].danger
                     ? 'bg-[var(--admin-danger)]'
                     : 'bg-[var(--admin-primary)]',
                 ].join(' ')}
               >
-                {actions.anyPending ? '처리 중...' : CONFIRM_META[confirm.type].confirmLabel}
+                {actions.anyPending
+                  ? '처리 중...'
+                  : ACTION_CONFIRM_META[actionConfirm.type].confirmLabel}
               </button>
             </div>
           </div>
         )}
       </BottomSheet>
+
+      <BottomSheet
+        open={closeConfirmOpen}
+        onClose={() => setCloseConfirmOpen(false)}
+        title="접수를 중단할까요?"
+      >
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className="text-[15px] font-semibold text-[var(--admin-text)]">
+              새 손님은 더 이상 줄을 설 수 없어요
+            </p>
+            <p className="mt-1 text-sm text-[var(--admin-text-muted)]">
+              {pendingCount > 0
+                ? `이미 대기 중인 ${pendingCount}팀은 다시 접수를 시작하면 계속 처리할 수 있어요.`
+                : '필요할 때 다시 접수를 시작할 수 있어요.'}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setCloseConfirmOpen(false)}
+              disabled={togglePending}
+              className="flex-1 rounded-xl bg-[var(--admin-surface-hover)] py-3 text-[15px] font-semibold text-[var(--admin-text)]"
+            >
+              계속 받기
+            </button>
+            <button
+              type="button"
+              onClick={handleCloseConfirm}
+              disabled={togglePending}
+              className="flex-1 rounded-xl bg-[var(--admin-danger)] py-3 text-[15px] font-semibold text-white disabled:opacity-60"
+            >
+              {togglePending ? '중단 중...' : '접수 중단'}
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
+    </div>
+  );
+}
+
+interface ClosedViewProps {
+  pendingCount: number;
+  onStart: () => void;
+  starting: boolean;
+}
+
+function ClosedView({ pendingCount, onStart, starting }: ClosedViewProps) {
+  return (
+    <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-6 rounded-2xl bg-[var(--admin-surface)] px-6 py-12 text-center ring-1 ring-[var(--admin-border)]">
+      <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[var(--admin-surface-hover)]">
+        <PowerOff size={40} className="text-[var(--admin-text-faint)]" strokeWidth={1.6} />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <h2 className="text-[20px] font-bold text-[var(--admin-text)]">
+          지금은 접수를 받지 않고 있어요
+        </h2>
+        <p className="text-[14px] text-[var(--admin-text-muted)]">
+          접수를 시작하면 손님이 줄을 서서 등록할 수 있어요.
+        </p>
+      </div>
+
+      {pendingCount > 0 && (
+        <p className="max-w-md rounded-xl bg-[var(--admin-warn-soft)] px-4 py-2.5 text-[13px] text-[var(--admin-warn)]">
+          아직 처리하지 못한 <strong>{pendingCount}팀</strong>이 있어요. 접수를 시작하면 계속 처리할
+          수 있어요.
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={onStart}
+        disabled={starting}
+        className="flex h-12 items-center gap-2 rounded-xl bg-[var(--admin-success)] px-6 text-[15px] font-bold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
+      >
+        <Power size={18} />
+        {starting ? '시작하는 중...' : '접수 시작하기'}
+      </button>
     </div>
   );
 }
