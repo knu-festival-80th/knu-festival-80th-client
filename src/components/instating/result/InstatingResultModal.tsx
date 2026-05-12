@@ -6,7 +6,7 @@ import closeIcon from '@/assets/instating/icon/closeIcon.svg';
 import ScratchCard from './ScratchCard';
 import ResultCard from './ResultCard';
 import FailureCard from './FailureCard';
-import { useInstatingScratchCanvas } from '@/hooks/instating/useInstaTingScratchCanvas';
+import { useInstatingScratchCanvas } from '@/hooks/instating/useInstatingScratchCanvas';
 
 export type MatchResult = { matched: true; instagramId: string } | { matched: false };
 

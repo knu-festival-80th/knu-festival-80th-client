@@ -1,7 +1,7 @@
 import { GradientBanner } from '@/components/common/GradientBanner';
 import ApplicantsNumberSection from '@/components/instating/intro/ApplicantsNumberSection';
 import CountDownSection from '@/components/instating/intro/CountDownSection';
-import InstatingContent from '../intro/InstaTingContent';
+import InstatingContent from '../intro/InstatingContent';
 
 const InstatingIntroView = () => {
   return (

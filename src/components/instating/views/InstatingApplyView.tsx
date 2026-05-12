@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import type { SubmittedData } from '../result/InstaTingSuccessModal';
-import InstatingSuccessModal from '../result/InstaTingSuccessModal';
+import type { SubmittedData } from '../result/InstatingSuccessModal';
+import InstatingSuccessModal from '../result/InstatingSuccessModal';
 
 type FormValues = {
   gender: 'male' | 'female';
