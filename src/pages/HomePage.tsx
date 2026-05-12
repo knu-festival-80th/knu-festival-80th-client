@@ -60,7 +60,7 @@ export default function HomePage() {
         </div>
         <motion.div
           className="relative mt-10 flex justify-center"
-          animate={{ y: [0, 10, 0] }}
+          animate={{ y: [10, 0, 10] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
         >
           <GlassCircleButton
@@ -72,25 +72,21 @@ export default function HomePage() {
 
       <div className="pt-16 flex flex-col gap-32 bg-background overflow-x-hidden">
         <div ref={countdownRef}>
-          <SectionBlock label="Count Down" title="축제까지 남은 시간" direction="left">
+          <SectionBlock label="Count Down" title="축제까지 남은 시간">
             <div className="px-5">
               <CountdownTimer />
             </div>
           </SectionBlock>
         </div>
 
-        <SectionBlock
-          label="Festival Start"
-          title="대동제의 주요 콘텐츠 확인하기"
-          direction="right"
-        >
+        <SectionBlock label="Festival Start" title="대동제의 주요 콘텐츠 확인하기">
           <div className="px-5">
             <ContentCard
               category="Stemp"
               title={`부스를 방문하고 스탬프를 모아\n상품을 응모하세요`}
               imageSrc={cardBg1}
               illustrationSrc={illustStemp}
-              to="/"
+              to="/stamptour"
             />
           </div>
           <div className="px-5">
@@ -108,16 +104,11 @@ export default function HomePage() {
           label="Time Table"
           title="올해 대동제를 빛내줄 축제 공연"
           viewAllTo="/timetable"
-          direction="left"
         >
           <TodayLineup data={MOCK_LINEUP} />
         </SectionBlock>
 
-        <SectionBlock
-          label="Festival Start"
-          title="대동제의 주요 콘텐츠 확인하기"
-          direction="right"
-        >
+        <SectionBlock label="Festival Start" title="대동제의 주요 콘텐츠 확인하기">
           <div className="px-5">
             <ContentCard
               category="Map"
@@ -138,7 +129,7 @@ export default function HomePage() {
           </div>
         </SectionBlock>
 
-        <SectionBlock label="Event" title="올해만 진행되는 2026 하푸르나 이벤트" direction="left">
+        <SectionBlock label="Event" title="올해만 진행되는 2026 하푸르나 이벤트">
           <div className="px-5">
             <ContentCard
               category="Memory Board"
@@ -157,7 +148,7 @@ export default function HomePage() {
               description="축제에서 만날 특별한 사람 매칭하기"
               imageSrc={cardBg1}
               illustrationSrc={illustInstaing}
-              to="/"
+              to="/instating"
             />
           </div>
 
@@ -168,7 +159,7 @@ export default function HomePage() {
               description="80주년 카메라 필터로 특별한 추억 만들기"
               imageSrc={cardBg3}
               illustrationSrc={illustPhotobooth}
-              to="/"
+              to="/congrat-video"
             />
           </div>
         </SectionBlock>
