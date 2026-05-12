@@ -168,9 +168,9 @@ function BoothRow({ booth, even, isPending, onEdit, onChangePassword, onDelete }
         <div className="tabular text-[var(--admin-text-muted)]">{idLabel}</div>
         <div className="min-w-0">
           <div className="truncate font-medium text-[var(--admin-text)]">{booth.name}</div>
-          {booth.description && (
+          {booth.department && (
             <div className="hidden truncate text-xs text-[var(--admin-text-muted)] sm:block">
-              {booth.description}
+              {booth.department}
             </div>
           )}
         </div>
@@ -259,9 +259,9 @@ function BoothRow({ booth, even, isPending, onEdit, onChangePassword, onDelete }
           <span className="tabular">
             대기 <strong className="text-[var(--admin-text)]">{booth.currentWaitingTeams}</strong>팀
           </span>
-          {booth.description && (
+          {booth.department && (
             <span className="line-clamp-1 min-w-0 flex-1 text-[var(--admin-text-faint)]">
-              {booth.description}
+              {booth.department}
             </span>
           )}
         </div>

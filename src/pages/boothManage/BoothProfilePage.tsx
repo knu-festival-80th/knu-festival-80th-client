@@ -86,7 +86,6 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
   const saveField = (field: string, value: string) => {
     const payload: BoothUpdateRequest = {};
     if (field === 'name') payload.name = value.trim() || undefined;
-    else if (field === 'description') payload.description = value.trim();
     else if (field === 'department') payload.department = value.trim();
     updateMutation.mutate(payload);
   };
@@ -144,20 +143,6 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
           onChange={setEditValue}
           onSave={() => saveField('department', editValue)}
           saving={updateMutation.isPending}
-        />
-        <RowDivider />
-        <InlineRow
-          label="설명"
-          value={booth.description || ''}
-          placeholder="부스 소개를 입력하세요"
-          editing={editingField === 'description'}
-          editValue={editValue}
-          onEdit={() => startEdit('description', booth.description ?? '')}
-          onCancel={cancelEdit}
-          onChange={setEditValue}
-          onSave={() => saveField('description', editValue)}
-          saving={updateMutation.isPending}
-          multiline
         />
       </SectionCard>
 

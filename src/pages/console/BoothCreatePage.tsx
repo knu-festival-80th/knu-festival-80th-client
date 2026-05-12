@@ -10,7 +10,6 @@ import BoothFormFields, { type BoothFormState } from './booths/BoothFormFields';
 
 const INITIAL_FORM: BoothFormState = {
   name: '',
-  description: '',
   department: '',
   location: '',
   xRatio: null,
@@ -57,7 +56,6 @@ export default function BoothCreatePage() {
 
     createMutation.mutate({
       name: form.name.trim(),
-      description: form.description.trim() || undefined,
       xRatio: form.xRatio ?? undefined,
       yRatio: form.yRatio ?? undefined,
       menuBoardImageUrl: form.menuBoardImageUrl.trim() || undefined,

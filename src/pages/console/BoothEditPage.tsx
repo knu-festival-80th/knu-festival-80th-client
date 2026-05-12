@@ -12,7 +12,6 @@ import BoothFormFields, { type BoothFormState } from './booths/BoothFormFields';
 function toFormState(booth: BoothListItem): BoothFormState {
   return {
     name: booth.name,
-    description: booth.description ?? '',
     department: booth.department ?? '',
     location: booth.location ?? '',
     xRatio: booth.xRatio ?? null,
@@ -118,7 +117,6 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
 
     updateMutation.mutate({
       name: form.name.trim() || undefined,
-      description: form.description.trim() || undefined,
       xRatio: form.xRatio ?? undefined,
       yRatio: form.yRatio ?? undefined,
       menuBoardImageUrl: form.menuBoardImageUrl.trim() || undefined,
