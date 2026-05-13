@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PlayButton from './PlayButton';
 
 type VideoCardProps = {
   badge: string;
@@ -38,6 +39,7 @@ export default function VideoCard({ badge, videoUrl }: VideoCardProps) {
             alt={badge}
             className="absolute inset-0 size-full object-cover"
           />
+          <PlayButton />
         </button>
       )}
       <span className="absolute top-5 left-5 z-10 bg-primary text-white text-body2 font-medium rounded-full px-5 py-1.5 pointer-events-none transition-opacity duration-300 group-hover:opacity-0">
