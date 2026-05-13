@@ -1,4 +1,4 @@
-import sadHobanwoo from '@/assets/instaTing/Hobanwoo/sadHobanwoo.svg';
+import sadHobanwoo from '@/assets/instating/Hobanwoo/sadHobanwoo.svg';
 
 const FailureCard = () => (
   <div

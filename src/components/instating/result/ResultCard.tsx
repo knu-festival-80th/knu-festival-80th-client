@@ -1,6 +1,6 @@
 import { CheckIcon } from 'lucide-react';
-import copyIcon from '@/assets/instaTing/icon/copyIcon.svg';
-import happyHobanwoo from '@/assets/instaTing/Hobanwoo/happyHobanwoo.svg';
+import copyIcon from '@/assets/instating/icon/copyIcon.svg';
+import happyHobanwoo from '@/assets/instating/Hobanwoo/happyHobanwoo.svg';
 
 interface ResultCardProps {
   instagramId: string;
