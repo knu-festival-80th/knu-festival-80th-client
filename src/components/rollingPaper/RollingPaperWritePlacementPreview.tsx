@@ -40,6 +40,7 @@ type RollingPaperWritePlacementPreviewProps = {
   message: string;
   occupiedNotes: PlacedRollingPaperNote[];
   selectedPlacement: RollingPaperPlacement | null;
+  isPlacementAvailable: boolean;
   scale: number;
   pan: RollingPaperPan;
   onPlacementChange: (placement: RollingPaperPlacement) => void;
@@ -69,6 +70,7 @@ export default function RollingPaperWritePlacementPreview({
   message,
   occupiedNotes,
   selectedPlacement,
+  isPlacementAvailable,
   scale,
   pan,
   onPlacementChange,
@@ -304,7 +306,7 @@ export default function RollingPaperWritePlacementPreview({
             <RollingPaperSticker
               colorId={colorId}
               message={message}
-              className="absolute z-30"
+              className={`absolute z-30 ${isPlacementAvailable ? '' : 'opacity-55 grayscale-[0.2]'}`}
               style={{
                 width: `${ROLLING_PAPER_NOTE_WIDTH}px`,
                 left: `${selectedPlacement.x}%`,

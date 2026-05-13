@@ -15,8 +15,8 @@ import {
   ROLLING_PAPER_MAX_NOTES_PER_BOARD,
   ROLLING_PAPER_CLIENT_COLLISION_SCALE,
   ROLLING_PAPER_ZOOM,
-  findNearestAvailableRollingPaperPlacement,
   getPlacedNotesForBoard,
+  isRollingPaperPlacementAvailable,
   type PlacedRollingPaperNote,
   type RollingPaperPan,
 } from '@/lib/rollingPaperLayout';
@@ -174,7 +174,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       return;
     }
 
-    const resolvedPlacement = findNearestAvailableRollingPaperPlacement(
+    const isRequestedPlacementAvailable = isRollingPaperPlacementAvailable(
       { x: note.x, y: note.y },
       note.colorId,
       currentBoardNotes,
@@ -183,7 +183,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       ROLLING_PAPER_CLIENT_COLLISION_SCALE,
     );
 
-    if (!resolvedPlacement) {
+    if (!isRequestedPlacementAvailable) {
       return;
     }
 
@@ -193,8 +193,6 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       boardVariant: boardIndex,
       categoryId: category.id,
       channelId: channel.id,
-      x: resolvedPlacement.x,
-      y: resolvedPlacement.y,
     });
     setIsWriteModalOpen(false);
   };

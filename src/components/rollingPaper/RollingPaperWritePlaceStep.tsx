@@ -19,6 +19,7 @@ type RollingPaperWritePlaceStepProps = {
   message: string;
   occupiedNotes: PlacedRollingPaperNote[];
   selectedPlacement: RollingPaperPlacement | null;
+  isPlacementAvailable: boolean;
   scale: number;
   pan: RollingPaperPan;
   onPlacementChange: (placement: RollingPaperPlacement) => void;
@@ -63,6 +64,7 @@ export default function RollingPaperWritePlaceStep({
   message,
   occupiedNotes,
   selectedPlacement,
+  isPlacementAvailable,
   scale,
   pan,
   onPlacementChange,
@@ -95,6 +97,7 @@ export default function RollingPaperWritePlaceStep({
           message={message}
           occupiedNotes={occupiedNotes}
           selectedPlacement={selectedPlacement}
+          isPlacementAvailable={isPlacementAvailable}
           scale={scale}
           pan={pan}
           onPlacementChange={onPlacementChange}
@@ -104,7 +107,9 @@ export default function RollingPaperWritePlaceStep({
       </div>
 
       <p className="mt-1 px-15 font-wanted-sans text-[10px] font-medium leading-[1.4] tracking-[-0.02em] text-gray/80">
-        한 손가락으로 포스트잇 위치를 정하고, 두 손가락으로 확대/축소와 화면 이동을 할 수 있어요
+        {isPlacementAvailable
+          ? '한 손가락으로 포스트잇 위치를 정하고, 두 손가락으로 확대/축소와 화면 이동을 할 수 있어요'
+          : '이미 붙은 포스트잇과 겹쳐요. 빈 위치로 옮겨주세요'}
       </p>
 
       <div className="mt-3 flex w-[287px] gap-3">
