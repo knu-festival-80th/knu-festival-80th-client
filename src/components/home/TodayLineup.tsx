@@ -1,5 +1,5 @@
 import type { DayLineup } from '@/types/home';
-import { isScheduleActive } from '@/utils/time';
+import { getNow, isScheduleActive } from '@/utils/time';
 import LineupImageCarousel from './LineupImageCarousel';
 import ScheduleItem from './ScheduleItem';
 
@@ -11,7 +11,7 @@ type TodayLineupProps = {
 };
 
 export default function TodayLineup({ data }: TodayLineupProps) {
-  const now = new Date();
+  const now = getNow();
   const today = now.getDate();
   const isFestivalDay = now.getMonth() + 1 === FESTIVAL_MONTH && FESTIVAL_DAYS.includes(today);
   const activeDay = isFestivalDay ? today : 21;

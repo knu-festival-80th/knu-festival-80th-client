@@ -3,11 +3,13 @@ export const toMinutes = (time: string) => {
   return h * 60 + m;
 };
 
+export const getNow = () => new Date();
+
 const FESTIVAL_MONTH = 5;
 const FESTIVAL_DAYS = [20, 21, 22];
 
 export function isScheduleActive(startTime: string, endTime: string, day: number): boolean {
-  const now = new Date();
+  const now = getNow();
   const isToday =
     now.getMonth() + 1 === FESTIVAL_MONTH &&
     FESTIVAL_DAYS.includes(now.getDate()) &&
