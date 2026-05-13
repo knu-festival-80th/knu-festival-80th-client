@@ -12,6 +12,8 @@ export type RollingPaperPan = {
 
 export type PlacedRollingPaperNote = {
   id: string;
+  postitId?: number;
+  boardId?: number;
   message: string;
   colorId: RollingPaperStickerColorId;
   x: number;

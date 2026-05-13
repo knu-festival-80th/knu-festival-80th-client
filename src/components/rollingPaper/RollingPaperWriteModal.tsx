@@ -24,6 +24,7 @@ export default function RollingPaperWriteModal({
   isOpen,
   boardVariant,
   placedNotes,
+  isSubmitting = false,
   onClose,
   onPlace,
 }: RollingPaperWriteModalProps) {
@@ -82,10 +83,10 @@ export default function RollingPaperWriteModal({
     setStep('place');
   };
 
-  const handlePlace = () => {
-    if (!trimmedMessage || !selectedPlacement) return;
+  const handlePlace = async () => {
+    if (!trimmedMessage || !selectedPlacement || isSubmitting) return;
 
-    onPlace({
+    await onPlace({
       id: createRollingPaperNoteId(),
       message: trimmedMessage,
       colorId,
@@ -129,8 +130,11 @@ export default function RollingPaperWriteModal({
             onScaleChange={setScale}
             onPanChange={setPan}
             onPlaceDisabled={
-              !selectedPlacement || occupiedNotes.length >= ROLLING_PAPER_MAX_NOTES_PER_BOARD
+              isSubmitting ||
+              !selectedPlacement ||
+              occupiedNotes.length >= ROLLING_PAPER_MAX_NOTES_PER_BOARD
             }
+            isSubmitting={isSubmitting}
             onPlace={handlePlace}
           />
         )}

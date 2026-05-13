@@ -25,6 +25,7 @@ type RollingPaperWritePlaceStepProps = {
   onScaleChange: (scale: number) => void;
   onPanChange: (pan: RollingPaperPan) => void;
   onPlaceDisabled: boolean;
+  isSubmitting?: boolean;
   onPlace: () => void;
 };
 
@@ -68,6 +69,7 @@ export default function RollingPaperWritePlaceStep({
   onScaleChange,
   onPanChange,
   onPlaceDisabled,
+  isSubmitting = false,
   onPlace,
 }: RollingPaperWritePlaceStepProps) {
   const remainingCount = ROLLING_PAPER_MAX_NOTES_PER_BOARD - occupiedNotes.length;
@@ -137,7 +139,11 @@ export default function RollingPaperWritePlaceStep({
         disabled={onPlaceDisabled}
         onClick={onPlace}
       >
-        {remainingCount === 0 ? '보드가 가득 찼어요' : '롤링페이퍼 붙이기'}
+        {isSubmitting
+          ? '붙이는 중이에요'
+          : remainingCount === 0
+            ? '보드가 가득 찼어요'
+            : '롤링페이퍼 붙이기'}
       </button>
     </div>
   );
