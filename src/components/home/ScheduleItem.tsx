@@ -13,7 +13,7 @@ export default function ScheduleItem({ entry }: ScheduleItemProps) {
         <span>{entry.startTime} ~ </span>
         <span>{entry.endTime}</span>
       </div>
-      <span className="flex-1 text-body2">{entry.name}</span>
+      <span className="flex-1 text-body2 whitespace-pre-line">{entry.name}</span>
     </div>
   );
 }

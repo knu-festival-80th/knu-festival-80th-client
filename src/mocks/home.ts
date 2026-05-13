@@ -23,16 +23,16 @@ export const MOCK_LINEUP: DayLineup[] = [
       { src: nctWish, alt: 'NCT WISH' },
     ],
     schedules: [
-      { name: 'KNU 가요제 및 시상식', startTime: '18:00', endTime: '19:00' },
-      { name: "축하공연 '권은비'", startTime: '19:00', endTime: '19:30' },
+      { name: 'KNU 가요제\n및 시상식', startTime: '18:00', endTime: '19:00' },
+      { name: "축하공연\n'권은비'", startTime: '19:00', endTime: '19:30' },
       { name: '개회식', startTime: '19:30', endTime: '19:50' },
       { name: '드론쇼', startTime: '19:50', endTime: '20:00' },
       {
-        name: "DJ와 함께하는 워터파티 '도미노보이즈,할리퀸'",
+        name: "DJ와 함께하는\n워터파티\n'도미노보이즈,\n할리퀸'",
         startTime: '20:00',
         endTime: '21:00',
       },
-      { name: "축하공연 'NCT WISH'", startTime: '21:00', endTime: '21:30' },
+      { name: "축하공연\n'NCT WISH'", startTime: '21:00', endTime: '21:30' },
     ],
   },
   {
@@ -45,11 +45,11 @@ export const MOCK_LINEUP: DayLineup[] = [
     ],
     schedules: [
       { name: '동아리 공연', startTime: '18:30', endTime: '19:30' },
-      { name: "축하공연 '아이칠린'", startTime: '19:30', endTime: '20:00' },
-      { name: "축하공연 '지코'", startTime: '20:00', endTime: '20:30' },
+      { name: "축하공연\n'아이칠린'", startTime: '19:30', endTime: '20:00' },
+      { name: "축하공연\n'지코'", startTime: '20:00', endTime: '20:30' },
       { name: '불꽃쇼', startTime: '20:30', endTime: '20:40' },
-      { name: "축하공연 '선미'", startTime: '20:40', endTime: '21:10' },
-      { name: "축하공연 '이영지'", startTime: '21:10', endTime: '21:40' },
+      { name: "축하공연\n'선미'", startTime: '20:40', endTime: '21:10' },
+      { name: "축하공연\n'이영지'", startTime: '21:10', endTime: '21:40' },
     ],
   },
 ];

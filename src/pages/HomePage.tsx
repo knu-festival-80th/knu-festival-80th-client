@@ -124,6 +124,7 @@ export default function HomePage() {
               title="원하는 주막에 실시간 대기 등록하기"
               imageSrc={cardBg1}
               illustrationSrc={illustBooth}
+              illustrationClassName="top-11"
               to="/taverns"
             />
           </div>
@@ -155,11 +156,11 @@ export default function HomePage() {
           <div className="px-5">
             <ContentCard
               category="Photo Booth"
-              title="포토부스"
-              description="80주년 카메라 필터로 특별한 추억 만들기"
+              title="호반우스타그램"
+              description="80주년 만의 카메라 필터로 특별한 추억 만들기"
               imageSrc={cardBg3}
               illustrationSrc={illustPhotobooth}
-              to="/congrat-video"
+              to="/hobanustagram"
             />
           </div>
         </SectionBlock>

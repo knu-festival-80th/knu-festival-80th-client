@@ -7,6 +7,7 @@ type ContentCardProps = {
   description?: string;
   imageSrc?: string;
   illustrationSrc?: string;
+  illustrationClassName?: string;
   to?: string;
   onClick?: () => void;
   className?: string;
@@ -23,6 +24,7 @@ export default function ContentCard({
   description,
   imageSrc,
   illustrationSrc,
+  illustrationClassName,
   to,
   onClick,
   className,
@@ -60,7 +62,7 @@ export default function ContentCard({
           <img
             src={illustrationSrc}
             alt=""
-            className="absolute inset-0 size-full object-contain object-bottom"
+            className={`absolute inset-0 size-full object-contain object-bottom ${illustrationClassName ?? ''}`}
           />
         )}
       </div>
