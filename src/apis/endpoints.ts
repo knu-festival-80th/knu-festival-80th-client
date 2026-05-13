@@ -19,6 +19,12 @@ export const ENDPOINTS = {
     my: '/waitings/my',
   },
 
+  canvas: {
+    questions: '/canvas/questions',
+    boards: '/canvas/boards',
+    postits: '/canvas/postits',
+  },
+
   admin: {
     uploadImage: '/admin/uploads/images',
     booths: '/admin/booths',
@@ -33,5 +39,9 @@ export const ENDPOINTS = {
     waitingSkip: (waitingId: number) => `/admin/waitings/${waitingId}/skip`,
     waitingReorder: (waitingId: number) => `/admin/waitings/${waitingId}/reorder`,
     waitingResendSms: (waitingId: number) => `/admin/waitings/${waitingId}/resend-sms`,
+    canvas: {
+      boards: '/admin/v1/canvas/boards',
+      postitById: (postitId: number) => `/admin/v1/canvas/postits/${postitId}`,
+    },
   },
 } as const;
