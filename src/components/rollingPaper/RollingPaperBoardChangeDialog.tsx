@@ -1,15 +1,12 @@
 import { X } from 'lucide-react';
-import {
-  getRollingPaperChannelsByCategory,
-  type RollingPaperCategory,
-  type RollingPaperChannel,
-} from '@/constants/rollingPaper';
+import type { RollingPaperCategory, RollingPaperChannel } from '@/constants/rollingPaper';
 import type { PlacedRollingPaperNote } from '@/lib/rollingPaperLayout';
 import RollingPaperChannelCard from './RollingPaperChannelCard';
 
 type RollingPaperBoardChangeDialogProps = {
   category: RollingPaperCategory;
   currentChannel: RollingPaperChannel;
+  channels: RollingPaperChannel[];
   placedNotes: PlacedRollingPaperNote[];
   onClose: () => void;
   onSelectChannel: (channel: RollingPaperChannel) => void;
@@ -18,12 +15,11 @@ type RollingPaperBoardChangeDialogProps = {
 export default function RollingPaperBoardChangeDialog({
   category,
   currentChannel,
+  channels,
   placedNotes,
   onClose,
   onSelectChannel,
 }: RollingPaperBoardChangeDialogProps) {
-  const channels = getRollingPaperChannelsByCategory(category.id);
-
   return (
     <div
       className="fixed inset-0 z-[80] flex items-end justify-center bg-black/45 px-4 pb-5"
@@ -59,9 +55,9 @@ export default function RollingPaperBoardChangeDialog({
             const noteCount =
               placedNotes.filter(
                 (note) =>
-                  note.boardVariant === index &&
-                  note.categoryId === category.id &&
-                  note.channelId === channel.id,
+                  note.boardVariant === (channel.boardVariant ?? index) &&
+                  (!note.categoryId || note.categoryId === category.id) &&
+                  (!note.channelId || note.channelId === channel.id),
               ).length || channel.noteCount;
 
             return (

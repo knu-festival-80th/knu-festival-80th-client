@@ -1,11 +1,22 @@
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import {
-  ROLLING_PAPER_CATEGORIES,
-  getRollingPaperChannelsByCategory,
-} from '@/constants/rollingPaper';
+import { rollingPaperApi } from '@/apis';
 import RollingPaperSelectionNav from '@/components/rollingPaper/RollingPaperSelectionNav';
+import { toRollingPaperCategory } from '@/components/rollingPaper/rollingPaperApiAdapter';
+
+const rollingPaperQuestionsQueryKey = ['rollingPaper', 'questions'] as const;
 
 export default function RollingPaperCategorySelectPage() {
+  const questionsQuery = useQuery({
+    queryKey: rollingPaperQuestionsQueryKey,
+    queryFn: rollingPaperApi.listQuestions,
+  });
+
+  const categories = (questionsQuery.data ?? [])
+    .slice()
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map(toRollingPaperCategory);
+
   return (
     <div className="min-h-[calc(100dvh-64px)] bg-[#f6f7ff]">
       <RollingPaperSelectionNav title="카테고리 선택" />
@@ -15,11 +26,17 @@ export default function RollingPaperCategorySelectPage() {
           카테고리 선택
         </h2>
 
-        <div className="mt-12 flex flex-col gap-[22px]">
-          {ROLLING_PAPER_CATEGORIES.map((category) => {
-            const firstChannel = getRollingPaperChannelsByCategory(category.id)[0];
-
-            return (
+        {questionsQuery.isLoading ? (
+          <p className="mt-12 text-center font-wanted-sans text-body1 text-gray">
+            카테고리를 불러오는 중이에요.
+          </p>
+        ) : questionsQuery.isError ? (
+          <p className="mt-12 text-center font-wanted-sans text-body1 text-gray">
+            카테고리를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
+          </p>
+        ) : (
+          <div className="mt-12 flex flex-col gap-[22px]">
+            {categories.map((category) => (
               <Link
                 key={category.id}
                 to={`/rolling-paper/categories/${category.id}/channels`}
@@ -34,12 +51,12 @@ export default function RollingPaperCategorySelectPage() {
                   </span>
                 </div>
                 <span className="shrink-0 font-wanted-sans text-caption font-semibold text-gray">
-                  {firstChannel.label}부터
+                  보드 보기
                 </span>
               </Link>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
