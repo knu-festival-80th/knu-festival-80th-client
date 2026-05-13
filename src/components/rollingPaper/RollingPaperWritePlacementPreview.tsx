@@ -78,6 +78,7 @@ export default function RollingPaperWritePlacementPreview({
   onScaleChange,
 }: RollingPaperWritePlacementPreviewProps) {
   const previewRef = useRef<HTMLButtonElement>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
   const activePointersRef = useRef(new Map<number, PointerSnapshot>());
   const pinchGestureRef = useRef<PinchGestureSnapshot | null>(null);
   const frameRect = getRollingPaperFrameRect(boardVariant);
@@ -89,7 +90,17 @@ export default function RollingPaperWritePlacementPreview({
     nextScale = scale,
     nextPan = pan,
   ) => {
+    const board = boardRef.current;
     const preview = previewRef.current;
+
+    if (board && nextScale === scale && nextPan === pan) {
+      const boardRect = board.getBoundingClientRect();
+
+      return {
+        x: ((clientX - boardRect.left) / boardRect.width) * ROLLING_PAPER_CANVAS_DIMENSIONS.width,
+        y: ((clientY - boardRect.top) / boardRect.height) * ROLLING_PAPER_CANVAS_DIMENSIONS.height,
+      };
+    }
 
     if (!preview) {
       return {
@@ -189,7 +200,7 @@ export default function RollingPaperWritePlacementPreview({
     onPanChange(nextPan);
   };
 
-  const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+  const handlePointerDown = (event: PointerEvent<HTMLSpanElement>) => {
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     activePointersRef.current.set(event.pointerId, {
@@ -207,7 +218,7 @@ export default function RollingPaperWritePlacementPreview({
     }
   };
 
-  const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+  const handlePointerMove = (event: PointerEvent<HTMLSpanElement>) => {
     if (!activePointersRef.current.has(event.pointerId)) {
       return;
     }
@@ -232,8 +243,12 @@ export default function RollingPaperWritePlacementPreview({
     }
   };
 
-  const handlePointerRelease = (event: PointerEvent<HTMLButtonElement>) => {
+  const handlePointerRelease = (event: PointerEvent<HTMLSpanElement>) => {
     activePointersRef.current.delete(event.pointerId);
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
 
     if (activePointersRef.current.size < 2) {
       pinchGestureRef.current = null;
@@ -246,13 +261,10 @@ export default function RollingPaperWritePlacementPreview({
       type="button"
       aria-label="롤링페이퍼를 자유롭게 붙일 위치 선택"
       className="relative h-[375px] w-[287px] touch-none overflow-hidden rounded-[24px] bg-[#ececec] text-left"
-      onPointerCancel={handlePointerRelease}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerRelease}
     >
       <div
-        className="absolute left-1/2 top-1/2"
+        ref={boardRef}
+        className="pointer-events-none absolute left-1/2 top-1/2"
         style={{
           width: `${ROLLING_PAPER_CANVAS_DIMENSIONS.width}px`,
           height: `${ROLLING_PAPER_CANVAS_DIMENSIONS.height}px`,
@@ -319,6 +331,15 @@ export default function RollingPaperWritePlacementPreview({
       </div>
 
       <div className="pointer-events-none absolute inset-0 rounded-[24px] border border-black/8" />
+
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 z-20 cursor-crosshair touch-none"
+        onPointerCancel={handlePointerRelease}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerRelease}
+      />
 
       <div className="absolute right-3 bottom-3 z-30 h-[72px] w-[52px] rounded-[10px] border border-black/10 bg-white/84 p-1 shadow-[0_4px_12px_rgba(0,0,0,0.12)] backdrop-blur">
         <div className="relative h-full w-full overflow-hidden rounded-[7px] bg-[#f4f4f4]">
