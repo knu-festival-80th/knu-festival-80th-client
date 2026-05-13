@@ -1,38 +1,10 @@
 import { useState } from 'react';
 import { FiChevronRight, FiX } from 'react-icons/fi';
 
+import { lookupMyWaitings, cancelMyWaiting } from '@/apis/modules/waiting';
+import { toApiClientError } from '@/apis/error';
 import FieldInput from '@/components/tavern/shared/FieldInput';
 import type { ReservationLookupResult } from '@/components/tavern/types';
-
-const createMockReservationResults = (
-  name: string,
-  phoneNumber: string,
-): ReservationLookupResult[] => [
-  {
-    id: 'startup',
-    tavernName: 'Start-up',
-    aheadTeams: 2,
-    name,
-    partySize: '2',
-    phoneNumber,
-  },
-  {
-    id: 'comstaurant',
-    tavernName: '컴스토랑',
-    aheadTeams: 5,
-    name,
-    partySize: '4',
-    phoneNumber,
-  },
-  {
-    id: 'itaewon-class',
-    tavernName: 'E태원 클라쓰',
-    aheadTeams: 10,
-    name,
-    partySize: '2',
-    phoneNumber,
-  },
-];
 
 export default function ReservationLookup() {
   const [reservationName, setReservationName] = useState('');
@@ -41,7 +13,44 @@ export default function ReservationLookup() {
   const [selectedReservation, setSelectedReservation] = useState<ReservationLookupResult | null>(
     null,
   );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const canSearch = reservationName.trim().length > 0 && phoneNumber.trim().length > 0;
+
+  const handleSearch = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!canSearch) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const results = await lookupMyWaitings(reservationName.trim(), phoneNumber.trim());
+      setLookupResults(
+        results.map((item) => ({
+          id: item.waitingId,
+          tavernName: item.boothName,
+          aheadTeams: item.aheadCount,
+          waitingNumber: item.waitingNumber,
+          status: item.status,
+          name: reservationName.trim(),
+          partySize: '',
+          phoneNumber: phoneNumber.trim(),
+        })),
+      );
+    } catch (err) {
+      const apiError = toApiClientError(err);
+      if (apiError.code === 'W005') {
+        setLookupResults([]);
+      } else if (apiError.code === 'W003') {
+        setError('예약자명과 연락처가 일치하지 않습니다.');
+      } else {
+        setError(apiError.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (lookupResults) {
     return (
@@ -49,17 +58,16 @@ export default function ReservationLookup() {
         <ReservationResultList
           reservations={lookupResults}
           onSelectReservation={setSelectedReservation}
+          onBack={() => setLookupResults(null)}
         />
 
         {selectedReservation && (
           <ReservationDetailModal
             reservation={selectedReservation}
+            phoneNumber={phoneNumber.trim()}
             onCancelReservation={() => {
               setLookupResults((currentResults) => {
-                if (!currentResults) {
-                  return currentResults;
-                }
-
+                if (!currentResults) return currentResults;
                 return currentResults.filter((result) => result.id !== selectedReservation.id);
               });
               setSelectedReservation(null);
@@ -80,16 +88,7 @@ export default function ReservationLookup() {
         </p>
       </div>
 
-      <form
-        className="flex flex-col gap-8"
-        onSubmit={(event) => {
-          event.preventDefault();
-
-          if (canSearch) {
-            setLookupResults(createMockReservationResults(reservationName, phoneNumber));
-          }
-        }}
-      >
+      <form className="flex flex-col gap-8" onSubmit={handleSearch}>
         <div className="flex flex-col gap-[18px]">
           <FieldInput
             id="reservation-name"
@@ -109,14 +108,21 @@ export default function ReservationLookup() {
             onChange={setPhoneNumber}
           />
         </div>
+
+        {error && (
+          <p className="rounded-[8px] bg-red-50 px-4 py-3 text-[14px] font-medium text-[#ff3d3d]">
+            {error}
+          </p>
+        )}
+
         <button
           type="submit"
           className={`h-[51px] w-full rounded-[8px] text-[16px] font-semibold tracking-[-0.32px] text-white ${
-            canSearch ? 'bg-[#ff3d3d]' : 'bg-[#cccccc]'
+            canSearch && !loading ? 'bg-[#ff3d3d]' : 'bg-[#cccccc]'
           }`}
-          disabled={!canSearch}
+          disabled={!canSearch || loading}
         >
-          조회하기
+          {loading ? '조회 중...' : '조회하기'}
         </button>
       </form>
     </section>
@@ -126,10 +132,32 @@ export default function ReservationLookup() {
 function ReservationResultList({
   reservations,
   onSelectReservation,
+  onBack,
 }: {
   reservations: ReservationLookupResult[];
   onSelectReservation: (reservation: ReservationLookupResult) => void;
+  onBack: () => void;
 }) {
+  if (reservations.length === 0) {
+    return (
+      <section className="flex flex-col gap-7 px-5 py-6">
+        <div className="flex flex-col gap-2.5">
+          <h1 className="text-[24px] font-bold leading-none tracking-[-0.48px]">예약 조회 결과</h1>
+          <p className="text-[16px] font-normal leading-none tracking-[-0.32px] text-[#808080]">
+            현재 대기 중인 예약이 없습니다.
+          </p>
+        </div>
+        <button
+          type="button"
+          className="h-[51px] w-full rounded-[8px] border border-[#e5e5e5] text-[16px] font-semibold tracking-[-0.32px]"
+          onClick={onBack}
+        >
+          다시 조회하기
+        </button>
+      </section>
+    );
+  }
+
   return (
     <section className="flex flex-col gap-7 px-5 py-6">
       <div className="flex flex-col gap-2.5">
@@ -170,8 +198,8 @@ function ReservationResultList({
         {reservations.length >= 3 && (
           <p className="text-[#f49800]">주막은 총 3곳까지만 예약 가능합니다.</p>
         )}
-        <p>차례가 오면 전화를 걸어 알려드립니다.</p>
-        <p>전화를 받지 않을 시 예약이 취소될 수 있습니다.</p>
+        <p>차례가 오면 문자로 알려드립니다.</p>
+        <p>10분 내 미방문 시 예약이 자동 취소됩니다.</p>
       </div>
     </section>
   );
@@ -179,13 +207,34 @@ function ReservationResultList({
 
 function ReservationDetailModal({
   reservation,
+  phoneNumber,
   onCancelReservation,
   onClose,
 }: {
   reservation: ReservationLookupResult;
+  phoneNumber: string;
   onCancelReservation: () => void;
   onClose: () => void;
 }) {
+  const [cancelling, setCancelling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCancel = async () => {
+    setCancelling(true);
+    setError(null);
+    try {
+      const digits = phoneNumber.replace(/\D/g, '');
+      const last4 = digits.slice(-4);
+      await cancelMyWaiting(reservation.id, last4);
+      onCancelReservation();
+    } catch (err) {
+      const apiError = toApiClientError(err);
+      setError(apiError.message);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex justify-center bg-black/30">
       <div className="relative min-h-dvh w-full max-w-[375px]">
@@ -220,6 +269,10 @@ function ReservationDetailModal({
                 </h3>
                 <FiChevronRight size={28} className="text-[#808080]" />
               </div>
+              <p className="mt-1 text-[14px] font-medium tracking-[-0.28px] text-[#808080]">
+                대기번호{' '}
+                <span className="font-bold text-[#ff3d3d]">{reservation.waitingNumber}</span>번
+              </p>
               <div className="mt-2.5 flex items-end gap-1">
                 <strong className="text-[28px] font-bold leading-[1.4] tracking-[-0.56px] text-[#ff3d3d]">
                   {reservation.aheadTeams}
@@ -237,21 +290,25 @@ function ReservationDetailModal({
                 <dd className="text-right">{reservation.name}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-[#808080]">인원</dt>
-                <dd className="text-right">{reservation.partySize}명</dd>
-              </div>
-              <div className="flex justify-between gap-4">
                 <dt className="text-[#808080]">연락처</dt>
                 <dd className="text-right">{reservation.phoneNumber}</dd>
               </div>
             </dl>
             <div className="my-4 h-px bg-[#e5e5e5]" />
+
+            {error && (
+              <p className="mb-3 rounded-[8px] bg-red-50 px-4 py-3 text-[14px] font-medium text-[#ff3d3d]">
+                {error}
+              </p>
+            )}
+
             <button
               type="button"
               className="h-[50px] w-full rounded-[8px] border-[1.4px] border-[#ff3d3d] bg-white text-[16px] font-medium tracking-[-0.32px] text-[#ff3d3d]"
-              onClick={onCancelReservation}
+              disabled={cancelling}
+              onClick={handleCancel}
             >
-              예약 취소하기
+              {cancelling ? '취소 중...' : '예약 취소하기'}
             </button>
           </div>
         </section>

@@ -6,45 +6,56 @@ export type BoothSort = 'likes' | 'waiting-asc';
 export interface BoothListItem {
   boothId: number;
   name: string;
-  description: string;
   xRatio: number | null;
   yRatio: number | null;
   likeCount: number;
   menuBoardImageUrl: string | null;
   waitingOpen: boolean;
   currentWaitingTeams: number;
+  department: string | null;
+  location: string | null;
 }
 
 export interface BoothSummary {
   boothId: number;
   name: string;
-  description: string;
   xRatio: number | null;
   yRatio: number | null;
   likeCount: number;
   menuBoardImageUrl: string | null;
   waitingOpen: boolean;
+  department: string | null;
+  location: string | null;
 }
 
 export interface BoothCreateRequest {
   name: string;
-  description?: string;
   xRatio?: number;
   yRatio?: number;
   menuBoardImageUrl?: string;
   adminPassword: string;
+  department?: string;
+  location?: string;
 }
 
 export interface BoothUpdateRequest {
   name?: string;
-  description?: string;
   xRatio?: number;
   yRatio?: number;
   menuBoardImageUrl?: string;
+  department?: string;
+  location?: string;
 }
 
 export interface BoothPasswordChangeRequest {
   newPassword: string;
+}
+
+export async function listBooths(sort: BoothSort = 'likes'): Promise<BoothListItem[]> {
+  const response = await http.get<ApiResponse<BoothListItem[]>>(ENDPOINTS.booths.list, {
+    params: { sort },
+  });
+  return unwrapApiResponse(response.data);
 }
 
 export async function listAdminBooths(sort: BoothSort = 'likes'): Promise<BoothListItem[]> {

@@ -34,9 +34,9 @@ export default function BoothManageShell() {
   return (
     <div data-admin-theme="booth" className="min-h-dvh bg-[var(--admin-bg)]">
       <header className="sticky top-0 z-30 border-b border-[var(--admin-border)] bg-white">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-5 py-3">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <h1 className="truncate text-[17px] font-bold text-[var(--admin-text)]">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <h1 className="truncate text-[16px] font-bold text-[var(--admin-text)]">
               {myBooth?.name ?? (boothsQuery.isLoading ? '...' : '내 주막')}
             </h1>
             {myBooth && (
@@ -52,6 +52,26 @@ export default function BoothManageShell() {
               </span>
             )}
           </div>
+          <nav aria-label="부스 운영 탭 (데스크톱)" className="hidden items-center gap-1 sm:flex">
+            {TABS.map(({ to, label, Icon, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  [
+                    'inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-semibold transition-colors',
+                    isActive
+                      ? 'bg-[var(--admin-primary-soft)] text-[var(--admin-primary)]'
+                      : 'text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-hover)] hover:text-[var(--admin-text)]',
+                  ].join(' ')
+                }
+              >
+                <Icon size={14} />
+                {label}
+              </NavLink>
+            ))}
+          </nav>
           <button
             type="button"
             onClick={() => logoutMutation.mutate()}
@@ -62,31 +82,9 @@ export default function BoothManageShell() {
             <LogOut size={18} />
           </button>
         </div>
-        <nav
-          aria-label="부스 운영 탭 (데스크톱)"
-          className="mx-auto hidden max-w-3xl gap-1 px-5 sm:flex"
-        >
-          {TABS.map(({ to, label, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                [
-                  'border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'border-[var(--admin-primary)] text-[var(--admin-primary)]'
-                    : 'border-transparent text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]',
-                ].join(' ')
-              }
-            >
-              {label}
-            </NavLink>
-          ))}
-        </nav>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-5 pt-5 pb-24 sm:pt-6 sm:pb-10">
+      <main className="mx-auto w-full max-w-6xl px-3 pt-3 pb-24 sm:px-6 sm:pt-5 sm:pb-10">
         <Outlet />
       </main>
 

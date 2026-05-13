@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, Check, Pencil, X } from 'lucide-react';
+import { Camera, Check, MapPin, Pencil, X } from 'lucide-react';
 import { useRef, useState, type ChangeEvent } from 'react';
 
 import { ApiClientError, boothApi, imagePathToSrc, imageUrlToPath, uploadApi } from '@/apis';
@@ -86,22 +86,7 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
   const saveField = (field: string, value: string) => {
     const payload: BoothUpdateRequest = {};
     if (field === 'name') payload.name = value.trim() || undefined;
-    else if (field === 'description') payload.description = value.trim();
-    else if (field === 'xRatio') {
-      const n = Number(value);
-      if (value && (!Number.isFinite(n) || n < 0 || n > 1)) {
-        showToast('error', '0과 1 사이의 값이어야 합니다.');
-        return;
-      }
-      payload.xRatio = value ? n : undefined;
-    } else if (field === 'yRatio') {
-      const n = Number(value);
-      if (value && (!Number.isFinite(n) || n < 0 || n > 1)) {
-        showToast('error', '0과 1 사이의 값이어야 합니다.');
-        return;
-      }
-      payload.yRatio = value ? n : undefined;
-    }
+    else if (field === 'department') payload.department = value.trim();
     updateMutation.mutate(payload);
   };
 
@@ -120,11 +105,11 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
   const menuBoardSrc = imagePathToSrc(imageUrlToPath(booth.menuBoardImageUrl));
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-2.5">
       {toast && (
         <div
           className={[
-            'rounded-xl px-4 py-3 text-sm font-medium',
+            'rounded-xl px-3 py-2 text-[13px] font-medium',
             toast.type === 'success'
               ? 'bg-[var(--admin-success-soft)] text-[var(--admin-success)]'
               : 'bg-[var(--admin-danger-soft)] text-[var(--admin-danger)]',
@@ -134,7 +119,7 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
         </div>
       )}
 
-      <div className="rounded-2xl bg-[var(--admin-surface)]">
+      <SectionCard title="기본 정보">
         <InlineRow
           label="부스 이름"
           value={booth.name}
@@ -146,62 +131,24 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
           onSave={() => saveField('name', editValue)}
           saving={updateMutation.isPending}
         />
-        <div className="mx-4 border-t border-[var(--admin-border)]" />
+        <RowDivider />
         <InlineRow
-          label="설명"
-          value={booth.description || ''}
-          placeholder="부스 소개를 입력하세요"
-          editing={editingField === 'description'}
+          label="학과 / 단체"
+          value={booth.department ?? ''}
+          placeholder="예: 컴퓨터학부"
+          editing={editingField === 'department'}
           editValue={editValue}
-          onEdit={() => startEdit('description', booth.description ?? '')}
+          onEdit={() => startEdit('department', booth.department ?? '')}
           onCancel={cancelEdit}
           onChange={setEditValue}
-          onSave={() => saveField('description', editValue)}
+          onSave={() => saveField('department', editValue)}
           saving={updateMutation.isPending}
-          multiline
         />
-      </div>
+      </SectionCard>
 
-      <div className="rounded-2xl bg-[var(--admin-surface)]">
-        <div className="px-4 pt-4 pb-2">
-          <span className="text-[13px] font-semibold text-[var(--admin-text-muted)]">
-            위치 (지도 비율)
-          </span>
-        </div>
-        <InlineRow
-          label="X 좌표"
-          value={booth.xRatio?.toString() ?? ''}
-          placeholder="0.00"
-          editing={editingField === 'xRatio'}
-          editValue={editValue}
-          onEdit={() => startEdit('xRatio', booth.xRatio?.toString() ?? '')}
-          onCancel={cancelEdit}
-          onChange={setEditValue}
-          onSave={() => saveField('xRatio', editValue)}
-          saving={updateMutation.isPending}
-          inputMode="decimal"
-        />
-        <div className="mx-4 border-t border-[var(--admin-border)]" />
-        <InlineRow
-          label="Y 좌표"
-          value={booth.yRatio?.toString() ?? ''}
-          placeholder="0.00"
-          editing={editingField === 'yRatio'}
-          editValue={editValue}
-          onEdit={() => startEdit('yRatio', booth.yRatio?.toString() ?? '')}
-          onCancel={cancelEdit}
-          onChange={setEditValue}
-          onSave={() => saveField('yRatio', editValue)}
-          saving={updateMutation.isPending}
-          inputMode="decimal"
-        />
-      </div>
-
-      <div className="rounded-2xl bg-[var(--admin-surface)] p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-[13px] font-semibold text-[var(--admin-text-muted)]">
-            메뉴판 이미지
-          </span>
+      <SectionCard
+        title="메뉴판 이미지"
+        action={
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
@@ -210,29 +157,63 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
             <Camera size={14} />
             {menuBoardSrc ? '변경' : '업로드'}
           </button>
-        </div>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp,image/gif"
-          className="hidden"
-          onChange={handleImageUpload}
-        />
-        {menuBoardSrc ? (
-          <img
-            src={menuBoardSrc}
-            alt="메뉴판"
-            className="w-full rounded-xl border border-[var(--admin-border)] object-contain"
-            style={{ maxHeight: 320 }}
+        }
+      >
+        <div className="px-3 pt-1 pb-3">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            className="hidden"
+            onChange={handleImageUpload}
           />
-        ) : (
-          <div className="flex h-32 items-center justify-center rounded-xl bg-[var(--admin-surface-hover)] text-sm text-[var(--admin-text-faint)]">
-            메뉴판 사진을 업로드하세요
-          </div>
-        )}
-      </div>
+          {menuBoardSrc ? (
+            <img
+              src={menuBoardSrc}
+              alt="메뉴판"
+              className="w-full rounded-xl border border-[var(--admin-border)] object-contain"
+              style={{ maxHeight: 280 }}
+            />
+          ) : (
+            <div className="flex h-24 items-center justify-center rounded-xl bg-[var(--admin-surface-hover)] text-[13px] text-[var(--admin-text-faint)]">
+              메뉴판 사진을 업로드하세요
+            </div>
+          )}
+        </div>
+      </SectionCard>
+
+      {booth.xRatio != null && booth.yRatio != null && (
+        <p className="flex items-center gap-1.5 px-1 text-[12px] text-[var(--admin-text-faint)]">
+          <MapPin size={12} className="shrink-0" />
+          지도 위치는 총관리자가 설정합니다
+        </p>
+      )}
     </div>
   );
+}
+
+function SectionCard({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl bg-[var(--admin-surface)]">
+      <div className="flex items-center justify-between px-4 pb-0.5 pt-3">
+        <span className="text-[12px] font-semibold text-[var(--admin-text-muted)]">{title}</span>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function RowDivider() {
+  return <div className="mx-4 border-t border-[var(--admin-border)]" />;
 }
 
 interface InlineRowProps {
@@ -315,20 +296,18 @@ function InlineRow({
     <button
       type="button"
       onClick={onEdit}
-      className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors active:bg-[var(--admin-surface-hover)]"
+      className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors active:bg-[var(--admin-surface-hover)]"
     >
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[13px] text-[var(--admin-text-muted)]">{label}</span>
-        <span
-          className={[
-            'text-[15px]',
-            value ? 'text-[var(--admin-text)]' : 'text-[var(--admin-text-faint)]',
-          ].join(' ')}
-        >
-          {value || placeholder || '미입력'}
-        </span>
-      </div>
-      <Pencil size={14} className="shrink-0 text-[var(--admin-text-faint)]" />
+      <span className="shrink-0 text-[13px] text-[var(--admin-text-muted)]">{label}</span>
+      <span
+        className={[
+          'min-w-0 flex-1 truncate text-right text-[14px]',
+          value ? 'text-[var(--admin-text)]' : 'text-[var(--admin-text-faint)]',
+        ].join(' ')}
+      >
+        {value || placeholder || '미입력'}
+      </span>
+      <Pencil size={13} className="shrink-0 text-[var(--admin-text-faint)]" />
     </button>
   );
 }
