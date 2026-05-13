@@ -80,10 +80,11 @@ describe('rollingPaperLayout', () => {
     expect(isRollingPaperPlacementAvailable(resolvedPlacement!, 'red', [], 0)).toBe(true);
   });
 
-  it('can place up to the max notes on one board with the blocked frame area', () => {
+  it('can repeatedly resolve nearby placements with the blocked frame area', () => {
     const notes: PlacedRollingPaperNote[] = [];
+    const repeatedPlacementCount = 50;
 
-    for (let index = 0; index < ROLLING_PAPER_MAX_NOTES_PER_BOARD; index += 1) {
+    for (let index = 0; index < repeatedPlacementCount; index += 1) {
       const placement = findNearestAvailableRollingPaperPlacement(
         { x: 50, y: 50 },
         'green',
@@ -96,7 +97,8 @@ describe('rollingPaperLayout', () => {
       notes.push(createPlacedNote(`note-${index}`, 0, placement!.x, placement!.y, 'green'));
     }
 
-    expect(getPlacedNotesForBoard(notes, 0)).toHaveLength(ROLLING_PAPER_MAX_NOTES_PER_BOARD);
+    expect(getPlacedNotesForBoard(notes, 0)).toHaveLength(repeatedPlacementCount);
+    expect(ROLLING_PAPER_MAX_NOTES_PER_BOARD).toBe(100);
   });
 
   it('clamps zoom to the mobile-supported range', () => {

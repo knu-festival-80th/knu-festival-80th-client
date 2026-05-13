@@ -17,6 +17,8 @@ export type PlacedRollingPaperNote = {
   x: number;
   y: number;
   boardVariant: number;
+  categoryId?: string;
+  channelId?: string;
 };
 
 export type RollingPaperScaleMode = 'contain' | 'cover';
@@ -28,6 +30,11 @@ type RollingPaperRect = {
   bottom: number;
 };
 
+type RollingPaperBoardScope = {
+  categoryId?: string;
+  channelId?: string;
+};
+
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const BOARD_PADDING_PX = {
@@ -37,7 +44,7 @@ const BOARD_PADDING_PX = {
   left: 14,
 } as const;
 
-const COLLISION_SCALE = 0.4;
+const COLLISION_SCALE = 0.6;
 const SEARCH_STEP_PX = 8;
 const SEARCH_ANGLE_STEP = 15;
 const FRAME_VARIANT_OFFSETS = [
@@ -137,7 +144,17 @@ function getRollingPaperRect(
 }
 
 function getFrameVariantOffset(boardVariant: number) {
-  return FRAME_VARIANT_OFFSETS[boardVariant] ?? FRAME_VARIANT_OFFSETS[0];
+  return (
+    FRAME_VARIANT_OFFSETS[boardVariant % FRAME_VARIANT_OFFSETS.length] ?? FRAME_VARIANT_OFFSETS[0]
+  );
+}
+
+function isInBoardScope(note: PlacedRollingPaperNote, scope?: RollingPaperBoardScope) {
+  if (!scope?.categoryId || !scope?.channelId || !note.categoryId || !note.channelId) {
+    return true;
+  }
+
+  return note.categoryId === scope.categoryId && note.channelId === scope.channelId;
 }
 
 export function clampRollingPaperScale(scale: number) {
@@ -146,8 +163,12 @@ export function clampRollingPaperScale(scale: number) {
   return Math.min(ROLLING_PAPER_ZOOM.max, Math.max(ROLLING_PAPER_ZOOM.min, roundedScale));
 }
 
-export function getPlacedNotesForBoard(notes: PlacedRollingPaperNote[], boardVariant: number) {
-  return notes.filter((note) => note.boardVariant === boardVariant);
+export function getPlacedNotesForBoard(
+  notes: PlacedRollingPaperNote[],
+  boardVariant: number,
+  scope?: RollingPaperBoardScope,
+) {
+  return notes.filter((note) => note.boardVariant === boardVariant && isInBoardScope(note, scope));
 }
 
 export function getRollingPaperNoteSize(

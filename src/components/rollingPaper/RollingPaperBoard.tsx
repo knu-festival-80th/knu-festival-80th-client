@@ -1,5 +1,13 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import {
+  getRollingPaperBoardPath,
+  getRollingPaperCategory,
+  getRollingPaperChannel,
+  getRollingPaperChannelIndex,
+  getRollingPaperChannelsByCategory,
+} from '@/constants/rollingPaper';
 import { getRollingPaperPerformanceNotesFromSearch } from '@/mocks/rollingPaperPerformance';
 import {
   ROLLING_PAPER_MAX_NOTES_PER_BOARD,
@@ -10,12 +18,18 @@ import {
   type RollingPaperPan,
 } from '@/lib/rollingPaperLayout';
 import RollingPaperBoardCanvas from './RollingPaperBoardCanvas';
-import { rollingPaperBoardFrames } from './rollingPaperBoardAssets';
+import RollingPaperBoardChangeDialog from './RollingPaperBoardChangeDialog';
+import RollingPaperCategoryTabs from './RollingPaperCategoryTabs';
 import RollingPaperTabs from './RollingPaperTabs';
 import RollingPaperWriteModal from './RollingPaperWriteModal';
 import RollingPaperZoomControls from './RollingPaperZoomControls';
 
 const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
+
+type RollingPaperBoardProps = {
+  categoryId?: string;
+  channelId?: string;
+};
 
 function getInitialPlacedNotes() {
   if (!import.meta.env.DEV || typeof window === 'undefined') {
@@ -25,15 +39,32 @@ function getInitialPlacedNotes() {
   return getRollingPaperPerformanceNotesFromSearch(window.location.search);
 }
 
-export default function RollingPaperBoard() {
-  const [boardIndex, setBoardIndex] = useState(0);
+function isNoteInChannel(note: PlacedRollingPaperNote, categoryId: string, channelId: string) {
+  if (!note.categoryId || !note.channelId) {
+    return true;
+  }
+
+  return note.categoryId === categoryId && note.channelId === channelId;
+}
+
+export default function RollingPaperBoard({ categoryId, channelId }: RollingPaperBoardProps) {
+  const navigate = useNavigate();
+  const category = getRollingPaperCategory(categoryId);
+  const channel = getRollingPaperChannel(category.id, channelId);
+  const categoryChannels = getRollingPaperChannelsByCategory(category.id);
+  const boardIndex = getRollingPaperChannelIndex(category.id, channel.id);
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
+  const [isBoardChangeDialogOpen, setIsBoardChangeDialogOpen] = useState(false);
   const [placedNotes, setPlacedNotes] = useState<PlacedRollingPaperNote[]>(getInitialPlacedNotes);
   const [boardScale, setBoardScale] = useState<number>(ROLLING_PAPER_ZOOM.default);
   const [boardPan, setBoardPan] = useState<RollingPaperPan>(INITIAL_BOARD_PAN);
   const [focusedNoteId, setFocusedNoteId] = useState<string | null>(null);
 
-  const currentBoardNotes = getPlacedNotesForBoard(placedNotes, boardIndex);
+  const boardScope = { categoryId: category.id, channelId: channel.id };
+  const scopedPlacedNotes = placedNotes.filter((note) =>
+    isNoteInChannel(note, category.id, channel.id),
+  );
+  const currentBoardNotes = getPlacedNotesForBoard(placedNotes, boardIndex, boardScope);
   const isCurrentBoardFull = currentBoardNotes.length >= ROLLING_PAPER_MAX_NOTES_PER_BOARD;
 
   const resetBoardViewport = () => {
@@ -44,17 +75,23 @@ export default function RollingPaperBoard() {
 
   const showPreviousBoard = () => {
     resetBoardViewport();
-    setBoardIndex((prev) => (prev === 0 ? rollingPaperBoardFrames.length - 1 : prev - 1));
+    const previousIndex = boardIndex === 0 ? categoryChannels.length - 1 : boardIndex - 1;
+    const previousChannel = categoryChannels[previousIndex];
+
+    navigate(getRollingPaperBoardPath(category.id, previousChannel.id));
   };
 
   const showNextBoard = () => {
     resetBoardViewport();
-    setBoardIndex((prev) => (prev + 1) % rollingPaperBoardFrames.length);
+    const nextIndex = (boardIndex + 1) % categoryChannels.length;
+    const nextChannel = categoryChannels[nextIndex];
+
+    navigate(getRollingPaperBoardPath(category.id, nextChannel.id));
   };
 
   const handlePlaceNote = (note: PlacedRollingPaperNote) => {
     setPlacedNotes((prevNotes) => {
-      const boardNotes = getPlacedNotesForBoard(prevNotes, note.boardVariant);
+      const boardNotes = getPlacedNotesForBoard(prevNotes, boardIndex, boardScope);
 
       if (boardNotes.length >= ROLLING_PAPER_MAX_NOTES_PER_BOARD) {
         return prevNotes;
@@ -75,6 +112,9 @@ export default function RollingPaperBoard() {
         ...prevNotes,
         {
           ...note,
+          boardVariant: boardIndex,
+          categoryId: category.id,
+          channelId: channel.id,
           x: resolvedPlacement.x,
           y: resolvedPlacement.y,
         },
@@ -86,6 +126,7 @@ export default function RollingPaperBoard() {
   return (
     <div className="bg-white">
       <RollingPaperTabs active="board" />
+      <RollingPaperCategoryTabs activeCategory={category} />
 
       <section className="min-h-[713px] bg-black/[0.02] pt-7 pb-16">
         <div className="flex flex-col gap-6 px-5">
@@ -98,15 +139,23 @@ export default function RollingPaperBoard() {
             </p>
           </div>
 
+          <button
+            type="button"
+            className="w-fit rounded-full border border-sub-red px-5 py-2.5 font-wanted-sans text-sm font-medium leading-[1.5] text-sub-red transition hover:bg-sub-red/5"
+            onClick={() => setIsBoardChangeDialogOpen(true)}
+          >
+            보드 변경하기
+          </button>
+
           <div className="flex items-end gap-7">
             <div className="flex min-w-0 flex-1 flex-col gap-2.5">
               <p className="font-wanted-sans text-body1 font-normal leading-none tracking-[-0.02em] text-gray">
                 Board
               </p>
               <p className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
-                <span className="text-sub-red">{boardIndex + 1}</span>/
-                {rollingPaperBoardFrames.length}
+                <span className="text-sub-red">{boardIndex + 1}</span>/{categoryChannels.length}
               </p>
+              <p className="font-wanted-sans text-caption font-medium text-gray">{channel.label}</p>
             </div>
             <button
               type="button"
@@ -126,7 +175,7 @@ export default function RollingPaperBoard() {
             variant={boardIndex}
             scale={boardScale}
             pan={boardPan}
-            placedNotes={placedNotes}
+            placedNotes={scopedPlacedNotes}
             focusedNoteId={focusedNoteId}
             onPanChange={setBoardPan}
             onScaleChange={setBoardScale}
@@ -166,9 +215,22 @@ export default function RollingPaperBoard() {
         <RollingPaperWriteModal
           isOpen={isWriteModalOpen}
           boardVariant={boardIndex}
-          placedNotes={placedNotes}
+          placedNotes={scopedPlacedNotes}
           onClose={() => setIsWriteModalOpen(false)}
           onPlace={handlePlaceNote}
+        />
+      )}
+
+      {isBoardChangeDialogOpen && (
+        <RollingPaperBoardChangeDialog
+          category={category}
+          currentChannel={channel}
+          placedNotes={placedNotes}
+          onClose={() => setIsBoardChangeDialogOpen(false)}
+          onSelectChannel={(nextChannel) => {
+            setIsBoardChangeDialogOpen(false);
+            navigate(getRollingPaperBoardPath(category.id, nextChannel.id));
+          }}
         />
       )}
     </div>

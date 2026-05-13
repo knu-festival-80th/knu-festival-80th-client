@@ -6,7 +6,7 @@ type RollingPaperTabsProps = {
 
 const tabs = [
   { key: 'intro', label: '소개', to: '/rolling-paper' },
-  { key: 'board', label: '롤링페이퍼', to: '/rolling-paper/board' },
+  { key: 'board', label: '롤링페이퍼', to: '/rolling-paper/categories' },
 ] as const;
 
 export default function RollingPaperTabs({ active }: RollingPaperTabsProps) {

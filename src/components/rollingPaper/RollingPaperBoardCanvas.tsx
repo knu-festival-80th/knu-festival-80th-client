@@ -94,7 +94,8 @@ export default function RollingPaperBoardCanvas({
     : null;
   const focusedNoteWidth = focusedNote ? ROLLING_PAPER_NOTE_WIDTH * renderedScale : 0;
   const frameRect = getRollingPaperFrameRect(variant);
-  const frameImage = rollingPaperBoardFrames[variant] ?? rollingPaperBoardFrames[0];
+  const frameImage =
+    rollingPaperBoardFrames[variant % rollingPaperBoardFrames.length] ?? rollingPaperBoardFrames[0];
   const { handlePointerDown, handlePointerMove, handlePointerRelease } =
     useRollingPaperBoardGestures({
       boardRef,

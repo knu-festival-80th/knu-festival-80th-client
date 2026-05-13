@@ -46,7 +46,7 @@ export default function RollingPaperIntro() {
             </p>
           </div>
           <Link
-            to="/rolling-paper/board"
+            to="/rolling-paper/categories"
             className="flex w-fit items-center gap-1.5 rounded-full border border-ink py-2.5 pl-5 pr-3.5"
           >
             <span className="font-wanted-sans text-sm font-medium leading-[1.5] text-ink">
