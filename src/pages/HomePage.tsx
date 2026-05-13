@@ -95,6 +95,7 @@ export default function HomePage() {
               title={`2026 대동제만의\n특별한 굿즈를 만나보세요`}
               imageSrc={cardBg1}
               illustrationSrc={illustGoods}
+              illustrationClassName="scale-115"
               to="/goods"
             />
           </div>
@@ -115,6 +116,7 @@ export default function HomePage() {
               title={`캠퍼스 지도에서\n이벤트 부스와 주막 위치를 확인하기`}
               imageSrc={cardBg2}
               illustrationSrc={illustMap}
+              illustrationClassName="scale-110"
               to="/map"
             />
           </div>
@@ -124,7 +126,7 @@ export default function HomePage() {
               title="원하는 주막에 실시간 대기 등록하기"
               imageSrc={cardBg1}
               illustrationSrc={illustBooth}
-              illustrationClassName="top-11"
+              illustrationClassName="top-7 scale-120"
               to="/taverns"
             />
           </div>
@@ -138,6 +140,7 @@ export default function HomePage() {
               description={`수천 명의 축제 참여자들과 함께\n추억 기록하기`}
               imageSrc={cardBg2}
               illustrationSrc={illustRolling}
+              illustrationClassName="top-5 scale-120"
               to="/rolling-paper"
             />
           </div>
@@ -160,6 +163,7 @@ export default function HomePage() {
               description="80주년 만의 카메라 필터로 특별한 추억 만들기"
               imageSrc={cardBg3}
               illustrationSrc={illustPhotobooth}
+              illustrationClassName="top-3"
               to="/hobanustagram"
             />
           </div>
