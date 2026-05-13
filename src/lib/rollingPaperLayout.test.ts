@@ -55,7 +55,7 @@ describe('rollingPaperLayout', () => {
     expect(isRollingPaperPlacementAvailable({ x: 12, y: 16 }, 'red', [], 0)).toBe(true);
   });
 
-  it('supports stricter client-side collision checks before submit', () => {
+  it('uses the same collision tolerance for client-side submit checks', () => {
     const existingNotes = [createPlacedNote('note-1', 0, 20, 15, 'red')];
     const closePlacement = { x: 27, y: 15 };
 
@@ -69,7 +69,7 @@ describe('rollingPaperLayout', () => {
         undefined,
         ROLLING_PAPER_CLIENT_COLLISION_SCALE,
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('centers the 320px mascot frame on the Figma-sized square canvas', () => {
