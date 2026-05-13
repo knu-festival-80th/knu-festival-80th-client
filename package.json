@@ -6,6 +6,7 @@
   "packageManager": "pnpm@9.15.3",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "demo:rolling-paper": "node demos/rolling-paper-placement-demo.mjs",
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:watch": "vitest",

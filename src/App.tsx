@@ -19,6 +19,10 @@ import GoodsPage from '@/pages/GoodsPage';
 import HobanustagramPage from '@/pages/HobanustagramPage';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import RollingPaperBoardPage from '@/pages/RollingPaperBoardPage';
+import RollingPaperCategorySelectPage from '@/pages/RollingPaperCategorySelectPage';
+import RollingPaperChannelSelectPage from '@/pages/RollingPaperChannelSelectPage';
+import RollingPaperIntroPage from '@/pages/RollingPaperIntroPage';
 import TavernDetailPage from '@/pages/TavernDetailPage';
 import TavernMapPage from '@/pages/TavernMapPage';
 import TimeTablePage from '@/pages/TimeTablePage';
@@ -86,6 +90,17 @@ export default function App() {
             <Route path="result" element={<InstatingResultView />} />
           </Route>
           <Route path="/congrat-video" element={<CongratVideoPage />} />
+          <Route path="/rolling-paper" element={<RollingPaperIntroPage />} />
+          <Route path="/rolling-paper/categories" element={<RollingPaperCategorySelectPage />} />
+          <Route
+            path="/rolling-paper/categories/:categoryId/channels"
+            element={<RollingPaperChannelSelectPage />}
+          />
+          <Route path="/rolling-paper/board" element={<RollingPaperBoardPage />} />
+          <Route
+            path="/rolling-paper/board/:categoryId/:channelId"
+            element={<RollingPaperBoardPage />}
+          />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Route>

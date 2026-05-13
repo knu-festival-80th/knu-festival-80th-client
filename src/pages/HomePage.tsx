@@ -137,7 +137,7 @@ export default function HomePage() {
               description={`수천 명의 축제 참여자들과 함께\n추억 기록하기`}
               imageSrc={cardBg2}
               illustrationSrc={illustRolling}
-              to="/"
+              to="/rolling-paper"
             />
           </div>
 
