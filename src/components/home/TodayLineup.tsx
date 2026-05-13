@@ -29,7 +29,7 @@ export default function TodayLineup({ data }: TodayLineupProps) {
               key={entry.name}
               entry={{
                 ...entry,
-                isActive: isScheduleActive(entry.startTime, entry.endTime),
+                isActive: isScheduleActive(entry.startTime, entry.endTime, dayData.day),
               }}
             />
           ))}

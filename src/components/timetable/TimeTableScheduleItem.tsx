@@ -3,10 +3,11 @@ import { isScheduleActive } from '@/utils/time';
 
 type TimeTableScheduleItemProps = {
   entry: ScheduleEntry;
+  day: number;
 };
 
-export default function TimeTableScheduleItem({ entry }: TimeTableScheduleItemProps) {
-  const active = isScheduleActive(entry.startTime, entry.endTime);
+export default function TimeTableScheduleItem({ entry, day }: TimeTableScheduleItemProps) {
+  const active = isScheduleActive(entry.startTime, entry.endTime, day);
 
   return (
     <div
