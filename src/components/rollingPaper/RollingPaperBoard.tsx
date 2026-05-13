@@ -22,6 +22,7 @@ import {
 } from '@/lib/rollingPaperLayout';
 import {
   toCanvasColorId,
+  toPendingPlacedRollingPaperNote,
   toPlacedRollingPaperNote,
   toRollingPaperCategory,
   toRollingPaperChannel,
@@ -34,6 +35,8 @@ import RollingPaperWriteModal from './RollingPaperWriteModal';
 import RollingPaperZoomControls from './RollingPaperZoomControls';
 
 const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
+const PENDING_POSTIT_REFETCH_INTERVAL_MS = 5000;
+const PENDING_POSTIT_LOCAL_VISIBLE_MS = 60000;
 
 type RollingPaperBoardProps = {
   categoryId?: string;
@@ -108,18 +111,33 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   );
   const boardIndex = channel.boardVariant ?? getRollingPaperChannelIndex(category.id, channel.id);
   const boardId = channel.boardId;
+  const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
+  const [isBoardChangeDialogOpen, setIsBoardChangeDialogOpen] = useState(false);
+  const [pendingPlacedNotes, setPendingPlacedNotes] = useState<PlacedRollingPaperNote[]>([]);
+  const [boardScale, setBoardScale] = useState<number>(ROLLING_PAPER_ZOOM.default);
+  const [boardPan, setBoardPan] = useState<RollingPaperPan>(INITIAL_BOARD_PAN);
+  const [focusedNoteId, setFocusedNoteId] = useState<string | null>(null);
   const postitsQuery = useQuery({
     queryKey: ['rollingPaper', 'postits', boardId],
     queryFn: () => rollingPaperApi.listPostits(boardId!),
     enabled: Boolean(boardId),
+    refetchInterval: (query) => {
+      if (!boardId) return false;
+
+      const latestPostits = query.state.data ?? [];
+      const latestPostitIds = new Set(latestPostits.map((postit) => postit.canvasPostitId));
+      const hasPendingPostit = pendingPlacedNotes.some(
+        (note) =>
+          note.boardId === boardId &&
+          (!note.postitId || !latestPostitIds.has(note.postitId)) &&
+          (!note.pendingVisibleUntil || note.pendingVisibleUntil > Date.now()),
+      );
+      const hasLoadedData = Array.isArray(query.state.data);
+
+      return hasPendingPostit && hasLoadedData ? PENDING_POSTIT_REFETCH_INTERVAL_MS : false;
+    },
   });
   const apiPlacedNotes = (postitsQuery.data ?? []).map(toPlacedRollingPaperNote);
-  const placedNotes = mockNotes.length > 0 ? mockNotes : apiPlacedNotes;
-  const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
-  const [isBoardChangeDialogOpen, setIsBoardChangeDialogOpen] = useState(false);
-  const [boardScale, setBoardScale] = useState<number>(ROLLING_PAPER_ZOOM.default);
-  const [boardPan, setBoardPan] = useState<RollingPaperPan>(INITIAL_BOARD_PAN);
-  const [focusedNoteId, setFocusedNoteId] = useState<string | null>(null);
   const createPostitMutation = useMutation({
     mutationFn: (note: PlacedRollingPaperNote) =>
       rollingPaperApi.createPostit({
@@ -133,6 +151,12 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       void queryClient.invalidateQueries({ queryKey: ['rollingPaper', 'postits', boardId] });
     },
   });
+  const approvedPostitIds = new Set(apiPlacedNotes.map((note) => note.postitId));
+  const visiblePendingNotes = pendingPlacedNotes.filter(
+    (note) => note.boardId === boardId && !approvedPostitIds.has(note.postitId),
+  );
+  const placedNotes =
+    mockNotes.length > 0 ? mockNotes : [...apiPlacedNotes, ...visiblePendingNotes];
 
   const boardScope = { categoryId: category.id, channelId: channel.id };
   const scopedPlacedNotes = placedNotes.filter((note) =>
@@ -187,13 +211,30 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       return;
     }
 
-    await createPostitMutation.mutateAsync({
+    const createdPostit = await createPostitMutation.mutateAsync({
       ...note,
       boardId,
       boardVariant: boardIndex,
       categoryId: category.id,
       channelId: channel.id,
     });
+
+    if (createdPostit.moderationStatus === 'PENDING') {
+      const pendingNote = {
+        ...toPendingPlacedRollingPaperNote(createdPostit),
+        categoryId: category.id,
+        channelId: channel.id,
+        pendingVisibleUntil: Date.now() + PENDING_POSTIT_LOCAL_VISIBLE_MS,
+      };
+
+      setPendingPlacedNotes((prevNotes) => [...prevNotes, pendingNote]);
+      window.setTimeout(() => {
+        setPendingPlacedNotes((prevNotes) =>
+          prevNotes.filter((note) => note.postitId !== pendingNote.postitId),
+        );
+      }, PENDING_POSTIT_LOCAL_VISIBLE_MS);
+    }
+
     setIsWriteModalOpen(false);
   };
 
