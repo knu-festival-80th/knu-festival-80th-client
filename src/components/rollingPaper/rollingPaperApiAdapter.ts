@@ -2,6 +2,7 @@ import type {
   CanvasBoardQuestionResponse,
   CanvasBoardSummaryResponse,
   CanvasColorId,
+  CanvasPostitCreateResponse,
   CanvasPostitResponse,
 } from '@/apis/modules/rollingPaper';
 import {
@@ -61,5 +62,15 @@ export function toPlacedRollingPaperNote(postit: CanvasPostitResponse): PlacedRo
     boardVariant: postit.boardVariant,
     categoryId: undefined,
     channelId: String(postit.boardId),
+  };
+}
+
+export function toPendingPlacedRollingPaperNote(
+  postit: CanvasPostitCreateResponse,
+): PlacedRollingPaperNote {
+  return {
+    ...toPlacedRollingPaperNote(postit),
+    isPending: postit.moderationStatus === 'PENDING',
+    isLocalOnly: postit.moderationStatus === 'PENDING',
   };
 }

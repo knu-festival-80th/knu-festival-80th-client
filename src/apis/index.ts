@@ -39,6 +39,7 @@ export type {
   CanvasPlacement,
   CanvasPostitCreateRequest,
   CanvasPostitCreateResponse,
+  CanvasPostitModerationStatus,
   CanvasPostitResponse,
 } from '@/apis/modules/rollingPaper';
 export type {

@@ -2,6 +2,7 @@ import { ENDPOINTS, http, unwrapApiResponse, unwrapVoidApiResponse } from '@/api
 import type { ApiResponse } from '@/apis/types';
 
 export type CanvasColorId = 1 | 2 | 3 | 4 | 5 | 6;
+export type CanvasPostitModerationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface CanvasPlacement {
   x: number;
@@ -33,14 +34,16 @@ export interface CanvasPostitResponse {
   createdAt: string;
 }
 
+export interface CanvasPostitCreateResponse extends CanvasPostitResponse {
+  moderationStatus: CanvasPostitModerationStatus;
+}
+
 export interface CanvasPostitCreateRequest {
   boardId: number;
   colorId: CanvasColorId;
   message: string;
   placement: CanvasPlacement;
 }
-
-export type CanvasPostitCreateResponse = CanvasPostitResponse;
 
 export interface CanvasBoardCreateRequest {
   questionId: number;
