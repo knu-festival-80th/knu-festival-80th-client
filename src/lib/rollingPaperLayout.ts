@@ -46,7 +46,8 @@ const BOARD_PADDING_PX = {
   left: 14,
 } as const;
 
-const COLLISION_SCALE = 0.6;
+export const ROLLING_PAPER_COLLISION_SCALE = 0.6;
+export const ROLLING_PAPER_CLIENT_COLLISION_SCALE = 0.9;
 const SEARCH_STEP_PX = 8;
 const SEARCH_ANGLE_STEP = 15;
 const FRAME_VARIANT_OFFSETS = [
@@ -336,13 +337,14 @@ export function isRollingPaperPlacementAvailable(
   placedNotes: PlacedRollingPaperNote[],
   boardVariant = 0,
   excludeNoteId?: string,
+  collisionScale = ROLLING_PAPER_COLLISION_SCALE,
 ) {
   const clampedPlacement = clampRollingPaperPlacement(placement, colorId);
   const candidateRect = getRollingPaperRect(
     clampedPlacement,
     colorId,
     ROLLING_PAPER_NOTE_WIDTH,
-    COLLISION_SCALE,
+    collisionScale,
   );
 
   if (doRectsOverlap(candidateRect, getRollingPaperBlockedFrameRect(boardVariant))) {
@@ -358,7 +360,7 @@ export function isRollingPaperPlacementAvailable(
       { x: note.x, y: note.y },
       note.colorId,
       ROLLING_PAPER_NOTE_WIDTH,
-      COLLISION_SCALE,
+      collisionScale,
     );
 
     return !doRectsOverlap(candidateRect, existingRect);
@@ -371,6 +373,7 @@ export function findNearestAvailableRollingPaperPlacement(
   placedNotes: PlacedRollingPaperNote[],
   boardVariant = 0,
   excludeNoteId?: string,
+  collisionScale = ROLLING_PAPER_COLLISION_SCALE,
 ) {
   const clampedTarget = clampRollingPaperPlacement(targetPlacement, colorId);
 
@@ -381,6 +384,7 @@ export function findNearestAvailableRollingPaperPlacement(
       placedNotes,
       boardVariant,
       excludeNoteId,
+      collisionScale,
     )
   ) {
     return clampedTarget;
@@ -410,6 +414,7 @@ export function findNearestAvailableRollingPaperPlacement(
           placedNotes,
           boardVariant,
           excludeNoteId,
+          collisionScale,
         )
       ) {
         return candidatePlacement;

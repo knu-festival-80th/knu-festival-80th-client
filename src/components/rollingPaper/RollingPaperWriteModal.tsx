@@ -5,6 +5,7 @@ import {
 } from '@/constants/rollingPaper';
 import {
   ROLLING_PAPER_MAX_NOTES_PER_BOARD,
+  ROLLING_PAPER_CLIENT_COLLISION_SCALE,
   ROLLING_PAPER_ZOOM,
   findNearestAvailableRollingPaperPlacement,
   getPlacedNotesForBoard,
@@ -44,6 +45,8 @@ export default function RollingPaperWriteModal({
     colorId,
     occupiedNotes,
     boardVariant,
+    undefined,
+    ROLLING_PAPER_CLIENT_COLLISION_SCALE,
   );
 
   useEffect(() => {

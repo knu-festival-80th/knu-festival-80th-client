@@ -13,6 +13,7 @@ import {
 import { getRollingPaperPerformanceNotesFromSearch } from '@/mocks/rollingPaperPerformance';
 import {
   ROLLING_PAPER_MAX_NOTES_PER_BOARD,
+  ROLLING_PAPER_CLIENT_COLLISION_SCALE,
   ROLLING_PAPER_ZOOM,
   findNearestAvailableRollingPaperPlacement,
   getPlacedNotesForBoard,
@@ -178,6 +179,8 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       note.colorId,
       currentBoardNotes,
       boardIndex,
+      undefined,
+      ROLLING_PAPER_CLIENT_COLLISION_SCALE,
     );
 
     if (!resolvedPlacement) {
