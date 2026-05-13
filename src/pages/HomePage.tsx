@@ -55,7 +55,7 @@ export default function HomePage() {
           </h1>
           <p className="mt-4 text-body1 font-bold text-ink">위대한 순간, 경북대 80주년</p>
           <p className="mt-1 text-body2 text-ink opacity-60">
-            2026 경북대학교 대동제 하푸르나를 함께하세요.
+            2026 경북대학교 대동제를 함께하세요.
           </p>
         </div>
         <motion.div
@@ -82,7 +82,7 @@ export default function HomePage() {
         <SectionBlock label="Festival Start" title="대동제의 주요 콘텐츠 확인하기">
           <div className="px-5">
             <ContentCard
-              category="Stemp"
+              category="Stamp"
               title={`부스를 방문하고 스탬프를 모아\n상품을 응모하세요`}
               imageSrc={cardBg1}
               illustrationSrc={illustStemp}
@@ -129,7 +129,7 @@ export default function HomePage() {
           </div>
         </SectionBlock>
 
-        <SectionBlock label="Event" title="올해만 진행되는 2026 하푸르나 이벤트">
+        <SectionBlock label="Event" title="올해만 진행되는 2026 대동제 이벤트">
           <div className="px-5">
             <ContentCard
               category="Memory Board"
