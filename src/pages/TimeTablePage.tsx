@@ -12,8 +12,13 @@ const DAY_DESCRIPTIONS: Record<number, string> = {
   22: '80주년 대동제의 마지막 날.\n모두 함께 축제의 마무리를 함께해요.',
 };
 
+function getDefaultDay() {
+  const today = new Date().getDate();
+  return DAYS.includes(today) ? today : 20;
+}
+
 export default function TimeTablePage() {
-  const [selectedDay, setSelectedDay] = useState(21);
+  const [selectedDay, setSelectedDay] = useState(getDefaultDay);
   const dayData = MOCK_LINEUP.find((d) => d.day === selectedDay) ?? MOCK_LINEUP[0];
 
   return (
