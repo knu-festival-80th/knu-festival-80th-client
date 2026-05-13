@@ -1,3 +1,5 @@
+import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
+
 interface ApplicantCardProps {
   label: string;
   count: number;
@@ -16,6 +18,11 @@ const ApplicantCard = ({ label, count, color }: ApplicantCardProps) => (
 );
 
 const ApplicantsNumberSection = () => {
+  const { data } = useMatchingStatus();
+
+  const maleCount = data?.malePendingCount ?? 0;
+  const femaleCount = data?.femalePendingCount ?? 0;
+
   return (
     <div className="flex w-full flex-col gap-6 bg-white px-5 pb-16 pt-8">
       <div className="flex flex-col gap-1.5">
@@ -28,9 +35,8 @@ const ApplicantsNumberSection = () => {
       </div>
 
       <div className="flex gap-2">
-        {/* TODO: api 연동 */}
-        <ApplicantCard label="남성" count={200} color="text-[#1893ff]" />
-        <ApplicantCard label="여성" count={100} color="text-[#ff6568]" />
+        <ApplicantCard label="남성" count={maleCount} color="text-[#1893ff]" />
+        <ApplicantCard label="여성" count={femaleCount} color="text-[#ff6568]" />
       </div>
     </div>
   );

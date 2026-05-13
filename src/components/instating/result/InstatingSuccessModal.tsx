@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CountDownTimer from '../intro/CountDownTimer';
-import { REVEAL_DEADLINE } from '../../../constants/instatingDeadline';
+import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
 
 export type SubmittedData = {
   gender: 'male' | 'female';
@@ -18,6 +18,8 @@ interface Props {
 
 const InstatingSuccessModal = ({ data, onClose }: Props) => {
   const navigate = useNavigate();
+  const { data: status } = useMatchingStatus();
+  const revealDeadline = status?.resultOpenAt ? new Date(status.resultOpenAt) : new Date(0);
 
   const handleClose = () => {
     onClose();
@@ -61,7 +63,7 @@ const InstatingSuccessModal = ({ data, onClose }: Props) => {
               <p className="font-wanted-sans text-body1 font-medium tracking-tight text-gray">
                 인스타팅 매칭 완료까지
               </p>
-              <CountDownTimer deadline={REVEAL_DEADLINE} />
+              <CountDownTimer deadline={revealDeadline} />
             </div>
 
             <div className="h-px w-full bg-border" />

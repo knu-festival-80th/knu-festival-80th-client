@@ -1,38 +1,25 @@
-import { useEffect, useState } from 'react';
 import CountDownTimer from './CountDownTimer';
-import {
-  APPLY_DEADLINE,
-  REVEAL_DEADLINE,
-  ZERO_DEADLINE,
-} from '../../../constants/instatingDeadline';
-
-type TimerMode = 'apply' | 'reveal' | 'zero';
-
-const getTimerMode = (): TimerMode => {
-  const hour = new Date().getHours();
-  if (hour >= 11 && hour < 21) return 'apply';
-  if (hour >= 21 && hour < 22) return 'reveal';
-  return 'zero'; // 22:00 - 11:00
-};
-
-const TIMER_CONFIG: Record<TimerMode, { label: string; deadline: Date }> = {
-  apply: { label: '인스타팅 신청 마감까지', deadline: APPLY_DEADLINE },
-  reveal: { label: '인스타팅 매칭 공개까지', deadline: REVEAL_DEADLINE },
-  zero: {
-    label: '결과를 확인하세요.\n결과는 다음날 오전 11시 까지 확인 가능합니다.',
-    deadline: ZERO_DEADLINE,
-  },
-};
+import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
 
 const CountDownSection = () => {
-  const [mode, setMode] = useState<TimerMode>(getTimerMode);
+  const { data } = useMatchingStatus();
 
-  useEffect(() => {
-    const id = setInterval(() => setMode(getTimerMode()), 60_000);
-    return () => clearInterval(id);
-  }, []);
+  let label: string;
+  let deadline: Date;
 
-  const { label, deadline } = TIMER_CONFIG[mode];
+  if (!data) {
+    label = '';
+    deadline = new Date(0);
+  } else if (data.registrationOpen && data.registrationDeadline) {
+    label = '인스타팅 신청 마감까지';
+    deadline = new Date(data.registrationDeadline);
+  } else if (!data.registrationOpen && !data.resultOpen && data.resultOpenAt) {
+    label = '인스타팅 매칭 공개까지';
+    deadline = new Date(data.resultOpenAt);
+  } else {
+    label = '결과를 확인하세요.\n결과는 다음날 오전 11시 까지 확인 가능합니다.';
+    deadline = new Date(0);
+  }
 
   return (
     <div className="flex w-full flex-col gap-6 bg-white px-5 pb-16 pt-8">
