@@ -13,7 +13,10 @@ import BoothCreatePage from '@/pages/console/BoothCreatePage';
 import BoothEditPage from '@/pages/console/BoothEditPage';
 import BoothListPage from '@/pages/console/BoothListPage';
 import BoothPasswordPage from '@/pages/console/BoothPasswordPage';
+import CanvasAdminPage from '@/pages/console/CanvasAdminPage';
 import ConsoleLoginPage from '@/pages/console/ConsoleLoginPage';
+import MatchingOverviewPage from '@/pages/console/MatchingOverviewPage';
+import MatchingParticipantsPage from '@/pages/console/MatchingParticipantsPage';
 import CongratVideoPage from '@/pages/CongratVideoPage';
 import GoodsPage from '@/pages/GoodsPage';
 import HobanustagramPage from '@/pages/HobanustagramPage';
@@ -56,6 +59,9 @@ export default function App() {
           <Route path="booths/new" element={<BoothCreatePage />} />
           <Route path="booths/:boothId/edit" element={<BoothEditPage />} />
           <Route path="booths/:boothId/password" element={<BoothPasswordPage />} />
+          <Route path="matching" element={<MatchingOverviewPage />} />
+          <Route path="matching/participants" element={<MatchingParticipantsPage />} />
+          <Route path="canvas" element={<CanvasAdminPage />} />
         </Route>
 
         <Route path="/booth/manage/login" element={<BoothManageLoginPage />} />

@@ -19,6 +19,20 @@ export const ENDPOINTS = {
     my: '/waitings/my',
   },
 
+  matchings: {
+    register: '/matchings',
+    result: '/matchings/result',
+    status: '/matchings/status',
+    applicantsCount: '/matchings/applicants/count',
+    unmatched: '/matchings/unmatched',
+  },
+
+  canvas: {
+    questions: '/canvas/questions',
+    boards: '/canvas/boards',
+    postits: '/canvas/postits',
+  },
+
   admin: {
     uploadImage: '/admin/uploads/images',
     booths: '/admin/booths',
@@ -33,5 +47,17 @@ export const ENDPOINTS = {
     waitingSkip: (waitingId: number) => `/admin/waitings/${waitingId}/skip`,
     waitingReorder: (waitingId: number) => `/admin/waitings/${waitingId}/reorder`,
     waitingResendSms: (waitingId: number) => `/admin/waitings/${waitingId}/resend-sms`,
+
+    matchingStatus: '/admin/matchings/status',
+    matchingJobs: '/admin/matchings/jobs',
+    matchingJobForDay: (festivalDay: string) => `/admin/matchings/jobs/${festivalDay}`,
+    matchingParticipants: '/admin/matchings/participants',
+    matchingParticipantById: (participantId: number) =>
+      `/admin/matchings/participants/${participantId}`,
+    matchingParticipantReset: (participantId: number) =>
+      `/admin/matchings/participants/${participantId}/reset`,
+
+    canvasBoards: '/admin/canvas/boards',
+    canvasPostitById: (postitId: number) => `/admin/canvas/postits/${postitId}`,
   },
 } as const;
