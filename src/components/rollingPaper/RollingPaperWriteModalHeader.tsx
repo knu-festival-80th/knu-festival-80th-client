@@ -13,7 +13,7 @@ export default function RollingPaperWriteModalHeader({
   onClose,
 }: RollingPaperWriteModalHeaderProps) {
   return (
-    <div className="flex h-[30px] items-center justify-between px-5">
+    <div className="flex h-[30px] shrink-0 items-center justify-between px-5">
       <button
         type="button"
         aria-label={step === 'compose' ? '작성 모달 닫기' : '메시지 작성으로 돌아가기'}
