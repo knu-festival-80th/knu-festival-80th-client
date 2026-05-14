@@ -174,6 +174,11 @@
   --admin-success-soft: rgba(22, 163, 74, 0.08);
   --admin-warn: #d97706;
   --admin-warn-soft: rgba(217, 119, 6, 0.08);
+  --admin-accent-waiting: #4b5563;
+  --admin-accent-called: #ea5147;
+  --admin-accent-entered: #16a34a;
+  --admin-accent-skipped: #9ca3af;
+  --admin-accent-cancelled: #dc2626;
 }
 
 [data-admin-theme='booth'] {

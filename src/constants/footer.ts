@@ -1,6 +1,6 @@
 export const NAV_LINKS = [
   { label: '지도 정보', to: '/map' },
-  { label: '롤링페이퍼', to: '/' },
+  { label: '롤링페이퍼', to: '/rolling-paper' },
   { label: '인스타팅', to: '/instating' },
   { label: '포토부스', to: '/congrat-video' },
   { label: '공지사항', to: '/' },

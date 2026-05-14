@@ -86,7 +86,6 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
   const saveField = (field: string, value: string) => {
     const payload: BoothUpdateRequest = {};
     if (field === 'name') payload.name = value.trim() || undefined;
-    else if (field === 'description') payload.description = value.trim();
     else if (field === 'department') payload.department = value.trim();
     updateMutation.mutate(payload);
   };
@@ -106,11 +105,11 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
   const menuBoardSrc = imagePathToSrc(imageUrlToPath(booth.menuBoardImageUrl));
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-2.5">
       {toast && (
         <div
           className={[
-            'rounded-xl px-4 py-3 text-sm font-medium',
+            'rounded-xl px-3 py-2 text-[13px] font-medium',
             toast.type === 'success'
               ? 'bg-[var(--admin-success-soft)] text-[var(--admin-success)]'
               : 'bg-[var(--admin-danger-soft)] text-[var(--admin-danger)]',
@@ -145,30 +144,7 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
           onSave={() => saveField('department', editValue)}
           saving={updateMutation.isPending}
         />
-        <RowDivider />
-        <InlineRow
-          label="설명"
-          value={booth.description || ''}
-          placeholder="부스 소개를 입력하세요"
-          editing={editingField === 'description'}
-          editValue={editValue}
-          onEdit={() => startEdit('description', booth.description ?? '')}
-          onCancel={cancelEdit}
-          onChange={setEditValue}
-          onSave={() => saveField('description', editValue)}
-          saving={updateMutation.isPending}
-          multiline
-        />
       </SectionCard>
-
-      {booth.xRatio != null && booth.yRatio != null && (
-        <div className="flex items-center gap-2 rounded-2xl bg-[var(--admin-surface)] px-4 py-3">
-          <MapPin size={14} className="shrink-0 text-[var(--admin-text-faint)]" />
-          <span className="text-[13px] text-[var(--admin-text-muted)]">
-            지도 위치는 총관리자가 설정합니다
-          </span>
-        </div>
-      )}
 
       <SectionCard
         title="메뉴판 이미지"
@@ -183,7 +159,7 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
           </button>
         }
       >
-        <div className="px-4 pb-4">
+        <div className="px-3 pt-1 pb-3">
           <input
             ref={fileRef}
             type="file"
@@ -199,12 +175,19 @@ function BoothProfileView({ boothId, booth }: BoothProfileViewProps) {
               style={{ maxHeight: 280 }}
             />
           ) : (
-            <div className="flex h-28 items-center justify-center rounded-xl bg-[var(--admin-surface-hover)] text-sm text-[var(--admin-text-faint)]">
+            <div className="flex h-24 items-center justify-center rounded-xl bg-[var(--admin-surface-hover)] text-[13px] text-[var(--admin-text-faint)]">
               메뉴판 사진을 업로드하세요
             </div>
           )}
         </div>
       </SectionCard>
+
+      {booth.xRatio != null && booth.yRatio != null && (
+        <p className="flex items-center gap-1.5 px-1 text-[12px] text-[var(--admin-text-faint)]">
+          <MapPin size={12} className="shrink-0" />
+          지도 위치는 총관리자가 설정합니다
+        </p>
+      )}
     </div>
   );
 }
@@ -220,8 +203,8 @@ function SectionCard({
 }) {
   return (
     <div className="rounded-2xl bg-[var(--admin-surface)]">
-      <div className="flex items-center justify-between px-4 pb-1 pt-4">
-        <span className="text-[13px] font-semibold text-[var(--admin-text-muted)]">{title}</span>
+      <div className="flex items-center justify-between px-4 pb-0.5 pt-3">
+        <span className="text-[12px] font-semibold text-[var(--admin-text-muted)]">{title}</span>
         {action}
       </div>
       {children}
@@ -313,20 +296,18 @@ function InlineRow({
     <button
       type="button"
       onClick={onEdit}
-      className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors active:bg-[var(--admin-surface-hover)]"
+      className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors active:bg-[var(--admin-surface-hover)]"
     >
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-[13px] text-[var(--admin-text-muted)]">{label}</span>
-        <span
-          className={[
-            'truncate text-[15px]',
-            value ? 'text-[var(--admin-text)]' : 'text-[var(--admin-text-faint)]',
-          ].join(' ')}
-        >
-          {value || placeholder || '미입력'}
-        </span>
-      </div>
-      <Pencil size={14} className="shrink-0 text-[var(--admin-text-faint)]" />
+      <span className="shrink-0 text-[13px] text-[var(--admin-text-muted)]">{label}</span>
+      <span
+        className={[
+          'min-w-0 flex-1 truncate text-right text-[14px]',
+          value ? 'text-[var(--admin-text)]' : 'text-[var(--admin-text-faint)]',
+        ].join(' ')}
+      >
+        {value || placeholder || '미입력'}
+      </span>
+      <Pencil size={13} className="shrink-0 text-[var(--admin-text-faint)]" />
     </button>
   );
 }

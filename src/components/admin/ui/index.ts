@@ -9,3 +9,5 @@ export { default as ImageUploadField } from './ImageUploadField';
 export { default as StatTile } from './StatTile';
 export { default as OverflowMenu } from './OverflowMenu';
 export { default as MapLocationPicker } from './MapLocationPicker';
+export { default as MapPickerModal } from './MapPickerModal';
+export { default as SegmentedTabs } from './SegmentedTabs';

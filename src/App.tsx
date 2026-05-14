@@ -8,7 +8,6 @@ import BoothManageGuard from '@/components/guards/BoothManageGuard';
 import ConsoleGuard from '@/components/guards/ConsoleGuard';
 import BoothManageLoginPage from '@/pages/boothManage/BoothManageLoginPage';
 import BoothProfilePage from '@/pages/boothManage/BoothProfilePage';
-import WaitingInsertPage from '@/pages/boothManage/WaitingInsertPage';
 import WaitingListPage from '@/pages/boothManage/WaitingListPage';
 import BoothCreatePage from '@/pages/console/BoothCreatePage';
 import BoothEditPage from '@/pages/console/BoothEditPage';
@@ -20,6 +19,10 @@ import GoodsPage from '@/pages/GoodsPage';
 import HobanustagramPage from '@/pages/HobanustagramPage';
 import HomePage from '@/pages/HomePage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import RollingPaperBoardPage from '@/pages/RollingPaperBoardPage';
+import RollingPaperCategorySelectPage from '@/pages/RollingPaperCategorySelectPage';
+import RollingPaperChannelSelectPage from '@/pages/RollingPaperChannelSelectPage';
+import RollingPaperIntroPage from '@/pages/RollingPaperIntroPage';
 import TavernDetailPage from '@/pages/TavernDetailPage';
 import TavernMapPage from '@/pages/TavernMapPage';
 import TimeTablePage from '@/pages/TimeTablePage';
@@ -66,7 +69,10 @@ export default function App() {
         >
           <Route index element={<BoothProfilePage />} />
           <Route path="waitings" element={<WaitingListPage />} />
-          <Route path="waitings/insert" element={<WaitingInsertPage />} />
+          <Route
+            path="waitings/insert"
+            element={<Navigate to="/booth/manage/waitings" replace />}
+          />
         </Route>
 
         <Route element={<DefaultLayout />}>
@@ -84,6 +90,17 @@ export default function App() {
             <Route path="result" element={<InstatingResultView />} />
           </Route>
           <Route path="/congrat-video" element={<CongratVideoPage />} />
+          <Route path="/rolling-paper" element={<RollingPaperIntroPage />} />
+          <Route path="/rolling-paper/categories" element={<RollingPaperCategorySelectPage />} />
+          <Route
+            path="/rolling-paper/categories/:categoryId/channels"
+            element={<RollingPaperChannelSelectPage />}
+          />
+          <Route path="/rolling-paper/board" element={<RollingPaperBoardPage />} />
+          <Route
+            path="/rolling-paper/board/:categoryId/:channelId"
+            element={<RollingPaperBoardPage />}
+          />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Route>
