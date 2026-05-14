@@ -3,12 +3,12 @@ import {
   ROLLING_PAPER_STICKER_COLORS,
   type RollingPaperStickerColorId,
 } from '@/constants/rollingPaper';
-import RollingPaperSticker from './RollingPaperSticker';
 import {
   getRollingPaperStickerMessageLength,
   getRollingPaperStickerTextInputStyle,
   limitRollingPaperMessageForSticker,
 } from './rollingPaperStickerText';
+import RollingPaperSticker from './RollingPaperSticker';
 
 type RollingPaperWriteComposeStepProps = {
   message: string;
@@ -25,6 +25,46 @@ const stickerPreviewClassNames: Record<RollingPaperStickerColorId, string> = {
   blue: 'w-10',
   purple: 'w-8',
   pink: 'w-8',
+};
+
+const stickerComposePreviewLayouts: Record<
+  RollingPaperStickerColorId,
+  {
+    containerWidth: number;
+    stickerTop: number;
+    stickerWidth: number;
+  }
+> = {
+  red: {
+    containerWidth: 266,
+    stickerTop: 68,
+    stickerWidth: 228,
+  },
+  yellow: {
+    containerWidth: 266,
+    stickerTop: 50,
+    stickerWidth: 239.191,
+  },
+  green: {
+    containerWidth: 266,
+    stickerTop: 20,
+    stickerWidth: 209.776,
+  },
+  blue: {
+    containerWidth: 334,
+    stickerTop: 77,
+    stickerWidth: 289.398,
+  },
+  purple: {
+    containerWidth: 266,
+    stickerTop: 64,
+    stickerWidth: 212,
+  },
+  pink: {
+    containerWidth: 266,
+    stickerTop: 55.19,
+    stickerWidth: 228.104,
+  },
 };
 
 function StickerColorPicker({
@@ -79,6 +119,7 @@ export default function RollingPaperWriteComposeStep({
 }: RollingPaperWriteComposeStepProps) {
   const textInputStyle = getRollingPaperStickerTextInputStyle(message, colorId);
   const messageLength = getRollingPaperStickerMessageLength(message, colorId);
+  const stickerLayout = stickerComposePreviewLayouts[colorId];
 
   const updateMessage = (nextMessage: string, nextColorId = colorId) => {
     onMessageChange(
@@ -96,12 +137,19 @@ export default function RollingPaperWriteComposeStep({
   };
 
   return (
-    <div className="flex flex-1 flex-col items-center">
-      <div className="relative mt-4 h-[360px] w-[266px] overflow-hidden">
+    <div className="flex flex-1 flex-col items-center justify-between">
+      <div
+        className="relative h-[360px] shrink-0 overflow-hidden"
+        style={{ width: `${stickerLayout.containerWidth}px` }}
+      >
         <RollingPaperSticker
           colorId={colorId}
           message=""
-          className="absolute left-1/2 top-1/2 w-[230px] -translate-x-1/2 -translate-y-1/2"
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{
+            top: `${stickerLayout.stickerTop}px`,
+            width: `${stickerLayout.stickerWidth}px`,
+          }}
         >
           <textarea
             aria-label="롤링페이퍼 메시지"
@@ -119,23 +167,25 @@ export default function RollingPaperWriteComposeStep({
             onChange={(event) => updateMessage(event.target.value)}
           />
         </RollingPaperSticker>
-        <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 font-wanted-sans text-[12px] font-medium leading-none text-white">
+        <div className="absolute bottom-0 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/20 px-2 py-1 font-wanted-sans text-[12px] font-medium leading-none tracking-[-0.02em] text-white">
           {messageLength} / {ROLLING_PAPER_MAX_MESSAGE_LENGTH}
         </div>
       </div>
 
-      <div className="mt-3 w-full">
+      <div className="w-full shrink-0">
         <StickerColorPicker selectedColorId={colorId} onSelect={updateColor} />
       </div>
 
-      <button
-        type="button"
-        className="mt-auto h-[50px] w-[287px] rounded-lg bg-[#ff3d3d] font-wanted-sans text-[16px] font-medium leading-none text-white disabled:bg-gray/40"
-        disabled={!message.trim()}
-        onClick={onNext}
-      >
-        다음으로
-      </button>
+      <div className="w-full shrink-0 px-6">
+        <button
+          type="button"
+          className="h-[50px] w-full rounded-lg bg-[#ff3d3d] font-wanted-sans text-[16px] font-medium leading-none tracking-[-0.02em] text-white disabled:bg-gray/40"
+          disabled={!message.trim()}
+          onClick={onNext}
+        >
+          다음으로
+        </button>
+      </div>
     </div>
   );
 }

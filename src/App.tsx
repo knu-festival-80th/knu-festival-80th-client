@@ -13,7 +13,10 @@ import BoothCreatePage from '@/pages/console/BoothCreatePage';
 import BoothEditPage from '@/pages/console/BoothEditPage';
 import BoothListPage from '@/pages/console/BoothListPage';
 import BoothPasswordPage from '@/pages/console/BoothPasswordPage';
+import CanvasAdminPage from '@/pages/console/CanvasAdminPage';
 import ConsoleLoginPage from '@/pages/console/ConsoleLoginPage';
+import MatchingOverviewPage from '@/pages/console/MatchingOverviewPage';
+import MatchingParticipantsPage from '@/pages/console/MatchingParticipantsPage';
 import CongratVideoPage from '@/pages/CongratVideoPage';
 import GoodsPage from '@/pages/GoodsPage';
 import HobanustagramPage from '@/pages/HobanustagramPage';
@@ -27,6 +30,7 @@ import TavernDetailPage from '@/pages/TavernDetailPage';
 import TavernMapPage from '@/pages/TavernMapPage';
 import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
+import PostHogPageView from '@/utils/PostHogPageView';
 import StampTourPage from './pages/stampTour/StampTourPage';
 import StampBoothListPage from './pages/stampTour/StampBoothListPage';
 import InstatingPage from './pages/InstatingPage';
@@ -38,6 +42,7 @@ export default function App() {
   return (
     <>
       <GoogleAnalytics />
+      <PostHogPageView />
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
@@ -56,6 +61,9 @@ export default function App() {
           <Route path="booths/new" element={<BoothCreatePage />} />
           <Route path="booths/:boothId/edit" element={<BoothEditPage />} />
           <Route path="booths/:boothId/password" element={<BoothPasswordPage />} />
+          <Route path="matching" element={<MatchingOverviewPage />} />
+          <Route path="matching/participants" element={<MatchingParticipantsPage />} />
+          <Route path="canvas" element={<CanvasAdminPage />} />
         </Route>
 
         <Route path="/booth/manage/login" element={<BoothManageLoginPage />} />

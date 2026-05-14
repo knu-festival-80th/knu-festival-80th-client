@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ROLLING_PAPER_DEFAULT_MESSAGE,
   type RollingPaperStickerColorId,
@@ -105,14 +106,14 @@ export default function RollingPaperWriteModal({
     });
   };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="rolling-paper-write-title"
-      className="fixed inset-0 z-[100] flex justify-center overflow-y-auto bg-black/30 px-5 pt-[101px] pb-10"
+      className="fixed inset-0 z-[100] flex h-dvh justify-center overflow-y-auto bg-black/30 px-5 pt-[101px] pb-10 [-webkit-overflow-scrolling:touch]"
     >
-      <div className="flex h-[612px] w-full max-w-[335px] flex-col overflow-hidden rounded-xl bg-white pt-4 pb-6 shadow-[0_16px_60px_rgba(0,0,0,0.2)]">
+      <div className="flex h-[612px] w-full max-w-[335px] shrink-0 flex-col overflow-hidden rounded-xl bg-white pt-4 pb-6 shadow-[0_16px_60px_rgba(0,0,0,0.2)]">
         <RollingPaperWriteModalHeader step={step} onBack={handleBack} onClose={onClose} />
         <span id="rolling-paper-write-title" className="sr-only">
           롤링페이퍼 메시지 작성
@@ -145,6 +146,7 @@ export default function RollingPaperWriteModal({
           />
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

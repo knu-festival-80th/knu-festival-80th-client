@@ -1,16 +1,17 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
+import { getRuntimeEnv, getRuntimeEnvNumber } from '@/config/runtimeEnv';
+
 import { toApiClientError } from './error';
 
 const FALLBACK_API_BASE_URL = 'http://localhost:8080';
 const FALLBACK_TIMEOUT_MS = 10000;
 
-const parsedTimeout = Number(import.meta.env.VITE_API_TIMEOUT_MS);
-const timeoutMs = Number.isFinite(parsedTimeout) ? parsedTimeout : FALLBACK_TIMEOUT_MS;
+const timeoutMs = getRuntimeEnvNumber('VITE_API_TIMEOUT_MS', FALLBACK_TIMEOUT_MS);
 
 export const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || FALLBACK_API_BASE_URL,
+  baseURL: getRuntimeEnv('VITE_API_BASE_URL') || FALLBACK_API_BASE_URL,
   timeout: timeoutMs,
   withCredentials: true,
   headers: {

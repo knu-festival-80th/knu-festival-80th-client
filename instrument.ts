@@ -1,14 +1,16 @@
 import * as Sentry from '@sentry/react';
+import { getRuntimeEnv, isProductionMode } from '@/config/runtimeEnv';
 
-const isProd = import.meta.env.MODE === 'production';
+const sentryDsn = getRuntimeEnv('VITE_SENTRY_DSN');
+const apiBaseUrl = getRuntimeEnv('VITE_API_BASE_URL');
 
-if (isProd && import.meta.env.VITE_SENTRY_DSN) {
+if (isProductionMode && sentryDsn) {
   Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
+    dsn: sentryDsn,
     sendDefaultPii: true,
     integrations: [Sentry.browserTracingIntegration()],
     tracesSampleRate: 1.0,
-    tracePropagationTargets: ['localhost', import.meta.env.VITE_API_BASE_URL],
+    tracePropagationTargets: ['localhost', apiBaseUrl].filter(Boolean),
     ignoreErrors: ['Java object is gone', 'Error invoking postMessage', 'Request aborted'],
   });
 }

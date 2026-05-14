@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronDown, Plus } from 'lucide-react';
 import { rollingPaperApi } from '@/apis';
 import {
   getRollingPaperBoardPath,
@@ -9,6 +10,7 @@ import {
   getRollingPaperChannel,
   getRollingPaperChannelIndex,
   getRollingPaperChannelsByCategory,
+  ROLLING_PAPER_CHANNELS_PER_CATEGORY,
 } from '@/constants/rollingPaper';
 import { getRollingPaperPerformanceNotesFromSearch } from '@/mocks/rollingPaperPerformance';
 import {
@@ -29,10 +31,13 @@ import {
 } from './rollingPaperApiAdapter';
 import RollingPaperBoardCanvas from './RollingPaperBoardCanvas';
 import RollingPaperBoardChangeDialog from './RollingPaperBoardChangeDialog';
+import RollingPaperCategoryChangeDialog from './RollingPaperCategoryChangeDialog';
 import RollingPaperCategoryTabs from './RollingPaperCategoryTabs';
+import RollingPaperPageTransition from './RollingPaperPageTransition';
 import RollingPaperTabs from './RollingPaperTabs';
 import RollingPaperWriteModal from './RollingPaperWriteModal';
 import RollingPaperZoomControls from './RollingPaperZoomControls';
+import { rollingPaperItemMotion } from './rollingPaperMotion';
 
 const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
 const PENDING_POSTIT_REFETCH_INTERVAL_MS = 5000;
@@ -88,7 +93,9 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
     apiCategories.find((item) => item.id === categoryId) ??
     apiCategories[0] ??
     (isApiRoute ? placeholderCategory : fallbackCategory);
-  const apiChannels = (boardsQuery.data ?? []).map(toRollingPaperChannel);
+  const apiChannels = (boardsQuery.data ?? [])
+    .map(toRollingPaperChannel)
+    .slice(0, ROLLING_PAPER_CHANNELS_PER_CATEGORY);
   const fallbackChannels = isApiRoute ? [] : getRollingPaperChannelsByCategory(category.id);
   const categoryChannels = apiChannels.length > 0 ? apiChannels : fallbackChannels;
   const fallbackChannel = isApiRoute
@@ -113,6 +120,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   const boardId = channel.boardId;
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
   const [isBoardChangeDialogOpen, setIsBoardChangeDialogOpen] = useState(false);
+  const [isCategoryChangeDialogOpen, setIsCategoryChangeDialogOpen] = useState(false);
   const [pendingPlacedNotes, setPendingPlacedNotes] = useState<PlacedRollingPaperNote[]>([]);
   const [boardScale, setBoardScale] = useState<number>(ROLLING_PAPER_ZOOM.default);
   const [boardPan, setBoardPan] = useState<RollingPaperPan>(INITIAL_BOARD_PAN);
@@ -164,8 +172,10 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   );
   const currentBoardNotes = getPlacedNotesForBoard(placedNotes, boardIndex, boardScope);
   const boardCapacity = channel.capacity ?? ROLLING_PAPER_MAX_NOTES_PER_BOARD;
-  const totalBoardCount = Math.max(1, categoryChannels.length);
+  const currentBoardNoteCount = Math.min(currentBoardNotes.length, boardCapacity);
   const isCurrentBoardFull = currentBoardNotes.length >= boardCapacity;
+  const boardCategories = apiCategories.length > 0 ? apiCategories : [category];
+  const boardNumberLabel = `BOR ${String(channelIndex + 1).padStart(2, '0')}`;
 
   const resetBoardViewport = () => {
     setBoardScale(ROLLING_PAPER_ZOOM.default);
@@ -239,56 +249,53 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   };
 
   return (
-    <div className="bg-white">
+    <RollingPaperPageTransition className="bg-white">
       <RollingPaperTabs active="board" />
       <RollingPaperCategoryTabs
         activeCategory={category}
-        categories={apiCategories.length > 0 ? apiCategories : [category]}
+        categories={boardCategories}
+        onGridClick={() => setIsCategoryChangeDialogOpen(true)}
       />
 
-      <section className="min-h-[713px] bg-black/[0.02] pt-7 pb-16">
-        <div className="flex flex-col gap-6 px-5">
-          <div className="flex flex-col gap-2.5">
-            <h1 className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
-              롤링페이퍼
-            </h1>
-            <p className="font-wanted-sans text-body1 font-normal leading-none tracking-[-0.02em] text-gray">
-              경북대학교 80주년을 축하해주세요!
-            </p>
-          </div>
-
+      <section className="min-h-[713px] bg-white pb-16">
+        <motion.div className="border-b border-border px-5 pt-5 pb-7" {...rollingPaperItemMotion}>
           <button
             type="button"
-            className="w-fit rounded-full border border-sub-red px-5 py-2.5 font-wanted-sans text-sm font-medium leading-[1.5] text-sub-red transition hover:bg-sub-red/5"
+            className="flex h-[30px] items-center gap-1 rounded border border-border bg-white px-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-black"
             onClick={() => setIsBoardChangeDialogOpen(true)}
           >
-            보드 변경하기
+            <span className="font-semibold text-sub-red">{boardNumberLabel}</span>
+            <span>보드 변경하기</span>
+            <ChevronDown className="size-3.5" />
           </button>
 
-          <div className="flex items-end gap-7">
-            <div className="flex min-w-0 flex-1 flex-col gap-2.5">
-              <p className="font-wanted-sans text-body1 font-normal leading-none tracking-[-0.02em] text-gray">
-                Board
+          <div className="mt-[18px] flex items-end justify-between gap-5">
+            <div className="min-w-0">
+              {isCurrentBoardFull && (
+                <p className="mb-1.5 font-wanted-sans text-[15px] font-bold leading-none tracking-[-0.02em] text-sub-red">
+                  🎉 이 보드는 추억으로 가득 찼어요!
+                </p>
+              )}
+              <div className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
+                <span className="text-sub-red">{currentBoardNoteCount}</span>/{boardCapacity}
+              </div>
+              <p className="mt-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-gray">
+                메시지
               </p>
-              <p className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
-                <span className="text-sub-red">{channelIndex + 1}</span>/{totalBoardCount}
-              </p>
-              <p className="font-wanted-sans text-caption font-medium text-gray">{channel.label}</p>
             </div>
             <button
               type="button"
-              className={`rounded-full px-5 py-2.5 font-wanted-sans text-sm font-medium leading-[1.5] text-white shadow-[0_6px_14px_rgba(255,61,61,0.22)] transition ${
-                isCurrentBoardFull || !boardId
-                  ? 'cursor-not-allowed bg-sub-red/45 shadow-none'
-                  : 'bg-sub-red'
+              className={`flex h-10 shrink-0 items-center gap-1 rounded-full px-5 font-wanted-sans text-sm font-bold leading-none tracking-[-0.02em] text-white shadow-[0_6px_14px_rgba(255,61,61,0.22)] transition ${
+                isCurrentBoardFull || !boardId ? 'hidden' : 'bg-sub-red'
               }`}
               disabled={isCurrentBoardFull || !boardId}
               onClick={() => setIsWriteModalOpen(true)}
             >
-              {isCurrentBoardFull ? '보드가 가득 찼어요' : '메시지 남기기'}
+              <Plus className="size-4" />
+              <span>메시지 남기기</span>
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {(questionsQuery.isLoading || boardsQuery.isLoading || postitsQuery.isLoading) && (
           <p className="mt-4 px-5 font-wanted-sans text-caption text-gray">
@@ -302,7 +309,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
           </p>
         )}
 
-        <div className="relative mt-6">
+        <motion.div className="relative mt-6" {...rollingPaperItemMotion}>
           <RollingPaperBoardCanvas
             variant={boardIndex}
             scale={boardScale}
@@ -332,7 +339,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
               <ArrowRight className="size-6" />
             </button>
           </div>
-        </div>
+        </motion.div>
 
         <RollingPaperZoomControls
           scale={boardScale}
@@ -363,10 +370,24 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
           onClose={() => setIsBoardChangeDialogOpen(false)}
           onSelectChannel={(nextChannel) => {
             setIsBoardChangeDialogOpen(false);
+            resetBoardViewport();
             navigate(getRollingPaperBoardPath(category.id, nextChannel.id));
           }}
         />
       )}
-    </div>
+
+      {isCategoryChangeDialogOpen && (
+        <RollingPaperCategoryChangeDialog
+          currentCategory={category}
+          categories={boardCategories}
+          onClose={() => setIsCategoryChangeDialogOpen(false)}
+          onSelectCategory={(nextCategory) => {
+            setIsCategoryChangeDialogOpen(false);
+            resetBoardViewport();
+            navigate(`/rolling-paper/categories/${nextCategory.id}/channels`);
+          }}
+        />
+      )}
+    </RollingPaperPageTransition>
   );
 }

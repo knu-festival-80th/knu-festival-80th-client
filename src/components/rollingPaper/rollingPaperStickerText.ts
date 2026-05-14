@@ -33,7 +33,7 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
 > = {
   red: {
     centerX: '50%',
-    centerY: '57%',
+    centerY: '59%',
     width: '75.5%',
     height: '55%',
     aspectRatio: 250 / 271,
@@ -43,7 +43,7 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
   },
   yellow: {
     centerX: '50%',
-    centerY: '56%',
+    centerY: '62%',
     width: '56%',
     height: '65%',
     aspectRatio: 270 / 274,
@@ -53,7 +53,7 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
   },
   green: {
     centerX: '50%',
-    centerY: '38%',
+    centerY: '40%',
     width: '62%',
     height: '40%',
     aspectRatio: 361 / 253,
@@ -63,7 +63,7 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
   },
   blue: {
     centerX: '50%',
-    centerY: '50%',
+    centerY: '53%',
     width: '65%',
     height: '67%',
     aspectRatio: 230 / 326,
@@ -73,9 +73,9 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
   },
   purple: {
     centerX: '50%',
-    centerY: '50%',
+    centerY: '57%',
     width: '60%',
-    height: '50%',
+    height: '64%',
     aspectRatio: 259 / 259,
     heightRatio: 0.44,
     maxLines: 6,
@@ -83,7 +83,7 @@ export const ROLLING_PAPER_STICKER_TEXT_CONFIG: Record<
   },
   pink: {
     centerX: '50%',
-    centerY: '50%',
+    centerY: '52%',
     width: '60%',
     height: '50%',
     aspectRatio: 271 / 271,

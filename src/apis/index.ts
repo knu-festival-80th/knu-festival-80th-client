@@ -18,6 +18,7 @@ export type {
 
 export * as authApi from '@/apis/modules/auth';
 export * as boothApi from '@/apis/modules/booth';
+export * as matchingApi from '@/apis/modules/matching';
 export * as rollingPaperApi from '@/apis/modules/rollingPaper';
 export * as uploadApi from '@/apis/modules/upload';
 export * as waitingApi from '@/apis/modules/waiting';
@@ -49,3 +50,15 @@ export type {
   WaitingStatus,
   WaitingToggleRequest,
 } from '@/apis/modules/waiting';
+export type {
+  ListParticipantsParams,
+  MatchingApplicantsCountResponse,
+  MatchingGender,
+  MatchingJobResponse,
+  MatchingOperationStatus,
+  MatchingParticipantAdmin,
+  MatchingParticipantStatus,
+  MatchingParticipantsAdminResponse,
+  MatchingStatusResponse,
+  MatchingStatusUpdateRequest,
+} from '@/apis/modules/matching';

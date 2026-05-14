@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { getGoogleAnalyticsId } from '@/lib/googleAnalytics';
 
 export function useGAPageView() {
   const location = useLocation();
 
   useEffect(() => {
-    const gaId = import.meta.env.VITE_GA_ID;
+    const gaId = getGoogleAnalyticsId();
     if (!gaId || !window.gtag) {
       return;
     }

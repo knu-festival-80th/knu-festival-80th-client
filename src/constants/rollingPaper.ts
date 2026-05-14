@@ -1,8 +1,8 @@
 export const ROLLING_PAPER_DEFAULT_MESSAGE = '';
 
-export const ROLLING_PAPER_MAX_MESSAGE_LENGTH = 60;
+export const ROLLING_PAPER_MAX_MESSAGE_LENGTH = 80;
 export const ROLLING_PAPER_CHANNEL_CAPACITY = 100;
-export const ROLLING_PAPER_CHANNELS_PER_CATEGORY = 20;
+export const ROLLING_PAPER_CHANNELS_PER_CATEGORY = 12;
 
 export const ROLLING_PAPER_STICKER_COLORS = [
   { id: 'red', label: '레드', value: '#ff3d3d' },
