@@ -9,6 +9,7 @@ import {
   getRollingPaperChannel,
   getRollingPaperChannelIndex,
   getRollingPaperChannelsByCategory,
+  ROLLING_PAPER_CHANNELS_PER_CATEGORY,
 } from '@/constants/rollingPaper';
 import { getRollingPaperPerformanceNotesFromSearch } from '@/mocks/rollingPaperPerformance';
 import {
@@ -89,7 +90,9 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
     apiCategories.find((item) => item.id === categoryId) ??
     apiCategories[0] ??
     (isApiRoute ? placeholderCategory : fallbackCategory);
-  const apiChannels = (boardsQuery.data ?? []).map(toRollingPaperChannel);
+  const apiChannels = (boardsQuery.data ?? [])
+    .map(toRollingPaperChannel)
+    .slice(0, ROLLING_PAPER_CHANNELS_PER_CATEGORY);
   const fallbackChannels = isApiRoute ? [] : getRollingPaperChannelsByCategory(category.id);
   const categoryChannels = apiChannels.length > 0 ? apiChannels : fallbackChannels;
   const fallbackChannel = isApiRoute

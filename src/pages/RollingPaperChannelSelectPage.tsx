@@ -8,7 +8,11 @@ import {
   toRollingPaperCategory,
   toRollingPaperChannel,
 } from '@/components/rollingPaper/rollingPaperApiAdapter';
-import { getRollingPaperBoardPath, ROLLING_PAPER_CATEGORIES } from '@/constants/rollingPaper';
+import {
+  getRollingPaperBoardPath,
+  ROLLING_PAPER_CATEGORIES,
+  ROLLING_PAPER_CHANNELS_PER_CATEGORY,
+} from '@/constants/rollingPaper';
 
 export default function RollingPaperChannelSelectPage() {
   const { categoryId } = useParams();
@@ -31,7 +35,9 @@ export default function RollingPaperChannelSelectPage() {
     .map(toRollingPaperCategory);
   const category = categories.find((item) => item.id === categoryId);
   const activeCategory = category ?? categories[0] ?? ROLLING_PAPER_CATEGORIES[0];
-  const channels = (boardsQuery.data ?? []).map(toRollingPaperChannel);
+  const channels = (boardsQuery.data ?? [])
+    .map(toRollingPaperChannel)
+    .slice(0, ROLLING_PAPER_CHANNELS_PER_CATEGORY);
 
   if (!isValidQuestionId && categories[0]) {
     return <Navigate to={`/rolling-paper/categories/${categories[0].id}/channels`} replace />;
