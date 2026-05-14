@@ -1,13 +1,24 @@
 import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { rollingPaperApi } from '@/apis';
+import RollingPaperCategoryTabs from '@/components/rollingPaper/RollingPaperCategoryTabs';
 import RollingPaperChannelCard from '@/components/rollingPaper/RollingPaperChannelCard';
-import RollingPaperSelectionNav from '@/components/rollingPaper/RollingPaperSelectionNav';
+import RollingPaperPageTransition from '@/components/rollingPaper/RollingPaperPageTransition';
+import RollingPaperTabs from '@/components/rollingPaper/RollingPaperTabs';
+import {
+  rollingPaperItemMotion,
+  rollingPaperStaggerContainerMotion,
+} from '@/components/rollingPaper/rollingPaperMotion';
 import {
   toRollingPaperCategory,
   toRollingPaperChannel,
 } from '@/components/rollingPaper/rollingPaperApiAdapter';
-import { getRollingPaperBoardPath } from '@/constants/rollingPaper';
+import {
+  getRollingPaperBoardPath,
+  ROLLING_PAPER_CATEGORIES,
+  ROLLING_PAPER_CHANNELS_PER_CATEGORY,
+} from '@/constants/rollingPaper';
 
 export default function RollingPaperChannelSelectPage() {
   const { categoryId } = useParams();
@@ -29,25 +40,33 @@ export default function RollingPaperChannelSelectPage() {
     .sort((a, b) => a.orderIndex - b.orderIndex)
     .map(toRollingPaperCategory);
   const category = categories.find((item) => item.id === categoryId);
-  const channels = (boardsQuery.data ?? []).map(toRollingPaperChannel);
+  const activeCategory = category ?? categories[0] ?? ROLLING_PAPER_CATEGORIES[0];
+  const channels = (boardsQuery.data ?? [])
+    .map(toRollingPaperChannel)
+    .slice(0, ROLLING_PAPER_CHANNELS_PER_CATEGORY);
 
   if (!isValidQuestionId && categories[0]) {
     return <Navigate to={`/rolling-paper/categories/${categories[0].id}/channels`} replace />;
   }
 
   return (
-    <div className="min-h-[calc(100dvh-64px)] bg-[#f6f7ff]">
-      <RollingPaperSelectionNav title="보드 선택" />
+    <RollingPaperPageTransition className="min-h-[calc(100dvh-64px)] bg-white">
+      <RollingPaperTabs active="board" />
+      <RollingPaperCategoryTabs
+        activeCategory={activeCategory}
+        categories={categories}
+        gridTo="/rolling-paper/categories"
+      />
 
-      <section className="px-3.5 pt-24 pb-16">
-        <div className="text-center">
-          <h2 className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.02em] text-black">
+      <section className="px-5 py-7">
+        <motion.div className="text-center" {...rollingPaperItemMotion}>
+          <h2 className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
             보드 선택
           </h2>
-          <p className="mt-3 font-wanted-sans text-caption font-medium text-gray">
-            {category?.label ?? '선택한 카테고리'} 카테고리에서 작성할 채널을 골라주세요.
+          <p className="mt-2.5 font-wanted-sans text-body1 font-normal leading-none tracking-[-0.02em] text-gray">
+            빈 자리가 있는 보드를 선택해주세요
           </p>
-        </div>
+        </motion.div>
 
         {questionsQuery.isLoading || boardsQuery.isLoading ? (
           <p className="mt-11 text-center font-wanted-sans text-body1 text-gray">
@@ -58,17 +77,21 @@ export default function RollingPaperChannelSelectPage() {
             보드를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
           </p>
         ) : (
-          <div className="mt-11 grid grid-cols-3 gap-x-2.5 gap-y-3">
+          <motion.div
+            className="mt-6 grid grid-cols-3 gap-2.5"
+            {...rollingPaperStaggerContainerMotion}
+          >
             {channels.map((channel) => (
-              <RollingPaperChannelCard
-                key={channel.id}
-                channel={channel}
-                onClick={() => navigate(getRollingPaperBoardPath(category.id, channel.id))}
-              />
+              <motion.div key={channel.id} {...rollingPaperItemMotion}>
+                <RollingPaperChannelCard
+                  channel={channel}
+                  onClick={() => navigate(getRollingPaperBoardPath(category.id, channel.id))}
+                />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </section>
-    </div>
+    </RollingPaperPageTransition>
   );
 }

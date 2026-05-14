@@ -1,35 +1,61 @@
 import { Link } from 'react-router-dom';
+import gridViewIcon from '@/assets/rollingPaper/categories/grid_view.svg';
 import { ROLLING_PAPER_CATEGORIES, type RollingPaperCategory } from '@/constants/rollingPaper';
 
 type RollingPaperCategoryTabsProps = {
   activeCategory: RollingPaperCategory;
   categories?: RollingPaperCategory[];
+  gridTo?: string;
+  onGridClick?: () => void;
 };
 
 export default function RollingPaperCategoryTabs({
   activeCategory,
   categories = ROLLING_PAPER_CATEGORIES,
+  gridTo = '/rolling-paper/categories',
+  onGridClick,
 }: RollingPaperCategoryTabsProps) {
+  const gridClassName =
+    'flex h-7 w-[38px] shrink-0 items-center justify-center rounded-full border border-border bg-white text-[#808080]';
+
   return (
-    <div className="border-b border-border bg-white">
+    <div className="bg-[#f5f5f5] px-5 py-3">
       <nav
-        className="flex overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         aria-label="롤링페이퍼 카테고리"
       >
-        {categories.map((category) => {
+        {onGridClick ? (
+          <button
+            type="button"
+            className={gridClassName}
+            aria-label="카테고리 변경하기"
+            onClick={onGridClick}
+          >
+            <img src={gridViewIcon} alt="" className="size-[18px]" aria-hidden="true" />
+          </button>
+        ) : (
+          <Link to={gridTo} className={gridClassName} aria-label="카테고리 목록으로 이동">
+            <img src={gridViewIcon} alt="" className="size-[18px]" aria-hidden="true" />
+          </Link>
+        )}
+
+        {categories.map((category, index) => {
           const isActive = category.id === activeCategory.id;
 
           return (
             <Link
               key={category.id}
               to={`/rolling-paper/categories/${category.id}/channels`}
-              className={`shrink-0 border-b-2 px-3.5 py-2.5 font-wanted-sans text-body1 font-bold leading-none tracking-[-0.02em] ${
-                isActive
-                  ? 'border-sub-red bg-sub-red text-black'
-                  : 'border-sub-red bg-white text-black'
+              className={`flex h-7 shrink-0 items-center gap-1 rounded-full px-2.5 font-wanted-sans leading-none tracking-[-0.02em] ${
+                isActive ? 'bg-[#1a1a1a] text-white' : 'bg-white text-[#666]'
               }`}
             >
-              {category.label}
+              <span className="text-[10px] font-semibold">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className={`text-caption ${isActive ? 'font-bold' : 'font-medium'}`}>
+                {category.label}
+              </span>
             </Link>
           );
         })}
