@@ -52,6 +52,10 @@ function getRollingPaperStickerColor(colorId: RollingPaperStickerColorId) {
   );
 }
 
+function hasPositionClass(className: string) {
+  return /\b(absolute|fixed|relative|sticky)\b/.test(className);
+}
+
 export default function RollingPaperSticker({
   colorId,
   message,
@@ -67,9 +71,10 @@ export default function RollingPaperSticker({
   const textStyle = getRollingPaperStickerTextStyle(message, color.id);
   const text = message || placeholder || '';
   const isPlaceholder = !message && Boolean(placeholder);
+  const positionClassName = hasPositionClass(className) ? '' : 'relative';
 
   return (
-    <div className={`relative [container-type:inline-size] ${className}`} style={style}>
+    <div className={`${positionClassName} [container-type:inline-size] ${className}`} style={style}>
       <span
         aria-hidden="true"
         className="block w-full select-none [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ROLLING_PAPER_BOARD_VIEWPORT,
   ROLLING_PAPER_CANVAS_DIMENSIONS,
+  ROLLING_PAPER_CLIENT_COLLISION_SCALE,
   ROLLING_PAPER_MAX_NOTES_PER_BOARD,
   ROLLING_PAPER_NOTE_FOCUS_ZOOM,
   clampRollingPaperPan,
@@ -52,6 +53,23 @@ describe('rollingPaperLayout', () => {
   it('blocks placements that overlap the centered frame zone', () => {
     expect(isRollingPaperPlacementAvailable({ x: 50, y: 50 }, 'red', [], 0)).toBe(false);
     expect(isRollingPaperPlacementAvailable({ x: 12, y: 16 }, 'red', [], 0)).toBe(true);
+  });
+
+  it('uses the same collision tolerance for client-side submit checks', () => {
+    const existingNotes = [createPlacedNote('note-1', 0, 20, 15, 'red')];
+    const closePlacement = { x: 27, y: 15 };
+
+    expect(isRollingPaperPlacementAvailable(closePlacement, 'red', existingNotes, 0)).toBe(true);
+    expect(
+      isRollingPaperPlacementAvailable(
+        closePlacement,
+        'red',
+        existingNotes,
+        0,
+        undefined,
+        ROLLING_PAPER_CLIENT_COLLISION_SCALE,
+      ),
+    ).toBe(true);
   });
 
   it('centers the 320px mascot frame on the Figma-sized square canvas', () => {

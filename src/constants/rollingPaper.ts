@@ -1,6 +1,6 @@
 export const ROLLING_PAPER_DEFAULT_MESSAGE = '';
 
-export const ROLLING_PAPER_MAX_MESSAGE_LENGTH = 80;
+export const ROLLING_PAPER_MAX_MESSAGE_LENGTH = 60;
 export const ROLLING_PAPER_CHANNEL_CAPACITY = 100;
 export const ROLLING_PAPER_CHANNELS_PER_CATEGORY = 20;
 
@@ -19,6 +19,7 @@ export type RollingPaperCategory = {
   id: string;
   label: string;
   description: string;
+  questionId?: number;
 };
 
 export type RollingPaperChannel = {
@@ -27,6 +28,9 @@ export type RollingPaperChannel = {
   label: string;
   noteCount: number;
   capacity: number;
+  boardId?: number;
+  questionId?: number;
+  boardVariant?: number;
 };
 
 export const ROLLING_PAPER_CATEGORIES: RollingPaperCategory[] = [
@@ -99,6 +103,10 @@ export function getRollingPaperChannelIndex(categoryId?: string, channelId?: str
 }
 
 export function getRollingPaperBoardPath(categoryId?: string, channelId?: string) {
+  if (categoryId && channelId) {
+    return `/rolling-paper/board/${categoryId}/${channelId}`;
+  }
+
   const category = getRollingPaperCategory(categoryId);
   const channel = getRollingPaperChannel(category.id, channelId);
 

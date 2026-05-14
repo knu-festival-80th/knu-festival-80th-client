@@ -7,8 +7,9 @@ export type RollingPaperWriteModalProps = {
   isOpen: boolean;
   boardVariant: number;
   placedNotes: PlacedRollingPaperNote[];
+  isSubmitting?: boolean;
   onClose: () => void;
-  onPlace: (note: PlacedRollingPaperNote) => void;
+  onPlace: (note: PlacedRollingPaperNote) => void | Promise<void>;
 };
 
 export type RollingPaperWriteStepBaseProps = {
