@@ -1,5 +1,6 @@
 import { ENDPOINTS, http, unwrapApiResponse } from '@/apis';
 import type { ApiResponse } from '@/apis/types';
+import { getRuntimeEnv } from '@/config/runtimeEnv';
 
 export interface ImageUploadResponse {
   /** 즉시 표시 가능한 완전한 URL. */
@@ -18,7 +19,7 @@ export async function uploadImage(file: File): Promise<ImageUploadResponse> {
   return unwrapApiResponse(response.data);
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE = getRuntimeEnv('VITE_API_BASE_URL') || 'http://localhost:8080';
 
 /**
  * 서버가 응답으로 내려준 이미지 값(완전한 URL이거나 외부 URL)에서 DB-저장용 path 만 추출한다.

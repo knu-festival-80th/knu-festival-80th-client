@@ -1,17 +1,22 @@
-const GA_ID = import.meta.env.VITE_GA_ID;
+import { getRuntimeEnv } from '@/config/runtimeEnv';
+
+export function getGoogleAnalyticsId(): string {
+  return getRuntimeEnv('VITE_GA_ID');
+}
 
 export function initGA(): void {
-  if (!GA_ID) return;
+  const gaId = getGoogleAnalyticsId();
+  if (!gaId) return;
 
   window.dataLayer = window.dataLayer || [];
   window.gtag = (...args) => {
     window.dataLayer.push(args);
   };
   window.gtag('js', new Date());
-  window.gtag('config', GA_ID, { send_page_view: false });
+  window.gtag('config', gaId, { send_page_view: false });
 
   const script = document.createElement('script');
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
   document.head.appendChild(script);
 }
