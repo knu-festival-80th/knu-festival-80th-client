@@ -18,8 +18,8 @@ export type {
 
 export * as authApi from '@/apis/modules/auth';
 export * as boothApi from '@/apis/modules/booth';
-export * as canvasApi from '@/apis/modules/canvas';
 export * as matchingApi from '@/apis/modules/matching';
+export * as rollingPaperApi from '@/apis/modules/rollingPaper';
 export * as uploadApi from '@/apis/modules/upload';
 export * as waitingApi from '@/apis/modules/waiting';
 export { imagePathToSrc, imageUrlToPath } from '@/apis/modules/upload';
@@ -33,6 +33,16 @@ export type {
   BoothUpdateRequest,
   BoothSort,
 } from '@/apis/modules/booth';
+export type {
+  CanvasBoardQuestionResponse,
+  CanvasBoardSummaryResponse,
+  CanvasColorId,
+  CanvasPlacement,
+  CanvasPostitCreateRequest,
+  CanvasPostitCreateResponse,
+  CanvasPostitModerationStatus,
+  CanvasPostitResponse,
+} from '@/apis/modules/rollingPaper';
 export type {
   WaitingInsertRequest,
   WaitingItem,
@@ -52,9 +62,3 @@ export type {
   MatchingStatusResponse,
   MatchingStatusUpdateRequest,
 } from '@/apis/modules/matching';
-export type {
-  CanvasBoardCreateRequest,
-  CanvasBoardSummary,
-  CanvasPostit,
-  CanvasQuestion,
-} from '@/apis/modules/canvas';

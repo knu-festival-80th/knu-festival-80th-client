@@ -21,7 +21,7 @@ export default function DayScheduleBlock({ data, description }: DayScheduleBlock
         {data.schedules.map((entry, index) => (
           <div key={entry.name}>
             {index !== 0 && <div className="mx-4" />}
-            <TimeTableScheduleItem entry={entry} />
+            <TimeTableScheduleItem entry={entry} day={data.day} />
           </div>
         ))}
       </div>

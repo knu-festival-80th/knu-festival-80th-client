@@ -4,10 +4,12 @@ import {
   type RollingPaperStickerColorId,
 } from '@/constants/rollingPaper';
 import {
+  ROLLING_PAPER_CLIENT_COLLISION_SCALE,
   ROLLING_PAPER_MAX_NOTES_PER_BOARD,
   ROLLING_PAPER_ZOOM,
-  findNearestAvailableRollingPaperPlacement,
+  clampRollingPaperPlacement,
   getPlacedNotesForBoard,
+  isRollingPaperPlacementAvailable,
   type RollingPaperPan,
   type RollingPaperPlacement,
 } from '@/lib/rollingPaperLayout';
@@ -24,6 +26,7 @@ export default function RollingPaperWriteModal({
   isOpen,
   boardVariant,
   placedNotes,
+  isSubmitting = false,
   onClose,
   onPlace,
 }: RollingPaperWriteModalProps) {
@@ -37,13 +40,22 @@ export default function RollingPaperWriteModal({
   const [scale, setScale] = useState<number>(ROLLING_PAPER_ZOOM.default);
   const [pan, setPan] = useState<RollingPaperPan>({ x: 0, y: 0 });
 
+  const trimmedMessage = message.trim();
   const occupiedNotes = getPlacedNotesForBoard(placedNotes, boardVariant);
-  const selectedPlacement = findNearestAvailableRollingPaperPlacement(
-    requestedPlacement,
+  const selectedPlacement = clampRollingPaperPlacement(requestedPlacement, colorId);
+  const isPlacementAvailable = isRollingPaperPlacementAvailable(
+    selectedPlacement,
     colorId,
     occupiedNotes,
     boardVariant,
+    undefined,
+    ROLLING_PAPER_CLIENT_COLLISION_SCALE,
   );
+  const canPlace =
+    Boolean(trimmedMessage) &&
+    isPlacementAvailable &&
+    !isSubmitting &&
+    occupiedNotes.length < ROLLING_PAPER_MAX_NOTES_PER_BOARD;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -59,8 +71,6 @@ export default function RollingPaperWriteModal({
   if (!isOpen) {
     return null;
   }
-
-  const trimmedMessage = message.trim();
 
   const resetPlacementStep = () => {
     setRequestedPlacement({ x: 50, y: 50 });
@@ -82,10 +92,10 @@ export default function RollingPaperWriteModal({
     setStep('place');
   };
 
-  const handlePlace = () => {
-    if (!trimmedMessage || !selectedPlacement) return;
+  const handlePlace = async () => {
+    if (!canPlace) return;
 
-    onPlace({
+    await onPlace({
       id: createRollingPaperNoteId(),
       message: trimmedMessage,
       colorId,
@@ -123,14 +133,14 @@ export default function RollingPaperWriteModal({
             message={trimmedMessage}
             occupiedNotes={occupiedNotes}
             selectedPlacement={selectedPlacement}
+            isPlacementAvailable={isPlacementAvailable}
             scale={scale}
             pan={pan}
             onPlacementChange={setRequestedPlacement}
             onScaleChange={setScale}
             onPanChange={setPan}
-            onPlaceDisabled={
-              !selectedPlacement || occupiedNotes.length >= ROLLING_PAPER_MAX_NOTES_PER_BOARD
-            }
+            onPlaceDisabled={!canPlace}
+            isSubmitting={isSubmitting}
             onPlace={handlePlace}
           />
         )}

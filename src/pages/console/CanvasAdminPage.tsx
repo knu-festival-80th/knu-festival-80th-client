@@ -2,8 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, CheckCircle2, Eye, Layers, MessageSquare, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { ApiClientError, canvasApi } from '@/apis';
-import type { CanvasBoardSummary, CanvasPostit, CanvasQuestion } from '@/apis';
+import { ApiClientError, rollingPaperApi } from '@/apis';
+import type {
+  CanvasBoardQuestionResponse,
+  CanvasBoardSummaryResponse,
+  CanvasPostitResponse,
+} from '@/apis';
 import RollingPaperSticker from '@/components/rollingPaper/RollingPaperSticker';
 import { rollingPaperBoardFrames } from '@/components/rollingPaper/rollingPaperBoardAssets';
 import {
@@ -32,7 +36,7 @@ export default function CanvasAdminPage() {
 
   const questionsQuery = useQuery({
     queryKey: ['admin', 'canvas', 'questions'],
-    queryFn: canvasApi.listQuestions,
+    queryFn: rollingPaperApi.listQuestions,
   });
 
   const questions = useMemo(() => questionsQuery.data ?? [], [questionsQuery.data]);
@@ -49,7 +53,7 @@ export default function CanvasAdminPage() {
 
   const boardsQuery = useQuery({
     queryKey: ['admin', 'canvas', 'boards', selectedQuestionId],
-    queryFn: () => canvasApi.listBoardSummaries(selectedQuestionId as number),
+    queryFn: () => rollingPaperApi.listBoards(selectedQuestionId as number),
     enabled: selectedQuestionId != null,
   });
 
@@ -67,14 +71,14 @@ export default function CanvasAdminPage() {
 
   const postitsQuery = useQuery({
     queryKey: ['admin', 'canvas', 'postits', selectedBoardId],
-    queryFn: () => canvasApi.listPostits(selectedBoardId as number),
+    queryFn: () => rollingPaperApi.listPostits(selectedBoardId as number),
     enabled: selectedBoardId != null,
   });
 
   const postits = postitsQuery.data ?? [];
 
   const createBoardMutation = useMutation({
-    mutationFn: canvasApi.createBoard,
+    mutationFn: rollingPaperApi.createBoard,
     onSuccess: (newBoardId) => {
       setErrorBanner(null);
       setSuccessBanner(`보드 #${newBoardId} 생성 완료`);
@@ -87,7 +91,7 @@ export default function CanvasAdminPage() {
   });
 
   const deletePostitMutation = useMutation({
-    mutationFn: canvasApi.deletePostit,
+    mutationFn: rollingPaperApi.deletePostit,
     onSuccess: () => {
       setErrorBanner(null);
       setSuccessBanner('포스트잇이 삭제되었습니다.');
@@ -232,7 +236,7 @@ function ErrorBanner({ message }: { message: string }) {
 }
 
 interface QuestionPickerProps {
-  questions: CanvasQuestion[];
+  questions: CanvasBoardQuestionResponse[];
   loading: boolean;
   error: unknown;
   selectedQuestionId: number | null;
@@ -303,7 +307,7 @@ function QuestionPicker({
 }
 
 interface CreateBoardCardProps {
-  question: CanvasQuestion;
+  question: CanvasBoardQuestionResponse;
   isPending: boolean;
   onCreate: (maxNoteCount: number) => void;
 }
@@ -348,7 +352,7 @@ function CreateBoardCard({ question, isPending, onCreate }: CreateBoardCardProps
 }
 
 interface BoardsListCardProps {
-  boards: CanvasBoardSummary[];
+  boards: CanvasBoardSummaryResponse[];
   loading: boolean;
   error: unknown;
   selectedBoardId: number | null;
@@ -446,8 +450,8 @@ function BoardsListCard({
 }
 
 interface BoardPreviewCanvasProps {
-  board: CanvasBoardSummary;
-  postits: CanvasPostit[];
+  board: CanvasBoardSummaryResponse;
+  postits: CanvasPostitResponse[];
   loading: boolean;
   error: unknown;
   onClickPostit: (postitId: number) => void;
@@ -563,7 +567,7 @@ function BoardPreviewCanvas({
 }
 
 interface DeleteConfirmModalProps {
-  postit: CanvasPostit;
+  postit: CanvasPostitResponse;
   onCancel: () => void;
   onConfirm: () => void;
   isPending: boolean;

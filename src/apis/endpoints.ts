@@ -57,7 +57,9 @@ export const ENDPOINTS = {
     matchingParticipantReset: (participantId: number) =>
       `/admin/matchings/participants/${participantId}/reset`,
 
-    canvasBoards: '/admin/canvas/boards',
-    canvasPostitById: (postitId: number) => `/admin/canvas/postits/${postitId}`,
+    canvas: {
+      boards: '/admin/canvas/boards',
+      postitById: (postitId: number) => `/admin/canvas/postits/${postitId}`,
+    },
   },
 } as const;
