@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download, ImagePlus, RotateCcw } from 'lucide-react';
+import { Download, ImagePlus, RotateCcw, Share2 } from 'lucide-react';
 
 import { capturePhoto } from '@/lib/capturePhoto';
 import { CHARACTER_LIST } from '@/constants/hobanustagram';
@@ -14,6 +14,7 @@ export const PhotoboothTab = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<CharacterKey>('hobanu');
   const [capturedDataUrl, setCapturedDataUrl] = useState<string | null>(null);
   const [showFrameSelector, setShowFrameSelector] = useState(false);
+  const [showSaveSheet, setShowSaveSheet] = useState(false);
 
   const { videoRef, isReady, error, facingMode, startCamera, stopCamera, flipCamera } = useCamera();
   const overlayRef = useRef<HTMLImageElement>(null);
@@ -66,6 +67,43 @@ export const PhotoboothTab = () => {
     setTabStep(1);
   };
 
+  const handleSaveButtonClick = () => {
+    const testFile = new File([], 'test');
+    if (navigator.canShare?.({ files: [testFile] })) {
+      setShowSaveSheet(true);
+    } else {
+      void downloadPhoto();
+    }
+  };
+
+  const downloadPhoto = async () => {
+    if (!capturedDataUrl) return;
+    setShowSaveSheet(false);
+    const res = await fetch(capturedDataUrl);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hobanu-photo.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const sharePhoto = async () => {
+    if (!capturedDataUrl) return;
+    setShowSaveSheet(false);
+    const res = await fetch(capturedDataUrl);
+    const blob = await res.blob();
+    const file = new File([blob], 'hobanu-photo.png', { type: 'image/png' });
+    try {
+      await navigator.share({ files: [file] });
+    } catch {
+      // 사용자 취소 시 무시
+    }
+  };
+
   return (
     <>
       {cameraState !== 'idle' && (
@@ -89,6 +127,55 @@ export const PhotoboothTab = () => {
           onRetake={handleRetake}
           onUsePhoto={handleUsePhoto}
         />
+      )}
+
+      {showSaveSheet && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          onClick={() => setShowSaveSheet(false)}
+        >
+          <div className="absolute inset-0 bg-black/40" />
+          <div
+            className="relative w-full max-w-[600px] rounded-t-2xl bg-white px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))] animate-[slideUp_0.25s_ease-out]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-[#DDD]" />
+
+            <button
+              type="button"
+              onClick={() => void downloadPhoto()}
+              className="flex w-full items-center gap-4 rounded-xl px-4 py-4 text-left active:bg-[#F5F5F5]"
+            >
+              <div className="flex size-12 items-center justify-center rounded-full bg-[#EEEEEE]">
+                <Download className="size-6 text-[#333]" />
+              </div>
+              <div>
+                <p className="font-wanted-sans text-base font-semibold text-[#1D1D1D]">
+                  기기에 저장
+                </p>
+                <p className="font-wanted-sans text-xs text-[#808080]">
+                  iPhone Chrome에서는 공유하기를 이용해 주세요
+                </p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => void sharePhoto()}
+              className="flex w-full items-center gap-4 rounded-xl px-4 py-4 text-left active:bg-[#F5F5F5]"
+            >
+              <div className="flex size-12 items-center justify-center rounded-full bg-[#EEEEEE]">
+                <Share2 className="size-6 text-[#333]" />
+              </div>
+              <div>
+                <p className="font-wanted-sans text-base font-semibold text-[#1D1D1D]">공유하기</p>
+                <p className="font-wanted-sans text-xs text-[#808080]">
+                  Instagram 스토리 등에 바로 올릴 수 있어요
+                </p>
+              </div>
+            </button>
+          </div>
+        </div>
       )}
 
       <div className="flex min-h-screen flex-col gap-7 bg-white px-5 py-7">
@@ -151,18 +238,18 @@ export const PhotoboothTab = () => {
                   다시 찍기
                 </span>
               </button>
-              <a
-                href={capturedDataUrl}
-                download="hobanu-photo.png"
+              <button
+                type="button"
+                onClick={handleSaveButtonClick}
                 className="flex flex-col items-center gap-2"
               >
                 <div className="flex size-20 items-center justify-center rounded-full bg-[#EEEEEE]">
                   <Download className="size-9 text-[#333]" />
                 </div>
                 <span className="font-wanted-sans text-sm font-medium text-[#808080]">
-                  기기에 저장
+                  다운로드
                 </span>
-              </a>
+              </button>
             </div>
           </div>
         )}
