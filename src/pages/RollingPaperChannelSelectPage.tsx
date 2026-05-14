@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { rollingPaperApi } from '@/apis';
 import RollingPaperCategoryTabs from '@/components/rollingPaper/RollingPaperCategoryTabs';
 import RollingPaperChannelCard from '@/components/rollingPaper/RollingPaperChannelCard';
@@ -16,6 +16,7 @@ import {
 } from '@/components/rollingPaper/rollingPaperApiAdapter';
 import {
   getRollingPaperBoardPath,
+  getRollingPaperChannelsByCategory,
   ROLLING_PAPER_CATEGORIES,
   ROLLING_PAPER_CHANNELS_PER_CATEGORY,
 } from '@/constants/rollingPaper';
@@ -23,8 +24,10 @@ import {
 export default function RollingPaperChannelSelectPage() {
   const { categoryId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const questionId = Number(categoryId);
   const isValidQuestionId = Number.isFinite(questionId);
+  const isFullBoardsPreview = import.meta.env.DEV && searchParams.get('preview') === 'full-boards';
   const questionsQuery = useQuery({
     queryKey: ['rollingPaper', 'questions'],
     queryFn: rollingPaperApi.listQuestions,
@@ -39,14 +42,25 @@ export default function RollingPaperChannelSelectPage() {
     .slice()
     .sort((a, b) => a.orderIndex - b.orderIndex)
     .map(toRollingPaperCategory);
-  const category = categories.find((item) => item.id === categoryId);
-  const activeCategory = category ?? categories[0] ?? ROLLING_PAPER_CATEGORIES[0];
-  const channels = (boardsQuery.data ?? [])
+  const previewCategories =
+    isFullBoardsPreview && categories.length === 0 ? ROLLING_PAPER_CATEGORIES : categories;
+  const category = previewCategories.find((item) => item.id === categoryId);
+  const activeCategory = category ?? previewCategories[0] ?? ROLLING_PAPER_CATEGORIES[0];
+  const apiChannels = (boardsQuery.data ?? [])
     .map(toRollingPaperChannel)
     .slice(0, ROLLING_PAPER_CHANNELS_PER_CATEGORY);
+  const previewChannels = getRollingPaperChannelsByCategory(activeCategory.id)
+    .slice(0, ROLLING_PAPER_CHANNELS_PER_CATEGORY)
+    .map((channel) => ({
+      ...channel,
+      noteCount: channel.capacity,
+    }));
+  const channels = isFullBoardsPreview ? previewChannels : apiChannels;
 
-  if (!isValidQuestionId && categories[0]) {
-    return <Navigate to={`/rolling-paper/categories/${categories[0].id}/channels`} replace />;
+  if (!isValidQuestionId && !isFullBoardsPreview && previewCategories[0]) {
+    return (
+      <Navigate to={`/rolling-paper/categories/${previewCategories[0].id}/channels`} replace />
+    );
   }
 
   return (
@@ -54,7 +68,7 @@ export default function RollingPaperChannelSelectPage() {
       <RollingPaperTabs active="board" />
       <RollingPaperCategoryTabs
         activeCategory={activeCategory}
-        categories={categories}
+        categories={previewCategories}
         gridTo="/rolling-paper/categories"
       />
 
@@ -68,11 +82,12 @@ export default function RollingPaperChannelSelectPage() {
           </p>
         </motion.div>
 
-        {questionsQuery.isLoading || boardsQuery.isLoading ? (
+        {!isFullBoardsPreview && (questionsQuery.isLoading || boardsQuery.isLoading) ? (
           <p className="mt-11 text-center font-wanted-sans text-body1 text-gray">
             보드를 불러오는 중이에요.
           </p>
-        ) : questionsQuery.isError || boardsQuery.isError || !category ? (
+        ) : (!isFullBoardsPreview && (questionsQuery.isError || boardsQuery.isError)) ||
+          !category ? (
           <p className="mt-11 text-center font-wanted-sans text-body1 text-gray">
             보드를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
           </p>
