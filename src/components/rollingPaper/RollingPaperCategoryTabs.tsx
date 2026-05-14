@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Grid3X3 } from 'lucide-react';
+import gridViewIcon from '@/assets/rollingPaper/categories/grid_view.svg';
 import { ROLLING_PAPER_CATEGORIES, type RollingPaperCategory } from '@/constants/rollingPaper';
 
 type RollingPaperCategoryTabsProps = {
@@ -31,11 +31,11 @@ export default function RollingPaperCategoryTabs({
             aria-label="카테고리 변경하기"
             onClick={onGridClick}
           >
-            <Grid3X3 className="size-[18px]" />
+            <img src={gridViewIcon} alt="" className="size-[18px]" aria-hidden="true" />
           </button>
         ) : (
           <Link to={gridTo} className={gridClassName} aria-label="카테고리 목록으로 이동">
-            <Grid3X3 className="size-[18px]" />
+            <img src={gridViewIcon} alt="" className="size-[18px]" aria-hidden="true" />
           </Link>
         )}
 

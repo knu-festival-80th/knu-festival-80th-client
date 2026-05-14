@@ -22,6 +22,7 @@ export default function RollingPaperChannelCard({
     : isFull
       ? 'border-sub-red bg-sub-red text-white'
       : 'border-border bg-white text-black hover:border-sub-red/50';
+  const labelClassName = isFull ? 'text-white' : isActive ? 'text-sub-red' : 'text-black';
 
   return (
     <button
@@ -29,12 +30,16 @@ export default function RollingPaperChannelCard({
       className={`flex h-[127px] w-full flex-col gap-4 rounded-xl border px-3 py-3.5 text-left transition ${cardClassName}`}
       onClick={onClick}
     >
-      <span className="flex w-full items-center gap-1 font-wanted-sans text-caption font-bold leading-none tracking-[-0.02em]">
+      <span
+        className={`flex w-full items-center gap-1 font-wanted-sans text-caption font-bold leading-none tracking-[-0.02em] ${
+          labelClassName
+        }`}
+      >
         <span>BOR</span>
         <span>·</span>
         <span>{labelNumber}</span>
         {isActive && (
-          <span className="ml-1 rounded-full bg-sub-red px-1.5 py-[3px] text-[10px] font-bold leading-none text-white">
+          <span className="ml-auto rounded-full bg-sub-red px-1.5 py-[3px] text-[10px] font-bold leading-none text-white">
             현재
           </span>
         )}
