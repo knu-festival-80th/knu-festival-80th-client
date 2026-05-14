@@ -1,9 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { rollingPaperApi } from '@/apis';
 import RollingPaperCategoryTabs from '@/components/rollingPaper/RollingPaperCategoryTabs';
 import RollingPaperChannelCard from '@/components/rollingPaper/RollingPaperChannelCard';
+import RollingPaperPageTransition from '@/components/rollingPaper/RollingPaperPageTransition';
 import RollingPaperTabs from '@/components/rollingPaper/RollingPaperTabs';
+import {
+  rollingPaperItemMotion,
+  rollingPaperStaggerContainerMotion,
+} from '@/components/rollingPaper/rollingPaperMotion';
 import {
   toRollingPaperCategory,
   toRollingPaperChannel,
@@ -44,7 +50,7 @@ export default function RollingPaperChannelSelectPage() {
   }
 
   return (
-    <div className="min-h-[calc(100dvh-64px)] bg-white">
+    <RollingPaperPageTransition className="min-h-[calc(100dvh-64px)] bg-white">
       <RollingPaperTabs active="board" />
       <RollingPaperCategoryTabs
         activeCategory={activeCategory}
@@ -53,14 +59,14 @@ export default function RollingPaperChannelSelectPage() {
       />
 
       <section className="px-5 py-7">
-        <div className="text-center">
+        <motion.div className="text-center" {...rollingPaperItemMotion}>
           <h2 className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
             보드 선택
           </h2>
           <p className="mt-2.5 font-wanted-sans text-body1 font-normal leading-none tracking-[-0.02em] text-gray">
             빈 자리가 있는 보드를 선택해주세요
           </p>
-        </div>
+        </motion.div>
 
         {questionsQuery.isLoading || boardsQuery.isLoading ? (
           <p className="mt-11 text-center font-wanted-sans text-body1 text-gray">
@@ -71,17 +77,21 @@ export default function RollingPaperChannelSelectPage() {
             보드를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
           </p>
         ) : (
-          <div className="mt-6 grid grid-cols-3 gap-2.5">
+          <motion.div
+            className="mt-6 grid grid-cols-3 gap-2.5"
+            {...rollingPaperStaggerContainerMotion}
+          >
             {channels.map((channel) => (
-              <RollingPaperChannelCard
-                key={channel.id}
-                channel={channel}
-                onClick={() => navigate(getRollingPaperBoardPath(category.id, channel.id))}
-              />
+              <motion.div key={channel.id} {...rollingPaperItemMotion}>
+                <RollingPaperChannelCard
+                  channel={channel}
+                  onClick={() => navigate(getRollingPaperBoardPath(category.id, channel.id))}
+                />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </section>
-    </div>
+    </RollingPaperPageTransition>
   );
 }

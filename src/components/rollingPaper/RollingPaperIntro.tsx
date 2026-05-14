@@ -1,15 +1,21 @@
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import rollingHeroBg from '@/assets/rollingPaper/rolling-hero-bg.png';
 import rollingIntroIllust from '@/assets/rollingPaper/Group 425.svg';
+import RollingPaperPageTransition from './RollingPaperPageTransition';
 import RollingPaperTabs from './RollingPaperTabs';
+import { rollingPaperItemMotion } from './rollingPaperMotion';
 
 export default function RollingPaperIntro() {
   return (
-    <div className="bg-white">
+    <RollingPaperPageTransition className="bg-white">
       <RollingPaperTabs active="intro" />
 
-      <section className="relative flex min-h-[226px] items-center overflow-hidden px-5 py-10">
+      <motion.section
+        className="relative flex min-h-[226px] items-center overflow-hidden px-5 py-10"
+        {...rollingPaperItemMotion}
+      >
         <div aria-hidden className="absolute inset-0">
           <img
             src={rollingHeroBg}
@@ -29,10 +35,10 @@ export default function RollingPaperIntro() {
           <br />
           롤링페이퍼
         </h1>
-      </section>
+      </motion.section>
 
       <section className="flex flex-col gap-12 px-5 pt-16 pb-12">
-        <div className="flex flex-col gap-5">
+        <motion.div className="flex flex-col gap-5" {...rollingPaperItemMotion}>
           <div className="flex flex-col gap-1.5">
             <p className="font-wanted-sans text-body1 font-bold leading-[1.4] tracking-[-0.02em] text-black">
               Rolling Paper
@@ -54,16 +60,17 @@ export default function RollingPaperIntro() {
             </span>
             <ArrowRight className="size-6 text-ink" />
           </Link>
-        </div>
+        </motion.div>
 
-        <img
+        <motion.img
           src={rollingIntroIllust}
           alt=""
           className="mx-auto w-[287px] max-w-full object-contain"
+          {...rollingPaperItemMotion}
         />
       </section>
 
       <div className="h-[52px]" />
-    </div>
+    </RollingPaperPageTransition>
   );
 }

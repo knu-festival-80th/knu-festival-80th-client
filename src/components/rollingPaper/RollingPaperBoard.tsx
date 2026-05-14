@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ChevronDown, Plus } from 'lucide-react';
@@ -32,9 +33,11 @@ import RollingPaperBoardCanvas from './RollingPaperBoardCanvas';
 import RollingPaperBoardChangeDialog from './RollingPaperBoardChangeDialog';
 import RollingPaperCategoryChangeDialog from './RollingPaperCategoryChangeDialog';
 import RollingPaperCategoryTabs from './RollingPaperCategoryTabs';
+import RollingPaperPageTransition from './RollingPaperPageTransition';
 import RollingPaperTabs from './RollingPaperTabs';
 import RollingPaperWriteModal from './RollingPaperWriteModal';
 import RollingPaperZoomControls from './RollingPaperZoomControls';
+import { rollingPaperItemMotion } from './rollingPaperMotion';
 
 const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
 const PENDING_POSTIT_REFETCH_INTERVAL_MS = 5000;
@@ -246,7 +249,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   };
 
   return (
-    <div className="bg-white">
+    <RollingPaperPageTransition className="bg-white">
       <RollingPaperTabs active="board" />
       <RollingPaperCategoryTabs
         activeCategory={category}
@@ -255,15 +258,15 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       />
 
       <section className="min-h-[713px] bg-white pb-16">
-        <div className="border-b border-border px-5 pt-5 pb-7">
+        <motion.div className="border-b border-border px-5 pt-5 pb-7" {...rollingPaperItemMotion}>
           <button
             type="button"
-            className="flex h-[30px] items-center gap-1 rounded border border-sub-red bg-white px-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-black"
+            className="flex h-[30px] items-center gap-1 rounded border border-border bg-white px-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-black"
             onClick={() => setIsBoardChangeDialogOpen(true)}
           >
             <span className="font-semibold text-sub-red">{boardNumberLabel}</span>
             <span>보드 변경하기</span>
-            <ChevronDown className="size-3.5 text-sub-red" />
+            <ChevronDown className="size-3.5" />
           </button>
 
           <div className="mt-[18px] flex items-end justify-between gap-5">
@@ -292,7 +295,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
               <span>메시지 남기기</span>
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {(questionsQuery.isLoading || boardsQuery.isLoading || postitsQuery.isLoading) && (
           <p className="mt-4 px-5 font-wanted-sans text-caption text-gray">
@@ -306,7 +309,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
           </p>
         )}
 
-        <div className="relative mt-6">
+        <motion.div className="relative mt-6" {...rollingPaperItemMotion}>
           <RollingPaperBoardCanvas
             variant={boardIndex}
             scale={boardScale}
@@ -336,7 +339,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
               <ArrowRight className="size-6" />
             </button>
           </div>
-        </div>
+        </motion.div>
 
         <RollingPaperZoomControls
           scale={boardScale}
@@ -385,6 +388,6 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
           }}
         />
       )}
-    </div>
+    </RollingPaperPageTransition>
   );
 }
