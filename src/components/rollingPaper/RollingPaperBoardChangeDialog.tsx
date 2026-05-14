@@ -22,35 +22,40 @@ export default function RollingPaperBoardChangeDialog({
 }: RollingPaperBoardChangeDialogProps) {
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/45 px-4 pb-5"
+      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/35"
       role="dialog"
       aria-modal="true"
       aria-labelledby="rolling-paper-board-change-title"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
     >
-      <div className="max-h-[78dvh] w-full max-w-[560px] overflow-hidden rounded-[24px] bg-white shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <div className="flex flex-col gap-1">
+      <div className="max-h-[calc(100dvh-147px)] w-full max-w-[600px] overflow-hidden rounded-t-[8px] bg-white shadow-[0_-18px_50px_rgba(0,0,0,0.14)]">
+        <div className="flex h-[82px] items-center justify-between border-b border-border px-5">
+          <div>
             <h2
               id="rolling-paper-board-change-title"
-              className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.02em] text-black"
+              className="font-wanted-sans text-[18px] font-bold leading-none tracking-[-0.02em] text-black"
             >
-              보드 변경
+              보드 변경하기
             </h2>
-            <p className="font-wanted-sans text-caption font-medium text-gray">
-              {category.label} 안에서 작성할 채널을 선택해주세요.
+            <p className="mt-2 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-gray">
+              {category.label} · 총 {channels.length}개
             </p>
           </div>
           <button
             type="button"
-            className="flex size-9 items-center justify-center rounded-full bg-black/[0.04] text-ink"
+            className="flex size-6 items-center justify-center text-ink"
             aria-label="보드 변경 닫기"
             onClick={onClose}
           >
-            <X className="size-5" />
+            <X className="size-6" />
           </button>
         </div>
 
-        <div className="grid max-h-[calc(78dvh-92px)] grid-cols-3 gap-2.5 overflow-y-auto bg-[#f6f7ff] p-4">
+        <div className="grid max-h-[calc(100dvh-229px)] grid-cols-3 gap-2.5 overflow-y-auto px-5 py-5">
           {channels.map((channel, index) => {
             const noteCount =
               placedNotes.filter(
