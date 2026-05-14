@@ -1,5 +1,7 @@
+import { getRuntimeEnv } from '@/config/runtimeEnv';
+
 export function initClarity(): void {
-  const clarityId = import.meta.env.VITE_CLARITY_ID;
+  const clarityId = getRuntimeEnv('VITE_CLARITY_ID');
   if (!clarityId) return;
 
   (function (c: Window & typeof globalThis, l: Document, a: string, r: string, i: string) {
