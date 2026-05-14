@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import type { RollingPaperCategory } from '@/constants/rollingPaper';
 import RollingPaperCategoryCard from './RollingPaperCategoryCard';
 
@@ -15,9 +16,9 @@ export default function RollingPaperCategoryChangeDialog({
   onClose,
   onSelectCategory,
 }: RollingPaperCategoryChangeDialogProps) {
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/35"
+      className="fixed inset-0 z-[80] flex h-dvh items-end justify-center overflow-hidden bg-black/35"
       role="dialog"
       aria-modal="true"
       aria-labelledby="rolling-paper-category-change-title"
@@ -27,8 +28,8 @@ export default function RollingPaperCategoryChangeDialog({
         }
       }}
     >
-      <div className="max-h-[calc(100dvh-100px)] w-full max-w-[600px] overflow-hidden rounded-t-[8px] bg-white shadow-[0_-18px_50px_rgba(0,0,0,0.14)]">
-        <div className="flex h-16 items-center justify-between border-b border-border px-5">
+      <div className="flex h-[calc(100dvh-100px)] w-full max-w-[600px] flex-col overflow-hidden rounded-t-[8px] bg-white shadow-[0_-18px_50px_rgba(0,0,0,0.14)]">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-5">
           <h2
             id="rolling-paper-category-change-title"
             className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.02em] text-black"
@@ -45,7 +46,7 @@ export default function RollingPaperCategoryChangeDialog({
           </button>
         </div>
 
-        <div className="flex max-h-[calc(100dvh-164px)] flex-col gap-2 overflow-y-auto px-5 py-5">
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-5 py-5 [-webkit-overflow-scrolling:touch]">
           {categories.map((category, index) => (
             <RollingPaperCategoryCard
               key={category.id}
@@ -57,6 +58,7 @@ export default function RollingPaperCategoryChangeDialog({
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

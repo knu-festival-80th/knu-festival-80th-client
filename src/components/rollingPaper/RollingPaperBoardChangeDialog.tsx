@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import type { RollingPaperCategory, RollingPaperChannel } from '@/constants/rollingPaper';
 import type { PlacedRollingPaperNote } from '@/lib/rollingPaperLayout';
 import RollingPaperChannelCard from './RollingPaperChannelCard';
@@ -20,9 +21,9 @@ export default function RollingPaperBoardChangeDialog({
   onClose,
   onSelectChannel,
 }: RollingPaperBoardChangeDialogProps) {
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/35"
+      className="fixed inset-0 z-[80] flex h-dvh items-end justify-center overflow-hidden bg-black/35"
       role="dialog"
       aria-modal="true"
       aria-labelledby="rolling-paper-board-change-title"
@@ -32,8 +33,8 @@ export default function RollingPaperBoardChangeDialog({
         }
       }}
     >
-      <div className="max-h-[calc(100dvh-147px)] w-full max-w-[600px] overflow-hidden rounded-t-[8px] bg-white shadow-[0_-18px_50px_rgba(0,0,0,0.14)]">
-        <div className="flex h-[82px] items-center justify-between border-b border-border px-5">
+      <div className="flex h-[calc(100dvh-100px)] w-full max-w-[600px] flex-col overflow-hidden rounded-t-[8px] bg-white shadow-[0_-18px_50px_rgba(0,0,0,0.14)]">
+        <div className="flex h-[82px] shrink-0 items-center justify-between border-b border-border px-5">
           <div>
             <h2
               id="rolling-paper-board-change-title"
@@ -55,7 +56,7 @@ export default function RollingPaperBoardChangeDialog({
           </button>
         </div>
 
-        <div className="grid max-h-[calc(100dvh-229px)] grid-cols-3 gap-2.5 overflow-y-auto px-5 py-5">
+        <div className="grid min-h-0 flex-1 grid-cols-3 content-start gap-2.5 overflow-y-auto overscroll-contain px-5 py-5 [-webkit-overflow-scrolling:touch]">
           {channels.map((channel, index) => {
             const noteCount =
               placedNotes.filter(
@@ -77,6 +78,7 @@ export default function RollingPaperBoardChangeDialog({
           })}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
