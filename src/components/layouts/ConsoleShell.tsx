@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { LayoutList, LogOut, Plus } from 'lucide-react';
+import { Heart, LayoutList, LogOut, MessageSquare, Plus } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { authApi } from '@/apis';
@@ -9,6 +9,8 @@ import { useAuthStore } from '@/stores/authStore';
 const NAV = [
   { to: '/console', label: '부스 목록', Icon: LayoutList, end: true },
   { to: '/console/booths/new', label: '신규 등록', Icon: Plus },
+  { to: '/console/matching', label: '인스타팅', Icon: Heart },
+  { to: '/console/canvas', label: '롤링페이퍼', Icon: MessageSquare },
 ];
 
 export default function ConsoleShell() {
