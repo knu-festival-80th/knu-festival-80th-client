@@ -30,6 +30,7 @@ import TavernDetailPage from '@/pages/TavernDetailPage';
 import TavernMapPage from '@/pages/TavernMapPage';
 import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
+import PostHogPageView from '@/utils/PostHogPageView';
 import StampTourPage from './pages/stampTour/StampTourPage';
 import StampBoothListPage from './pages/stampTour/StampBoothListPage';
 import InstatingPage from './pages/InstatingPage';
@@ -41,6 +42,7 @@ export default function App() {
   return (
     <>
       <GoogleAnalytics />
+      <PostHogPageView />
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />

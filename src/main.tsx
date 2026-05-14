@@ -8,9 +8,11 @@ import { setUnauthorizedHandler } from '@/apis';
 import App from './App.tsx';
 import AppProviders from './providers/AppProviders.tsx';
 import { initGA } from './lib/googleAnalytics.ts';
+import { initClarity } from './lib/clarity.ts';
 import { useAuthStore } from '@/stores/authStore.ts';
 
 initGA();
+initClarity();
 
 setUnauthorizedHandler(() => {
   useAuthStore.getState().clearSession();
