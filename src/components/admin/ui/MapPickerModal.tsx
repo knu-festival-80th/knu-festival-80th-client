@@ -268,8 +268,6 @@ function MapPickerModalInner({
     );
   };
 
-  const pinLeft = pin ? tx + pin.x * size.w * scale : 0;
-  const pinTop = pin ? ty + pin.y * size.h * scale : 0;
   const pinColor = boothType === 'BOOTH' ? '#15ccb1' : '#ff3d3d';
 
   const getMarkerColor = (marker: BoothMapItem) =>
@@ -335,27 +333,30 @@ function MapPickerModalInner({
               }}
               onDoubleClick={handleDoubleClick}
             >
-              <img
-                src={tavernMapImage}
-                alt="축제 지도"
-                draggable={false}
-                className="pointer-events-none origin-top-left select-none"
+              <div
+                className="absolute left-0 top-0 origin-top-left"
                 style={{
                   width: '100%',
                   height: '100%',
                   transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
                   transition: transitionStyle,
                 }}
-              />
-              {size.w > 0 &&
-                otherMarkers.map((m) => {
-                  const left = tx + (m.xRatio ?? 0) * size.w * scale;
-                  const top = ty + (m.yRatio ?? 0) * size.h * scale;
-                  return (
+              >
+                <img
+                  src={tavernMapImage}
+                  alt="축제 지도"
+                  draggable={false}
+                  className="pointer-events-none size-full select-none"
+                />
+                {size.w > 0 &&
+                  otherMarkers.map((m) => (
                     <div
                       key={m.boothId}
                       className="pointer-events-none absolute z-[5] -translate-x-1/2 -translate-y-1/2 opacity-40"
-                      style={{ left, top, transition: transitionStyle }}
+                      style={{
+                        left: `${(m.xRatio ?? 0) * 100}%`,
+                        top: `${(m.yRatio ?? 0) * 100}%`,
+                      }}
                     >
                       <span
                         className="flex size-5 items-center justify-center rounded-full border border-white text-[9px] font-bold leading-none text-white"
@@ -364,21 +365,24 @@ function MapPickerModalInner({
                         {m.boothId}
                       </span>
                     </div>
-                  );
-                })}
-              {pin && size.w > 0 && (
-                <div
-                  className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2"
-                  style={{ left: pinLeft, top: pinTop, transition: transitionStyle }}
-                >
-                  <span
-                    className="flex size-7 items-center justify-center rounded-[14.5px] border-2 border-white text-[14px] font-bold leading-none text-white shadow-lg"
-                    style={{ backgroundColor: pinColor }}
+                  ))}
+                {pin && size.w > 0 && (
+                  <div
+                    className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2"
+                    style={{
+                      left: `${pin.x * 100}%`,
+                      top: `${pin.y * 100}%`,
+                    }}
                   >
-                    {boothId ?? '?'}
-                  </span>
-                </div>
-              )}
+                    <span
+                      className="flex size-7 items-center justify-center rounded-[14.5px] border-2 border-white text-[14px] font-bold leading-none text-white shadow-lg"
+                      style={{ backgroundColor: pinColor }}
+                    >
+                      {boothId ?? '?'}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
