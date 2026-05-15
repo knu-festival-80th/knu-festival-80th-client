@@ -3,7 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom';
 import { FiMapPin } from 'react-icons/fi';
 
-import tavernMapImage from '@/assets/images/tavern-map.svg';
+import tavernMapImage from '@/assets/images/map.svg';
 import { festivalMap } from '@/constants/taverns';
 
 import { usePortalTheme } from './usePortalTheme';

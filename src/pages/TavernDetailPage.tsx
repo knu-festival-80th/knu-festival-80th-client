@@ -6,7 +6,8 @@ import { boothApi } from '@/apis';
 import TavernDetailView from '@/components/tavern/list/TavernDetailView';
 import WaitingCompleteModal from '@/components/tavern/modals/WaitingCompleteModal';
 import WaitingRegistrationModal from '@/components/tavern/modals/WaitingRegistrationModal';
-import type { WaitingReservation } from '@/components/tavern/types';
+import TavernTabBar from '@/components/tavern/TavernTabBar';
+import type { TopTab, WaitingReservation } from '@/components/tavern/types';
 import { boothToTavern } from '@/constants/taverns';
 
 export default function TavernDetailPage() {
@@ -14,16 +15,17 @@ export default function TavernDetailPage() {
   const boothId = Number(boothIdParam);
   const navigate = useNavigate();
 
-  const boothsQuery = useQuery({
-    queryKey: ['booths'],
-    queryFn: () => boothApi.listBooths('likes'),
+  const boothQuery = useQuery({
+    queryKey: ['booth', boothId],
+    queryFn: () => boothApi.getBooth(boothId),
+    enabled: Number.isInteger(boothId) && boothId > 0,
     staleTime: 30_000,
   });
 
   const [registrationTarget, setRegistrationTarget] = useState(false);
   const [waitingReservation, setWaitingReservation] = useState<WaitingReservation | null>(null);
 
-  if (boothsQuery.isLoading) {
+  if (boothQuery.isLoading) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-white text-[16px] text-[#808080]">
         주막 정보를 불러오는 중...
@@ -31,7 +33,7 @@ export default function TavernDetailPage() {
     );
   }
 
-  const booth = boothsQuery.data?.find((b) => b.boothId === boothId);
+  const booth = boothQuery.data;
   if (!booth) {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-white px-5">
@@ -48,9 +50,13 @@ export default function TavernDetailPage() {
   }
 
   const tavern = boothToTavern(booth);
+  const handleTabChange = (tab: TopTab) => {
+    navigate(tab === 'list' || tab === 'reservation' ? `/taverns?tab=${tab}` : `/map?tab=${tab}`);
+  };
 
   return (
     <div className="min-h-dvh bg-white">
+      <TavernTabBar activeTab="list" onTabChange={handleTabChange} />
       <TavernDetailView tavern={tavern} onRegister={() => setRegistrationTarget(true)} />
 
       {registrationTarget && (

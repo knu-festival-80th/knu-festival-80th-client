@@ -4,7 +4,7 @@ import { SectionTitle } from '@/components/common/SectionTitle';
 import { GoodsModal } from '@/components/goods/GoodsModal';
 import { ALL_GOODS, POPULAR_GOODS } from '@/mocks/goods';
 import { useGoodsModal } from '@/hooks/useGoodsModal';
-// TODO: 굿즈 상세소개 페이지 이동하기 있다면 구현
+
 export default function GoodsPage() {
   const { selectedGoods, openModal, closeModal } = useGoodsModal();
 
@@ -103,7 +103,7 @@ export default function GoodsPage() {
             label="Buy Now"
             title="지금 바로 구매하기"
             description={'대동제의 순간을 소장할 수 있는 특별한 기회를\n놓치지 마세요!'}
-            ctaLabel="굿즈 소개 페이지 이동하기"
+            ctaLabel="굿즈 구매 페이지 이동하기"
           />
         </div>
       </section>

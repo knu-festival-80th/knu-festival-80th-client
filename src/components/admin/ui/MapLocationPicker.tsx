@@ -2,7 +2,7 @@ import { Map as MapIcon } from 'lucide-react';
 import { useState } from 'react';
 import { FiMapPin } from 'react-icons/fi';
 
-import tavernMapImage from '@/assets/images/tavern-map.svg';
+import tavernMapImage from '@/assets/images/map.svg';
 import { festivalMap } from '@/constants/taverns';
 
 import MapPickerModal from './MapPickerModal';

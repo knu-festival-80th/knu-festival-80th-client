@@ -1,9 +1,86 @@
 import { ENDPOINTS, http, omitUndefined, unwrapApiResponse } from '@/apis';
 import type { ApiResponse } from '@/apis/types';
 
+// ---- 공통 타입 ----
+
 export type MatchingOperationStatus = 'OPEN' | 'PAUSED';
 export type MatchingParticipantStatus = 'PENDING' | 'MATCHED' | 'UNMATCHED';
 export type MatchingGender = 'MALE' | 'FEMALE';
+
+// ---- 사용자 ----
+
+export interface MatchingCreateRequest {
+  instagramId: string;
+  gender: MatchingGender;
+  phoneNumber: string;
+}
+
+export interface MatchingAuthRequest {
+  instagramId: string;
+  phoneNumber: string;
+}
+
+export interface MatchingRegisterResponse {
+  instagramId: string;
+  festivalDay: string;
+  status: MatchingParticipantStatus;
+  registrationDeadline: string;
+  resultOpenAt: string;
+}
+
+export interface MatchingResultResponse {
+  instagramId: string;
+  status: MatchingParticipantStatus;
+  resultOpen: boolean;
+  pickedInstagramId: string | null;
+  instagramProfileUrl: string | null;
+  messageKo: string | null;
+  messageEn: string | null;
+}
+
+export interface MatchingUserStatusResponse {
+  status: MatchingOperationStatus;
+  messageKo: string | null;
+  messageEn: string | null;
+  registrationOpen: boolean;
+  resultOpen: boolean;
+  registrationDeadline: string | null;
+  resultOpenAt: string | null;
+  pendingCount: number;
+  matchedCount: number;
+  unmatchedCount: number;
+  malePendingCount: number;
+  femalePendingCount: number;
+}
+
+export async function registerMatching(
+  payload: MatchingCreateRequest,
+): Promise<MatchingRegisterResponse> {
+  const response = await http.post<ApiResponse<MatchingRegisterResponse>>(
+    ENDPOINTS.matchings.register,
+    payload,
+  );
+  return unwrapApiResponse(response.data);
+}
+
+export async function getMatchingResult(
+  payload: MatchingAuthRequest,
+): Promise<MatchingResultResponse> {
+  const response = await http.post<ApiResponse<MatchingResultResponse>>(
+    ENDPOINTS.matchings.result,
+    payload,
+  );
+  return unwrapApiResponse(response.data);
+}
+
+export async function getMatchingStatus(): Promise<MatchingUserStatusResponse> {
+  const response = await http.get<ApiResponse<MatchingUserStatusResponse>>(
+    ENDPOINTS.matchings.status,
+  );
+  return unwrapApiResponse(response.data);
+}
+
+// ---- 관리자 ----
 
 export interface MatchingStatusResponse {
   status: MatchingOperationStatus;
