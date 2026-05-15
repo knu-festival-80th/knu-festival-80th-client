@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const FESTIVAL_START = new Date('2026-05-20T18:00:00');
+const FESTIVAL_START = new Date(2026, 4, 20, 9, 0, 0);
 
 type TimeLeft = {
   days: number;
