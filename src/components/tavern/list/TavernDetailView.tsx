@@ -17,7 +17,7 @@ const resolveMenuBoardSrc = (src: string | null) => {
 export default function TavernDetailView({ tavern, onRegister }: TavernDetailViewProps) {
   const singleTavernList = useMemo(() => [tavern], [tavern]);
   const menuBoardSrc = resolveMenuBoardSrc(tavern.menuBoardImageUrl);
-  const metaItems = [tavern.department, tavern.location].filter(Boolean);
+  const metaItems = [tavern.department].filter(Boolean);
   const isBooth = tavern.type === 'BOOTH';
   const description = tavern.department
     ? `${tavern.department}의 ${isBooth ? '부스' : '주막'}입니다. 어서오세요~`
@@ -61,13 +61,9 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
                 대기 등록하기
               </button>
             ) : (
-              <button
-                type="button"
-                className="h-[50px] w-full rounded-[8px] bg-[#e5e5e5] text-[16px] font-medium tracking-[-0.32px] text-[#808080]"
-                disabled
-              >
-                현장 방문해 주세요
-              </button>
+              <p className="text-[13px] tracking-[-0.26px] text-[#808080]">
+                현재 대기 등록을 받지 않고 있어요
+              </p>
             ))}
         </div>
       </article>

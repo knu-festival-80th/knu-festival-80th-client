@@ -24,20 +24,60 @@ export default function TavernListView({
     <section className="flex flex-col gap-3 px-5 py-6">
       <h1 className="text-[24px] font-bold leading-[1.6] tracking-[-0.48px]">주막 목록</h1>
       <TavernSortTabs sortKey={sortKey} onSortChange={onSortChange} />
-      <div className="flex flex-col gap-3">
-        {taverns.map((tavern) => (
-          <div key={tavern.id}>
-            <TavernCard
-              expanded={expandedMenuId === tavern.id}
+      {sortKey === 'simple' ? (
+        <div className="flex flex-col gap-2">
+          {taverns.map((tavern) => (
+            <TavernCompactCard
+              key={tavern.id}
               tavern={tavern}
-              onMenuToggle={() => onMenuToggle(expandedMenuId === tavern.id ? null : tavern.id)}
-              onRegister={() => onRegister(tavern)}
               onSelect={() => onSelectTavern(tavern)}
             />
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {taverns.map((tavern) => (
+            <div key={tavern.id}>
+              <TavernCard
+                expanded={expandedMenuId === tavern.id}
+                tavern={tavern}
+                onMenuToggle={() => onMenuToggle(expandedMenuId === tavern.id ? null : tavern.id)}
+                onRegister={() => onRegister(tavern)}
+                onSelect={() => onSelectTavern(tavern)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </section>
+  );
+}
+
+function TavernCompactCard({ tavern, onSelect }: { tavern: Tavern; onSelect: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="flex w-full items-center justify-between rounded-[12px] border border-[#e5e5e5] bg-white px-5 py-4"
+    >
+      <div className="flex flex-col items-start gap-1.5">
+        <span className="text-[13px] font-medium tracking-[-0.26px] text-[#808080]">
+          자세히 보기 &gt;
+        </span>
+        <span className="text-[18px] font-bold leading-none tracking-[-0.36px] text-black">
+          {tavern.name}
+        </span>
+      </div>
+      {tavern.waitingOpen && (
+        <div className="flex flex-col items-end gap-1.5">
+          <span className="text-[13px] font-medium tracking-[-0.26px] text-[#808080]">웨이팅</span>
+          <span className="text-[18px] font-bold leading-none tracking-[-0.36px]">
+            <span className="text-[#ff3d3d]">{tavern.waitTeams}</span>
+            <span className="text-[#808080]">팀</span>
+          </span>
+        </div>
+      )}
+    </button>
   );
 }
 
