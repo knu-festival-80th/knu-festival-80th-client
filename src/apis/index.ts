@@ -28,6 +28,7 @@ export type { AdminRole, LoginRequest, LoginResponse } from '@/apis/modules/auth
 export type {
   BoothCreateRequest,
   BoothListItem,
+  BoothMapItem,
   BoothPasswordChangeRequest,
   BoothSummary,
   BoothUpdateRequest,

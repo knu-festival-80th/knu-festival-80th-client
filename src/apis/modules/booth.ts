@@ -1,5 +1,6 @@
 import { ENDPOINTS, http, omitUndefined, unwrapApiResponse, unwrapVoidApiResponse } from '@/apis';
 import type { ApiResponse } from '@/apis/types';
+import { getMockBooth, getMockBooths, getMockMapBooths } from '@/mocks/taverns';
 
 export type BoothSort = 'likes' | 'waiting-asc';
 
@@ -14,6 +15,13 @@ export interface BoothListItem {
   currentWaitingTeams: number;
   department: string | null;
   location: string | null;
+}
+
+export interface BoothMapItem {
+  boothId: number;
+  name: string;
+  xRatio: number | null;
+  yRatio: number | null;
 }
 
 export interface BoothSummary {
@@ -52,9 +60,33 @@ export interface BoothPasswordChangeRequest {
 }
 
 export async function listBooths(sort: BoothSort = 'likes'): Promise<BoothListItem[]> {
+  if (import.meta.env.DEV) {
+    return getMockBooths(sort);
+  }
+
   const response = await http.get<ApiResponse<BoothListItem[]>>(ENDPOINTS.booths.list, {
     params: { sort },
   });
+  return unwrapApiResponse(response.data);
+}
+
+export async function listMapBooths(): Promise<BoothMapItem[]> {
+  if (import.meta.env.DEV) {
+    return getMockMapBooths();
+  }
+
+  const response = await http.get<ApiResponse<BoothMapItem[]>>(ENDPOINTS.booths.map);
+  return unwrapApiResponse(response.data);
+}
+
+export async function getBooth(boothId: number): Promise<BoothListItem> {
+  if (import.meta.env.DEV) {
+    const booth = getMockBooth(boothId);
+    if (!booth) throw new Error('주막을 찾을 수 없습니다.');
+    return booth;
+  }
+
+  const response = await http.get<ApiResponse<BoothListItem>>(ENDPOINTS.booths.detail(boothId));
   return unwrapApiResponse(response.data);
 }
 

@@ -12,7 +12,12 @@ import WaitingRegistrationModal from '@/components/tavern/modals/WaitingRegistra
 import ReservationLookup from '@/components/tavern/reservation/ReservationLookup';
 import TavernTabBar from '@/components/tavern/TavernTabBar';
 import type { TopTab, WaitingReservation } from '@/components/tavern/types';
-import { boothToTavern, type Tavern, type TavernSortKey } from '@/constants/taverns';
+import {
+  boothToTavern,
+  mapBoothToTavern,
+  type Tavern,
+  type TavernSortKey,
+} from '@/constants/taverns';
 
 const TAVERN_TABS = ['intro', 'map', 'list', 'reservation'] as const satisfies readonly TopTab[];
 
@@ -28,18 +33,31 @@ export default function TavernMapExperience() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const boothsQuery = useQuery({
-    queryKey: ['booths'],
-    queryFn: () => boothApi.listBooths('likes'),
-    staleTime: 30_000,
-  });
-
-  const taverns = useMemo(() => (boothsQuery.data ?? []).map(boothToTavern), [boothsQuery.data]);
-
   const activeTab = useMemo(
     () => resolveTavernTabFromUrl(location.pathname, location.search),
     [location.pathname, location.search],
   );
+
+  const boothsQuery = useQuery({
+    queryKey: ['booths'],
+    queryFn: () => boothApi.listBooths('likes'),
+    staleTime: 30_000,
+    enabled: activeTab === 'list',
+  });
+
+  const mapBoothsQuery = useQuery({
+    queryKey: ['booths', 'map'],
+    queryFn: boothApi.listMapBooths,
+    staleTime: 30_000,
+    enabled: activeTab === 'map',
+  });
+
+  const taverns = useMemo(() => (boothsQuery.data ?? []).map(boothToTavern), [boothsQuery.data]);
+  const mapTaverns = useMemo(
+    () => (mapBoothsQuery.data ?? []).map(mapBoothToTavern),
+    [mapBoothsQuery.data],
+  );
+
   const [sortKey, setSortKey] = useState<TavernSortKey>('shortWait');
   const [selectedTavern, setSelectedTavern] = useState<Tavern | null>(null);
   const [expandedMenuId, setExpandedMenuId] = useState<string | null>(null);
@@ -57,6 +75,21 @@ export default function TavernMapExperience() {
     }
     return list.sort((a, b) => b.popularity - a.popularity);
   }, [taverns, sortKey]);
+
+  const selectedBoothQuery = useQuery({
+    queryKey: ['booth', selectedTavern?.boothId],
+    queryFn: () => {
+      if (!selectedTavern) throw new Error('선택된 주막이 없습니다.');
+      return boothApi.getBooth(selectedTavern.boothId);
+    },
+    enabled: activeTab === 'map' && Boolean(selectedTavern),
+    staleTime: 30_000,
+  });
+
+  const selectedMapTavern = useMemo(
+    () => (selectedBoothQuery.data ? boothToTavern(selectedBoothQuery.data) : selectedTavern),
+    [selectedBoothQuery.data, selectedTavern],
+  );
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -77,7 +110,11 @@ export default function TavernMapExperience() {
     });
   };
 
-  if (boothsQuery.isLoading && activeTab !== 'intro') {
+  const isActiveTabLoading =
+    (activeTab === 'list' && boothsQuery.isLoading) ||
+    (activeTab === 'map' && mapBoothsQuery.isLoading);
+
+  if (isActiveTabLoading) {
     return (
       <div className="min-h-dvh bg-white font-wanted-sans text-black">
         <TavernTabBar activeTab={activeTab} onTabChange={handleTabChange} />
@@ -109,8 +146,8 @@ export default function TavernMapExperience() {
       ) : (
         <MapOverview
           expandedMenuId={expandedMenuId}
-          selectedTavern={selectedTavern}
-          taverns={taverns}
+          selectedTavern={selectedMapTavern}
+          taverns={mapTaverns}
           onMenuToggle={setExpandedMenuId}
           onOpenDetail={handleOpenTavernDetail}
           onRegister={handleRegister}
