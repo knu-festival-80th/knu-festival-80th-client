@@ -27,7 +27,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col pb-16">
-      <section className="relative flex min-h-dvh flex-col pb-25 pt-20">
+      <section className="relative flex min-h-dvh flex-col pb-8 pt-20">
         <div aria-hidden className="absolute inset-0 pointer-events-none">
           <img
             src={heroBg}
