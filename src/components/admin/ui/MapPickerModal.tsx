@@ -21,9 +21,13 @@ interface MapPickerModalProps {
 }
 
 const MIN_SCALE = 1;
-const MAX_SCALE = 6;
+const MAX_SCALE = 8;
 const ASPECT = festivalMap.width / festivalMap.height;
-const NUDGE_STEP = 0.001;
+const PIN_ZOOM_SCALE = 3.5;
+const PRECISION = 10000;
+
+const round = (v: number) => Math.round(v * PRECISION) / PRECISION;
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 
 export default function MapPickerModal(props: MapPickerModalProps) {
   if (!props.open) return null;
@@ -44,6 +48,7 @@ function MapPickerModalInner({
   const [scale, setScale] = useState(1);
   const [tx, setTx] = useState(0);
   const [ty, setTy] = useState(0);
+  const [animating, setAnimating] = useState(false);
   const [pin, setPin] = useState<{ x: number; y: number } | null>(
     initialX !== null && initialY !== null ? { x: initialX, y: initialY } : null,
   );
@@ -54,6 +59,14 @@ function MapPickerModalInner({
     startTy: number;
     moved: boolean;
   } | null>(null);
+  const scaleRef = useRef(scale);
+  const txRef = useRef(tx);
+  const tyRef = useRef(ty);
+  useEffect(() => {
+    scaleRef.current = scale;
+    txRef.current = tx;
+    tyRef.current = ty;
+  }, [scale, tx, ty]);
 
   const markersQuery = useQuery({
     queryKey: ['booths', 'map'],
@@ -73,6 +86,8 @@ function MapPickerModalInner({
     };
   }, []);
 
+  const nudgeStep = 1 / PRECISION / Math.max(1, scale / 2);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -80,25 +95,20 @@ function MapPickerModalInner({
         return;
       }
       if (!pin) return;
-      const nudge = { x: 0, y: 0 };
-      if (e.key === 'ArrowLeft') nudge.x = -NUDGE_STEP;
-      else if (e.key === 'ArrowRight') nudge.x = NUDGE_STEP;
-      else if (e.key === 'ArrowUp') nudge.y = -NUDGE_STEP;
-      else if (e.key === 'ArrowDown') nudge.y = NUDGE_STEP;
+      const step = nudgeStep;
+      let dx = 0;
+      let dy = 0;
+      if (e.key === 'ArrowLeft') dx = -step;
+      else if (e.key === 'ArrowRight') dx = step;
+      else if (e.key === 'ArrowUp') dy = -step;
+      else if (e.key === 'ArrowDown') dy = step;
       else return;
       e.preventDefault();
-      setPin((p) =>
-        p
-          ? {
-              x: Math.round(Math.max(0, Math.min(1, p.x + nudge.x)) * 1000) / 1000,
-              y: Math.round(Math.max(0, Math.min(1, p.y + nudge.y)) * 1000) / 1000,
-            }
-          : p,
-      );
+      setPin((p) => (p ? { x: round(clamp01(p.x + dx)), y: round(clamp01(p.y + dy)) } : p));
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [onClose, pin]);
+  }, [onClose, pin, nudgeStep]);
 
   useLayoutEffect(() => {
     const update = () => {
@@ -112,44 +122,79 @@ function MapPickerModalInner({
     return () => window.removeEventListener('resize', update);
   }, []);
 
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+    const handler = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = node.getBoundingClientRect();
+      const ax = e.clientX - rect.left;
+      const ay = e.clientY - rect.top;
+      const factor = e.deltaY > 0 ? 0.92 : 1.08;
+      const next = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scaleRef.current * factor));
+      if (next === scaleRef.current) return;
+      const f = next / scaleRef.current;
+      let ntx = ax - (ax - txRef.current) * f;
+      let nty = ay - (ay - tyRef.current) * f;
+      const imgW = size.w * next;
+      const imgH = size.h * next;
+      ntx = Math.max(Math.min(0, size.w - imgW), Math.min(0, ntx));
+      nty = Math.max(Math.min(0, size.h - imgH), Math.min(0, nty));
+      setScale(next);
+      setTx(ntx);
+      setTy(nty);
+    };
+    node.addEventListener('wheel', handler, { passive: false });
+    return () => node.removeEventListener('wheel', handler);
+  }, [size.w, size.h]);
+
   const clampPan = useCallback(
     (nextTx: number, nextTy: number, s: number) => {
       const imgW = size.w * s;
       const imgH = size.h * s;
-      const minTx = Math.min(0, size.w - imgW);
-      const minTy = Math.min(0, size.h - imgH);
       return {
-        tx: Math.max(minTx, Math.min(0, nextTx)),
-        ty: Math.max(minTy, Math.min(0, nextTy)),
+        tx: Math.max(Math.min(0, size.w - imgW), Math.min(0, nextTx)),
+        ty: Math.max(Math.min(0, size.h - imgH), Math.min(0, nextTy)),
       };
     },
     [size.w, size.h],
   );
 
-  const zoomTo = useCallback(
+  const smoothZoomTo = useCallback(
     (newScale: number, anchorX: number, anchorY: number) => {
       const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
-      if (clamped === scale) return;
-      const factor = clamped / scale;
-      const nextTx = anchorX - (anchorX - tx) * factor;
-      const nextTy = anchorY - (anchorY - ty) * factor;
-      const { tx: ftx, ty: fty } = clampPan(nextTx, nextTy, clamped);
+      const f = clamped / scaleRef.current;
+      const ntx = anchorX - (anchorX - txRef.current) * f;
+      const nty = anchorY - (anchorY - tyRef.current) * f;
+      const { tx: ftx, ty: fty } = clampPan(ntx, nty, clamped);
+      setAnimating(true);
       setScale(clamped);
       setTx(ftx);
       setTy(fty);
+      setTimeout(() => setAnimating(false), 350);
     },
-    [scale, tx, ty, clampPan],
+    [clampPan],
   );
 
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const ax = e.clientX - rect.left;
-    const ay = e.clientY - rect.top;
-    const factor = e.deltaY > 0 ? 0.9 : 1.1;
-    zoomTo(scale * factor, ax, ay);
-  };
+  const focusOnPin = useCallback(
+    (px: number, py: number, targetScale?: number) => {
+      if (size.w === 0) return;
+      const s = targetScale ?? Math.max(scaleRef.current, PIN_ZOOM_SCALE);
+      const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, s));
+      const centerX = size.w / 2;
+      const centerY = size.h / 2;
+      const ntx = centerX - px * size.w * clamped;
+      const nty = centerY - py * size.h * clamped;
+      const { tx: ftx, ty: fty } = clampPan(ntx, nty, clamped);
+      setAnimating(true);
+      setScale(clamped);
+      setTx(ftx);
+      setTy(fty);
+      setTimeout(() => setAnimating(false), 350);
+    },
+    [size.w, size.h, clampPan],
+  );
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -187,7 +232,9 @@ function MapPickerModalInner({
     const ix = (cx - tx) / scale / size.w;
     const iy = (cy - ty) / scale / size.h;
     if (ix < 0 || ix > 1 || iy < 0 || iy > 1) return;
-    setPin({ x: Math.round(ix * 1000) / 1000, y: Math.round(iy * 1000) / 1000 });
+    const newPin = { x: round(ix), y: round(iy) };
+    setPin(newPin);
+    focusOnPin(newPin.x, newPin.y);
   };
 
   const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -195,30 +242,25 @@ function MapPickerModalInner({
     if (!rect) return;
     const ax = e.clientX - rect.left;
     const ay = e.clientY - rect.top;
-    zoomTo(scale * 1.8, ax, ay);
+    smoothZoomTo(scale * 2, ax, ay);
   };
 
   const handleResetView = () => {
+    setAnimating(true);
     setScale(1);
     setTx(0);
     setTy(0);
+    setTimeout(() => setAnimating(false), 350);
   };
 
   const handleNudge = (dx: number, dy: number) => {
-    setPin((p) =>
-      p
-        ? {
-            x: Math.round(Math.max(0, Math.min(1, p.x + dx)) * 1000) / 1000,
-            y: Math.round(Math.max(0, Math.min(1, p.y + dy)) * 1000) / 1000,
-          }
-        : p,
-    );
+    setPin((p) => (p ? { x: round(clamp01(p.x + dx)), y: round(clamp01(p.y + dy)) } : p));
   };
 
   const handleCoordInput = (axis: 'x' | 'y', value: string) => {
     const num = parseFloat(value);
     if (isNaN(num)) return;
-    const clamped = Math.round(Math.max(0, Math.min(1, num)) * 1000) / 1000;
+    const clamped = round(clamp01(num));
     setPin((p) =>
       p
         ? { ...p, [axis]: clamped }
@@ -230,10 +272,20 @@ function MapPickerModalInner({
   const pinTop = pin ? ty + pin.y * size.h * scale : 0;
   const pinColor = boothType === 'BOOTH' ? '#15ccb1' : '#ff3d3d';
 
-  const getMarkerColor = (marker: BoothMapItem) => {
-    if (marker.type === 'BOOTH') return '#15ccb1';
-    return '#ff3d3d';
+  const getMarkerColor = (marker: BoothMapItem) =>
+    marker.type === 'BOOTH' ? '#15ccb1' : '#ff3d3d';
+
+  const zoomOnPin = (factor: number) => {
+    if (pin) {
+      const ax = tx + pin.x * size.w * scale;
+      const ay = ty + pin.y * size.h * scale;
+      smoothZoomTo(scale * factor, ax, ay);
+    } else {
+      smoothZoomTo(scale * factor, size.w / 2, size.h / 2);
+    }
   };
+
+  const transitionStyle = animating ? 'transform 300ms cubic-bezier(0.25,0.46,0.45,0.94)' : 'none';
 
   return (
     <>
@@ -243,16 +295,16 @@ function MapPickerModalInner({
           ref={wrapperRef}
           className="fixed inset-0 z-50 flex flex-col bg-black/85 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
         >
-          <header className="flex shrink-0 items-center justify-between px-4 py-3 text-white">
+          <header className="flex shrink-0 items-center justify-between px-4 py-2 text-white">
             <button
               type="button"
               onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10"
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-white/10"
               aria-label="닫기"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
-            <h2 className="text-base font-semibold">위치 선택</h2>
+            <h2 className="text-sm font-semibold">위치 선택</h2>
             <button
               type="button"
               onClick={() => {
@@ -260,7 +312,7 @@ function MapPickerModalInner({
                 else onClose();
               }}
               disabled={!pin}
-              className="flex h-9 items-center rounded-lg bg-white px-4 text-sm font-semibold text-black disabled:opacity-50"
+              className="flex h-8 items-center rounded-lg bg-white px-4 text-sm font-semibold text-black disabled:opacity-50"
             >
               완료
             </button>
@@ -272,10 +324,9 @@ function MapPickerModalInner({
               className="relative w-full max-w-[1200px] cursor-grab overflow-hidden rounded-xl bg-white select-none active:cursor-grabbing"
               style={{
                 aspectRatio: ASPECT,
-                maxHeight: 'calc(100dvh - 220px)',
+                maxHeight: 'calc(100dvh - 180px)',
                 touchAction: 'none',
               }}
-              onWheel={handleWheel}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
@@ -293,6 +344,7 @@ function MapPickerModalInner({
                   width: '100%',
                   height: '100%',
                   transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
+                  transition: transitionStyle,
                 }}
               />
               {size.w > 0 &&
@@ -303,7 +355,7 @@ function MapPickerModalInner({
                     <div
                       key={m.boothId}
                       className="pointer-events-none absolute z-[5] -translate-x-1/2 -translate-y-1/2 opacity-40"
-                      style={{ left, top }}
+                      style={{ left, top, transition: transitionStyle }}
                     >
                       <span
                         className="flex size-5 items-center justify-center rounded-full border border-white text-[9px] font-bold leading-none text-white"
@@ -317,7 +369,7 @@ function MapPickerModalInner({
               {pin && size.w > 0 && (
                 <div
                   className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2"
-                  style={{ left: pinLeft, top: pinTop }}
+                  style={{ left: pinLeft, top: pinTop, transition: transitionStyle }}
                 >
                   <span
                     className="flex size-7 items-center justify-center rounded-[14.5px] border-2 border-white text-[14px] font-bold leading-none text-white shadow-lg"
@@ -330,113 +382,99 @@ function MapPickerModalInner({
             </div>
           </div>
 
-          <div className="flex shrink-0 flex-col gap-2 px-4 pt-3 pb-3 text-white">
-            {pin && (
-              <div className="flex items-center justify-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleNudge(-NUDGE_STEP, 0)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
-                  aria-label="좌로 이동"
-                >
-                  <ArrowLeft size={14} />
-                </button>
-                <div className="flex flex-col gap-1">
+          <div className="flex shrink-0 items-center justify-between gap-2 px-4 pt-2 pb-2 text-white">
+            {pin ? (
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-0.5">
                   <button
                     type="button"
-                    onClick={() => handleNudge(0, -NUDGE_STEP)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
-                    aria-label="위로 이동"
+                    onClick={() => handleNudge(-nudgeStep, 0)}
+                    className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
+                    aria-label="좌"
                   >
-                    <ArrowUp size={14} />
+                    <ArrowLeft size={12} />
                   </button>
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => handleNudge(0, -nudgeStep)}
+                      className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
+                      aria-label="상"
+                    >
+                      <ArrowUp size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleNudge(0, nudgeStep)}
+                      className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
+                      aria-label="하"
+                    >
+                      <ArrowDown size={12} />
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => handleNudge(0, NUDGE_STEP)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
-                    aria-label="아래로 이동"
+                    onClick={() => handleNudge(nudgeStep, 0)}
+                    className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
+                    aria-label="우"
                   >
-                    <ArrowDown size={14} />
+                    <ArrowRight size={12} />
                   </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleNudge(NUDGE_STEP, 0)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
-                  aria-label="우로 이동"
-                >
-                  <ArrowRight size={14} />
-                </button>
-                <div className="ml-3 flex items-center gap-2">
-                  <label className="text-[10px] text-white/50">X</label>
+                <div className="flex items-center gap-1">
+                  <label className="text-[10px] text-white/40">X</label>
                   <input
                     type="number"
-                    step="0.001"
+                    step={1 / PRECISION}
                     min="0"
                     max="1"
-                    value={pin.x.toFixed(3)}
+                    value={pin.x.toFixed(4)}
                     onChange={(e) => handleCoordInput('x', e.target.value)}
-                    className="h-7 w-20 rounded bg-white/10 px-2 text-center text-xs tabular-nums text-white outline-none focus:bg-white/20"
+                    className="h-7 w-[4.5rem] rounded bg-white/10 px-1.5 text-center text-[11px] tabular-nums text-white outline-none focus:bg-white/20"
                   />
-                  <label className="text-[10px] text-white/50">Y</label>
+                  <label className="text-[10px] text-white/40">Y</label>
                   <input
                     type="number"
-                    step="0.001"
+                    step={1 / PRECISION}
                     min="0"
                     max="1"
-                    value={pin.y.toFixed(3)}
+                    value={pin.y.toFixed(4)}
                     onChange={(e) => handleCoordInput('y', e.target.value)}
-                    className="h-7 w-20 rounded bg-white/10 px-2 text-center text-xs tabular-nums text-white outline-none focus:bg-white/20"
+                    className="h-7 w-[4.5rem] rounded bg-white/10 px-1.5 text-center text-[11px] tabular-nums text-white outline-none focus:bg-white/20"
                   />
                 </div>
               </div>
+            ) : (
+              <span className="text-[11px] text-white/50">지도를 탭해 위치 지정</span>
             )}
-            {!pin && (
-              <div className="text-center text-xs text-white/70">
-                지도를 탭해 위치를 지정하세요 (화살표 키로 미세 조절)
-              </div>
-            )}
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => {
-                  if (pin) onConfirm(pin.x, pin.y);
-                  else onClose();
-                }}
-                disabled={!pin}
-                className="flex h-9 items-center rounded-lg bg-white px-5 text-sm font-semibold text-black disabled:opacity-50"
+                onClick={() => zoomOnPin(0.7)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
+                aria-label="축소"
               >
-                완료
+                <Minus size={14} />
               </button>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => zoomTo(scale * 0.85, size.w / 2, size.h / 2)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
-                  aria-label="축소"
-                >
-                  <Minus size={16} />
-                </button>
-                <span className="w-12 text-center text-xs tabular-nums">
-                  {Math.round(scale * 100)}%
-                </span>
-                <button
-                  type="button"
-                  onClick={() => zoomTo(scale * 1.18, size.w / 2, size.h / 2)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
-                  aria-label="확대"
-                >
-                  <Plus size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleResetView}
-                  className="ml-1 flex h-9 items-center gap-1 rounded-lg bg-white/10 px-2.5 text-xs font-medium hover:bg-white/20"
-                >
-                  <RotateCcw size={13} />
-                  원본
-                </button>
-              </div>
+              <span className="w-10 text-center text-[11px] tabular-nums">
+                {Math.round(scale * 100)}%
+              </span>
+              <button
+                type="button"
+                onClick={() => zoomOnPin(1.4)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20"
+                aria-label="확대"
+              >
+                <Plus size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={handleResetView}
+                className="ml-0.5 flex h-8 items-center gap-1 rounded-lg bg-white/10 px-2 text-[11px] font-medium hover:bg-white/20"
+              >
+                <RotateCcw size={12} />
+                원본
+              </button>
             </div>
           </div>
         </div>,
