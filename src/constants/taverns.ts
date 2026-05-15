@@ -4,9 +4,9 @@ export type TavernSortKey = 'popular' | 'shortWait' | 'simple';
 
 export const festivalMap = {
   id: 'knu-festival-2026-final-map',
-  version: 1,
-  width: 1364,
-  height: 1179,
+  version: 2,
+  width: 2942,
+  height: 3404,
 } as const;
 
 export type Tavern = {
