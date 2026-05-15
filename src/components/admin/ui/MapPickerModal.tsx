@@ -23,7 +23,6 @@ interface MapPickerModalProps {
 const MIN_SCALE = 1;
 const MAX_SCALE = 8;
 const ASPECT = festivalMap.width / festivalMap.height;
-const PIN_ZOOM_SCALE = 3.5;
 const PRECISION = 10000;
 
 const round = (v: number) => Math.round(v * PRECISION) / PRECISION;
@@ -62,11 +61,19 @@ function MapPickerModalInner({
   const scaleRef = useRef(scale);
   const txRef = useRef(tx);
   const tyRef = useRef(ty);
+  const pinRef = useRef(pin);
+  const sizeRef = useRef(size);
   useEffect(() => {
     scaleRef.current = scale;
     txRef.current = tx;
     tyRef.current = ty;
   }, [scale, tx, ty]);
+  useEffect(() => {
+    pinRef.current = pin;
+  }, [pin]);
+  useEffect(() => {
+    sizeRef.current = size;
+  }, [size]);
 
   const markersQuery = useQuery({
     queryKey: ['booths', 'map'],
@@ -86,7 +93,12 @@ function MapPickerModalInner({
     };
   }, []);
 
-  const nudgeStep = 1 / PRECISION / Math.max(1, scale / 2);
+  const getNudgeStep = useCallback(() => {
+    const w = sizeRef.current.w;
+    const s = scaleRef.current;
+    if (w <= 0) return 1 / PRECISION;
+    return Math.max(1 / PRECISION, Math.ceil((2 * PRECISION) / (w * s)) / PRECISION);
+  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -94,8 +106,8 @@ function MapPickerModalInner({
         onClose();
         return;
       }
-      if (!pin) return;
-      const step = nudgeStep;
+      if (!pinRef.current) return;
+      const step = getNudgeStep();
       let dx = 0;
       let dy = 0;
       if (e.key === 'ArrowLeft') dx = -step;
@@ -108,7 +120,7 @@ function MapPickerModalInner({
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [onClose, pin, nudgeStep]);
+  }, [onClose, getNudgeStep]);
 
   useLayoutEffect(() => {
     const update = () => {
@@ -180,7 +192,7 @@ function MapPickerModalInner({
   const focusOnPin = useCallback(
     (px: number, py: number, targetScale?: number) => {
       if (size.w === 0) return;
-      const s = targetScale ?? Math.max(scaleRef.current, PIN_ZOOM_SCALE);
+      const s = targetScale ?? MAX_SCALE;
       const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, s));
       const centerX = size.w / 2;
       const centerY = size.h / 2;
@@ -234,7 +246,7 @@ function MapPickerModalInner({
     if (ix < 0 || ix > 1 || iy < 0 || iy > 1) return;
     const newPin = { x: round(ix), y: round(iy) };
     setPin(newPin);
-    focusOnPin(newPin.x, newPin.y);
+    focusOnPin(newPin.x, newPin.y, MAX_SCALE);
   };
 
   const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -352,10 +364,11 @@ function MapPickerModalInner({
                   otherMarkers.map((m) => (
                     <div
                       key={m.boothId}
-                      className="pointer-events-none absolute z-[5] -translate-x-1/2 -translate-y-1/2 opacity-40"
+                      className="pointer-events-none absolute z-[5] opacity-40"
                       style={{
                         left: `${(m.xRatio ?? 0) * 100}%`,
                         top: `${(m.yRatio ?? 0) * 100}%`,
+                        transform: `translate(-50%, -50%) scale(${1 / Math.sqrt(scale * MAX_SCALE)})`,
                       }}
                     >
                       <span
@@ -368,10 +381,11 @@ function MapPickerModalInner({
                   ))}
                 {pin && size.w > 0 && (
                   <div
-                    className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2"
+                    className="pointer-events-none absolute z-10"
                     style={{
                       left: `${pin.x * 100}%`,
                       top: `${pin.y * 100}%`,
+                      transform: `translate(-50%, -50%) scale(${1 / Math.sqrt(scale * MAX_SCALE)})`,
                     }}
                   >
                     <span
@@ -392,7 +406,7 @@ function MapPickerModalInner({
                 <div className="flex items-center gap-0.5">
                   <button
                     type="button"
-                    onClick={() => handleNudge(-nudgeStep, 0)}
+                    onClick={() => handleNudge(-getNudgeStep(), 0)}
                     className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
                     aria-label="좌"
                   >
@@ -401,7 +415,7 @@ function MapPickerModalInner({
                   <div className="flex flex-col gap-0.5">
                     <button
                       type="button"
-                      onClick={() => handleNudge(0, -nudgeStep)}
+                      onClick={() => handleNudge(0, -getNudgeStep())}
                       className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
                       aria-label="상"
                     >
@@ -409,7 +423,7 @@ function MapPickerModalInner({
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleNudge(0, nudgeStep)}
+                      onClick={() => handleNudge(0, getNudgeStep())}
                       className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
                       aria-label="하"
                     >
@@ -418,7 +432,7 @@ function MapPickerModalInner({
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleNudge(nudgeStep, 0)}
+                    onClick={() => handleNudge(getNudgeStep(), 0)}
                     className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
                     aria-label="우"
                   >
