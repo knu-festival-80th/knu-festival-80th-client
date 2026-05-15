@@ -46,6 +46,7 @@ export interface MatchingUserStatusResponse {
   resultOpen: boolean;
   registrationDeadline: string | null;
   resultOpenAt: string | null;
+  registrationOpenAt: string | null;
   pendingCount: number;
   matchedCount: number;
   unmatchedCount: number;
