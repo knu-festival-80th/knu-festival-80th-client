@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download, ImagePlus, RotateCcw, Share2 } from 'lucide-react';
+import { Download, Film, ImagePlus, RotateCcw, Share2 } from 'lucide-react';
 
 import { capturePhoto } from '@/lib/capturePhoto';
 import { CHARACTER_LIST } from '@/constants/hobanustagram';
@@ -185,12 +185,29 @@ export const PhotoboothTab = () => {
           <div className="flex flex-col gap-7">
             <div className="flex flex-col items-center gap-2.5">
               <p className="font-wanted-sans text-2xl font-bold leading-none tracking-[-0.48px] text-black">
-                카메라로 찍어보세요
+                포토부스
               </p>
               <p className="font-wanted-sans text-base font-normal leading-none tracking-[-0.32px] text-gray">
-                프레임을 미리 보면서 촬영할 수 있어요
+                원하는 항목을 선택 후 카메라 권한을 허용해주세요.
               </p>
             </div>
+
+            <button
+              type="button"
+              className="flex h-67 w-full flex-col items-center justify-center gap-8 rounded-xl border border-dashed border-sub-red bg-[rgba(255,61,61,0.04)]"
+            >
+              <div className="flex size-20 items-center justify-center rounded-full bg-linear-to-br from-[#ffa855] to-sub-red">
+                <Film className="size-9 text-white" />
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <p className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black">
+                  인생두컷 찍기
+                </p>
+                <p className="whitespace-pre-line text-center font-wanted-sans text-sm font-normal leading-[1.4] tracking-[-0.28px] text-gray">
+                  {'2가지 필터 중 하나를 선택하고\n4컷을 찍은 뒤 마음에 드는 2장을 골라보세요.'}
+                </p>
+              </div>
+            </button>
 
             <button
               type="button"
@@ -202,10 +219,10 @@ export const PhotoboothTab = () => {
               </div>
               <div className="flex flex-col items-center gap-2">
                 <p className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black">
-                  카메라 열기
+                  호반우와 사진찍기
                 </p>
                 <p className="whitespace-pre-line text-center font-wanted-sans text-sm font-normal leading-[1.4] tracking-[-0.28px] text-gray">
-                  {'탭하면 카메라가 켜져요\n프레임을 씌운 채로 찍을 수 있어요'}
+                  {'호반우 프레임과 함께 촬영할 수 있어요.'}
                 </p>
               </div>
             </button>
