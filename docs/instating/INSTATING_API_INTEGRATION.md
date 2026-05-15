@@ -81,18 +81,21 @@ TanStack Query 없이 `react-hook-form`의 `handleSubmit` + `async/await` 직접
 
 ### 에러 처리
 
-`http.ts` 인터셉터가 모든 axios 에러를 `ApiClientError`로 변환한다. 컴포넌트에서는 `status` 코드별로 메시지를 분기한다.
+`http.ts` 인터셉터가 모든 axios 에러를 `ApiClientError`로 변환한다. 컴포넌트에서는 `status` 코드별로 처리를 분기한다. 중요 에러는 `AlertModal`(공통 컴포넌트)로 표시하고, 그 외는 인라인 텍스트로 표시한다.
 
 ```ts
 // 신청 폼
-409 → '이미 신청하셨습니다.'
-403 → '현재 신청이 마감되었습니다.'
+409 → AlertModal ('이미 참여하셨어요')
+403 → 인라인 텍스트 ('현재 신청이 마감되었습니다.')
 그 외 → err.message (서버 메시지 그대로 표시)
 
 // 결과 조회 폼
-404 → '신청 정보를 찾을 수 없습니다. 입력 정보를 확인해주세요.'
+401 → AlertModal ('신청 후 결과확인 해주세요!')
+404 → AlertModal ('신청 정보를 찾을 수 없어요')
 그 외 → err.message
 ```
+
+401은 인터셉터의 `unauthorizedHandler`가 `/console`, `/booth/manage` 경로에서만 동작하므로 인스타팅 페이지에서는 컴포넌트가 직접 처리한다.
 
 인터셉터가 항상 `ApiClientError`를 반환하므로 catch 블록의 `instanceof ApiClientError`가 false인 경우는 실제로 도달하지 않는다. 방어 코드로 유지하고 있다.
 
