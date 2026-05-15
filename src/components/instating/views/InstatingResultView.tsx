@@ -1,8 +1,11 @@
 import { useForm, useWatch } from 'react-hook-form';
 import InstatingResultModal, { type MatchResult } from '../result/InstatingResultModal';
+import AlertModal from '@/components/instating/AlertModal';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiClientError, matchingApi } from '@/apis';
+import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
+import { useCountdown } from '@/hooks/instating/useCountdown';
 
 type FormValues = {
   instagramId: string;
@@ -23,6 +26,12 @@ const InstatingResultView = () => {
 
   const [result, setResult] = useState<MatchResult | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [errorModal, setErrorModal] = useState<{ title: string; description: string } | null>(null);
+
+  const { data: status } = useMatchingStatus();
+  const isResultOpen = status?.resultOpen ?? true;
+  const resultOpenAt = status?.resultOpenAt ? new Date(status.resultOpenAt) : null;
+  const countdownText = useCountdown(resultOpenAt);
   const navigate = useNavigate();
 
   const onSubmit = async ({ instagramId, phone }: FormValues) => {
@@ -45,8 +54,16 @@ const InstatingResultView = () => {
       }
     } catch (err) {
       if (err instanceof ApiClientError) {
-        if (err.status === 404) {
-          setSubmitError('신청 정보를 찾을 수 없습니다. 입력 정보를 확인해주세요.');
+        if (err.status === 401) {
+          setErrorModal({
+            title: '신청 후 결과확인 해주세요!',
+            description: '결과확인은 신청자만 가능합니다.\n신청 후 결과를 확인해주세요.',
+          });
+        } else if (err.status === 404) {
+          setErrorModal({
+            title: '신청 정보를 찾을 수 없어요',
+            description: '입력한 정보를 다시 확인해주세요.',
+          });
         } else {
           setSubmitError(err.message);
         }
@@ -63,6 +80,13 @@ const InstatingResultView = () => {
   return (
     <>
       {result && <InstatingResultModal onClose={handleCloseResult} result={result} />}
+      {errorModal && (
+        <AlertModal
+          title={errorModal.title}
+          description={errorModal.description}
+          onClose={() => setErrorModal(null)}
+        />
+      )}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-7 bg-white px-5 py-6 min-h-[calc(100dvh-6.75rem)]"
@@ -77,7 +101,7 @@ const InstatingResultView = () => {
           </p>
         </div>
 
-        <div className="flex flex-col gap-[18px]">
+        <fieldset disabled={!isResultOpen} className="m-0 flex flex-col gap-[18px] border-0 p-0">
           {/* Instagram ID */}
           <div className="flex flex-col gap-2">
             <label className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink">
@@ -87,7 +111,7 @@ const InstatingResultView = () => {
               type="text"
               placeholder="인스타 아이디를 입력해주세요"
               {...register('instagramId', { required: true })}
-              className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none"
+              className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
             />
           </div>
 
@@ -103,10 +127,10 @@ const InstatingResultView = () => {
                 required: true,
                 pattern: /^01[0-9]{8,9}$/,
               })}
-              className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none"
+              className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
             />
           </div>
-        </div>
+        </fieldset>
 
         {submitError && (
           <p className="font-wanted-sans text-body2 text-sub-red" role="alert">
@@ -117,10 +141,16 @@ const InstatingResultView = () => {
         {/* Submit */}
         <button
           type="submit"
-          disabled={!isValid || isSubmitting}
-          className={`h-[50px] w-full rounded-md ${isValid && !isSubmitting ? 'bg-sub-red' : 'bg-[#CCCCCC]'} font-wanted-sans text-body1 font-medium tracking-tight text-surface`}
+          disabled={!isResultOpen || !isValid || isSubmitting}
+          className={`h-[50px] w-full rounded-md font-wanted-sans text-body1 font-medium tracking-tight text-surface ${
+            !isResultOpen ? 'bg-black' : isValid && !isSubmitting ? 'bg-sub-red' : 'bg-[#CCCCCC]'
+          }`}
         >
-          {isSubmitting ? '조회 중...' : '결과 조회하기'}
+          {!isResultOpen
+            ? `남은시간 ${countdownText}`
+            : isSubmitting
+              ? '조회 중...'
+              : '결과 조회하기'}
         </button>
       </form>
     </>
