@@ -15,7 +15,5 @@ export async function sharePhoto(dataUrl: string): Promise<void> {
   const res = await fetch(dataUrl);
   const blob = await res.blob();
   const file = new File([blob], 'hobanu-photo.png', { type: 'image/png' });
-  try {
-    await navigator.share({ files: [file] });
-  } catch {}
+  await navigator.share({ files: [file] }).catch(() => {});
 }
