@@ -1,12 +1,12 @@
-import type { BoothListItem } from '@/apis/modules/booth';
+import type { BoothListItem, BoothMapItem } from '@/apis/modules/booth';
 
 export type TavernSortKey = 'popular' | 'shortWait' | 'simple';
 
 export const festivalMap = {
   id: 'knu-festival-2026-final-map',
-  version: 1,
-  width: 1364,
-  height: 1179,
+  version: 2,
+  width: 2942,
+  height: 3404,
 } as const;
 
 export type Tavern = {
@@ -23,6 +23,8 @@ export type Tavern = {
   yRatio: number;
 };
 
+const normalizeRatio = (ratio: number | null | undefined) => ratio ?? 0.5;
+
 export function boothToTavern(booth: BoothListItem): Tavern {
   return {
     id: String(booth.boothId),
@@ -34,8 +36,24 @@ export function boothToTavern(booth: BoothListItem): Tavern {
     waitingOpen: booth.waitingOpen,
     popularity: booth.likeCount,
     menuBoardImageUrl: booth.menuBoardImageUrl,
-    xRatio: booth.xRatio ?? 0.5,
-    yRatio: booth.yRatio ?? 0.5,
+    xRatio: normalizeRatio(booth.xRatio),
+    yRatio: normalizeRatio(booth.yRatio),
+  };
+}
+
+export function mapBoothToTavern(booth: BoothMapItem): Tavern {
+  return {
+    id: String(booth.boothId),
+    boothId: booth.boothId,
+    department: '',
+    name: booth.name,
+    location: '',
+    waitTeams: 0,
+    waitingOpen: false,
+    popularity: 0,
+    menuBoardImageUrl: null,
+    xRatio: normalizeRatio(booth.xRatio),
+    yRatio: normalizeRatio(booth.yRatio),
   };
 }
 

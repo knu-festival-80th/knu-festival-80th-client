@@ -30,11 +30,13 @@ export default function MapOverview({
         </p>
       </div>
 
-      <CampusMap
-        taverns={taverns}
-        selectedTavern={selectedTavern}
-        onSelectTavern={onSelectTavern}
-      />
+      <div className="-mx-5 px-5">
+        <CampusMap
+          taverns={taverns}
+          selectedTavern={selectedTavern}
+          onSelectTavern={onSelectTavern}
+        />
+      </div>
 
       {selectedTavern && (
         <TavernCard

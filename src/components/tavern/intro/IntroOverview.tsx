@@ -5,7 +5,7 @@ import reservationIconImage from '@/assets/images/reservation-icon.png';
 import tavernGuideMapImage from '@/assets/images/tavern-guide-map.png';
 import tavernGuideReservationImage from '@/assets/images/tavern-guide-reservation.png';
 import tavernHeroBgImage from '@/assets/images/tavern-hero-bg.png';
-import tavernMapImage from '@/assets/images/tavern-map.svg';
+import tavernMapImage from '@/assets/images/map.svg';
 import ContentCard from '@/components/home/ContentCard';
 import SectionBlock from '@/components/home/SectionBlock';
 import SectionHeading from '@/components/tavern/shared/SectionHeading';
