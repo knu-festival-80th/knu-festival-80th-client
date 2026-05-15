@@ -42,21 +42,13 @@ jobs:
 
       - name: Run Lighthouse (local)
         if: ${{ inputs.target == 'local' }}
-        run: pnpm exec lhci collect --config=./lighthouserc.cjs --url=http://localhost:4173 --start-server-command="pnpm preview" --start-server-ready-pattern="Local"
+        env:
+          LHCI_BASE_URL: http://localhost:4173
+        run: pnpm exec lhci collect --config=./lighthouserc.cjs --start-server-command="pnpm preview" --start-server-ready-pattern="Local"
 
       - name: Run Lighthouse (prod)
         if: ${{ inputs.target == 'prod' }}
-        run: pnpm exec lhci collect --config=./lighthouserc.cjs --url=https://chcse.knu.ac.kr/festival
-
-      - name: Debug - list output files
-        if: always()
-        run: |
-          echo "=== pwd ==="
-          pwd
-          echo "=== .lighthouseci/ ==="
-          ls -la .lighthouseci/ 2>/dev/null || echo "not found"
-          echo "=== find lhr-*.json ==="
-          find . -name "lhr-*.json" 2>/dev/null | head -10
+        run: pnpm exec lhci collect --config=./lighthouserc.cjs
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -66,20 +58,32 @@ jobs:
           retention-days: 90
           include-hidden-files: true
 
-      - name: Post PR comment
+      - name: Write Job Summary and Post PR comment
         uses: actions/github-script@v7
+        if: always()
         continue-on-error: true
         with:
           script: |
             const fs = require('fs');
             const files = fs.readdirSync('.lighthouseci')
-              .filter(f => f.startsWith('lhr-') && f.endsWith('.json'));
+              .filter(f => f.startsWith('lhr-') && f.endsWith('.json'))
+              .sort();
             if (!files.length) return;
 
-            const lhr = JSON.parse(fs.readFileSync(`.lighthouseci/${files[0]}`, 'utf8'));
-            const cats = lhr.categories;
             const score = v => v != null ? Math.round(v * 100) : 'N/A';
             const emoji = v => v == null ? '⚪' : v >= 0.9 ? '🟢' : v >= 0.5 ? '🟡' : '🔴';
+
+            const rows = files.map(f => {
+              const lhr = JSON.parse(fs.readFileSync(`.lighthouseci/${f}`, 'utf8'));
+              const cats = lhr.categories;
+              const url = new URL(lhr.finalUrl || lhr.requestedUrl);
+              const page = url.pathname.replace('/festival', '') || '/';
+              const perf = cats.performance?.score;
+              const a11y = cats.accessibility?.score;
+              const bp = cats['best-practices']?.score;
+              const seo = cats.seo?.score;
+              return `| \`${page}\` | ${emoji(perf)} ${score(perf)} | ${emoji(a11y)} ${score(a11y)} | ${emoji(bp)} ${score(bp)} | ${emoji(seo)} ${score(seo)} |`;
+            });
 
             const target = '${{ inputs.target }}';
             const runId = '${{ github.run_id }}';
@@ -88,15 +92,14 @@ jobs:
             const body = [
               `## 🔦 Lighthouse 측정 결과 (\`${target}\`)`,
               '',
-              '| 카테고리 | 점수 |',
-              '|----------|------|',
-              `| Performance | ${emoji(cats.performance?.score)} ${score(cats.performance?.score)} |`,
-              `| Accessibility | ${emoji(cats.accessibility?.score)} ${score(cats.accessibility?.score)} |`,
-              `| Best Practices | ${emoji(cats['best-practices']?.score)} ${score(cats['best-practices']?.score)} |`,
-              `| SEO | ${emoji(cats.seo?.score)} ${score(cats.seo?.score)} |`,
+              '| 페이지 | Performance | Accessibility | Best Practices | SEO |',
+              '|--------|-------------|---------------|----------------|-----|',
+              ...rows,
               '',
               `> [리포트 다운로드](https://github.com/${repository}/actions/runs/${runId})`,
             ].join('\n');
+
+            await core.summary.addRaw(body).write();
 
             const branch = context.ref.replace('refs/heads/', '');
             const { data: prs } = await github.rest.pulls.list({
