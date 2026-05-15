@@ -39,9 +39,13 @@
 
 ### 인트로 뷰
 
-**카운트다운 (`CountDownTimer`)**
+**카운트다운 (`CountDownTimer`, `useTimeLeft`, `useCountdown`)**
 
-1초 간격 `setInterval`로 `days / hours / minutes / seconds`를 계산한다. 카운트다운이 0에 도달하면 인터벌을 정리한다. `deadline`이 변경될 때마다 재시작된다.
+tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를 증가시켜 리렌더를 유발하고, `getTimeLeft(deadline)`으로 매 렌더마다 남은 시간을 계산한다. 이 방식은 stale state 없이 항상 최신 값을 보장한다.
+
+- `useTimeLeft(deadline)` — tick 담당, `TimeLeft | null` 반환
+- `useCountdown(deadline)` — `useTimeLeft` 결과를 `"DD:HH:MM:SS"` 문자열로 포맷, 버튼 라벨 등 인라인 텍스트에 사용
+- `CountDownTimer` — `useTimeLeft` 결과로 큰 숫자 UI 조립, 인트로 섹션에 사용
 
 **신청자 현황 (`ApplicantsNumberSection`)**
 
@@ -53,11 +57,13 @@
 
 제출 성공 시 `InstatingSuccessModal`을 띄운다. 이 모달에는 입력한 정보 요약과 함께 결과 공개까지 남은 카운트다운이 표시된다.
 
+`registrationOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `useCountdown`으로 신청 시작까지 남은 시간을 표시한다.
+
 에러 처리:
 
 ```
-409 → 이미 신청하셨습니다.
-403 → 현재 신청이 마감되었습니다.
+409 → AlertModal ('이미 참여하셨어요')
+403 → 인라인 텍스트 ('현재 신청이 마감되었습니다.')
 그 외 → 서버 메시지 그대로 표시
 ```
 
@@ -65,10 +71,13 @@
 
 인스타 ID와 연락처를 입력해 인증한다. 제출 성공 시 `InstatingResultModal`을 띄운다.
 
-`resultOpen: false`이면 API 성공 응답 이후에도 "아직 결과 공개 전입니다." 메시지를 표시한다. 에러 처리:
+`resultOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `useCountdown`으로 결과 공개까지 남은 시간을 표시한다. API 성공 응답 이후에도 `resultOpen: false`이면 "아직 결과 공개 전입니다." 인라인 메시지를 표시한다.
+
+에러 처리:
 
 ```
-404 → 신청 정보를 찾을 수 없습니다.
+401 → AlertModal ('신청 후 결과확인 해주세요!')  ← 인터셉터 전역 처리 대상 아님
+404 → AlertModal ('신청 정보를 찾을 수 없어요')
 그 외 → 서버 메시지 그대로 표시
 ```
 
@@ -159,7 +168,9 @@ getApplicantsCount();
 
 `http.ts` 인터셉터가 모든 axios 에러를 `ApiClientError`로 변환한다. 컴포넌트는 `status` 코드별로 메시지를 분기하고, 그 외에는 서버가 내려준 `err.message`를 그대로 표시한다.
 
-401 / 403 응답은 인터셉터에서 `unauthorizedHandler`를 호출해 전역으로 처리한다.
+401 / 403 응답은 인터셉터에서 `unauthorizedHandler`를 호출해 전역으로 처리한다. 단, `unauthorizedHandler`는 `/console`, `/booth/manage` 경로에서만 리디렉션을 수행한다. 인스타팅 사용자 페이지에서 발생하는 401은 전역 처리 대상이 아니므로 각 컴포넌트에서 `AlertModal`로 별도 처리한다.
+
+공통 에러 모달은 `AlertModal` 컴포넌트로 통일했다. title과 description을 props로 주입받아 `createPortal`로 렌더링된다.
 
 ## 파일 구조
 
@@ -168,6 +179,7 @@ src/
 ├── apis/modules/matching.ts
 ├── hooks/instating/
 │   ├── useMatchingStatus.ts
+│   ├── useCountdown.ts          ← useTimeLeft, useCountdown, getTimeLeft
 │   └── useInstatingScratchCanvas.ts
 ├── pages/
 │   ├── InstatingPage.tsx
@@ -175,6 +187,7 @@ src/
 │       ├── MatchingOverviewPage.tsx
 │       └── MatchingParticipantsPage.tsx
 └── components/instating/
+    ├── AlertModal.tsx            ← 공통 에러 모달
     ├── TabNavigation.tsx
     ├── OutlineButton.tsx
     ├── intro/

@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { ApiClientError, matchingApi } from '@/apis';
+import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
+import { useCountdown } from '@/hooks/instating/useCountdown';
 import type { SubmittedData } from '../result/InstatingSuccessModal';
 import InstatingSuccessModal from '../result/InstatingSuccessModal';
+import AlertModal from '@/components/instating/AlertModal';
 
 type FormValues = {
   gender: 'male' | 'female';
@@ -14,6 +17,14 @@ type FormValues = {
 const InstatingApplyView = () => {
   const [submittedData, setSubmittedData] = useState<SubmittedData | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [errorModal, setErrorModal] = useState<{ title: string; description: string } | null>(null);
+
+  const { data: status } = useMatchingStatus();
+  const isRegistrationOpen = status?.registrationOpen ?? true;
+
+  // TODO: registrationOpenAt 서버 연동 후 status?.registrationOpenAt으로 교체
+  const registrationOpenAt: Date | null = null;
+  const countdownText = useCountdown(registrationOpenAt);
 
   const {
     register,
@@ -37,7 +48,10 @@ const InstatingApplyView = () => {
     } catch (err) {
       if (err instanceof ApiClientError) {
         if (err.status === 409) {
-          setSubmitError('이미 신청하셨습니다.');
+          setErrorModal({
+            title: '이미 참여하셨어요',
+            description: '본 이벤트는 하루에 한 번만 참여 가능합니다.\n내일 다시 참여해 주세요.',
+          });
         } else if (err.status === 403) {
           setSubmitError('현재 신청이 마감되었습니다.');
         } else {
@@ -54,6 +68,13 @@ const InstatingApplyView = () => {
       {submittedData && (
         <InstatingSuccessModal data={submittedData} onClose={() => setSubmittedData(null)} />
       )}
+      {errorModal && (
+        <AlertModal
+          title={errorModal.title}
+          description={errorModal.description}
+          onClose={() => setErrorModal(null)}
+        />
+      )}
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex flex-col gap-7 bg-white px-5 py-6 min-h-[calc(100dvh-6.75rem)]"
@@ -68,7 +89,10 @@ const InstatingApplyView = () => {
           </p>
         </div>
 
-        <div className="flex flex-col gap-6">
+        <fieldset
+          disabled={!isRegistrationOpen}
+          className="m-0 flex flex-col gap-6 border-0 p-0 disabled:opacity-40"
+        >
           {/* Gender */}
           <div className="flex flex-col gap-2">
             <span className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink">
@@ -76,7 +100,10 @@ const InstatingApplyView = () => {
             </span>
             <div className="flex gap-5">
               {(['male', 'female'] as const).map((value) => (
-                <label key={value} className="flex cursor-pointer items-center gap-1.5">
+                <label
+                  key={value}
+                  className="flex cursor-pointer items-center gap-1.5 disabled:cursor-not-allowed"
+                >
                   <input
                     type="radio"
                     value={value}
@@ -113,7 +140,7 @@ const InstatingApplyView = () => {
                 type="text"
                 placeholder="honggildong"
                 {...register('instagramId', { required: '인스타 ID를 입력해주세요.' })}
-                className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none"
+                className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed"
               />
               {errors.instagramId && (
                 <p className="font-wanted-sans text-body2 text-sub-red">
@@ -137,43 +164,43 @@ const InstatingApplyView = () => {
                     message: '올바른 연락처를 입력해주세요.',
                   },
                 })}
-                className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none"
+                className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed"
               />
               {errors.phone && (
                 <p className="font-wanted-sans text-body2 text-sub-red">{errors.phone.message}</p>
               )}
             </div>
           </div>
-        </div>
 
-        {/* Age confirmation */}
-        <label className="flex cursor-pointer items-center gap-1.5">
-          <input
-            type="checkbox"
-            {...register('ageConfirm', { required: true })}
-            className="hidden"
-          />
-          <div
-            className={`flex size-5 items-center justify-center rounded-sm ${
-              ageConfirm ? 'bg-sub-red' : 'border-2 border-border bg-surface'
-            }`}
-          >
-            {ageConfirm && (
-              <svg width="12" height="9" viewBox="0 0 12 9" fill="none" aria-hidden="true">
-                <path
-                  d="M1 4L4.5 7.5L11 1"
-                  stroke="white"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            )}
-          </div>
-          <span className="font-wanted-sans text-body1 font-medium tracking-tight text-ink">
-            만 19세 이상 성인임을 확인합니다.
-          </span>
-        </label>
+          {/* Age confirmation */}
+          <label className="flex cursor-pointer items-center gap-1.5">
+            <input
+              type="checkbox"
+              {...register('ageConfirm', { required: true })}
+              className="hidden"
+            />
+            <div
+              className={`flex size-5 items-center justify-center rounded-sm ${
+                ageConfirm ? 'bg-sub-red' : 'border-2 border-border bg-surface'
+              }`}
+            >
+              {ageConfirm && (
+                <svg width="12" height="9" viewBox="0 0 12 9" fill="none" aria-hidden="true">
+                  <path
+                    d="M1 4L4.5 7.5L11 1"
+                    stroke="white"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </div>
+            <span className="font-wanted-sans text-body1 font-medium tracking-tight text-ink">
+              만 19세 이상 성인임을 확인합니다.
+            </span>
+          </label>
+        </fieldset>
 
         {submitError && (
           <p className="font-wanted-sans text-body2 text-sub-red" role="alert">
@@ -184,10 +211,20 @@ const InstatingApplyView = () => {
         {/* Submit */}
         <button
           type="submit"
-          disabled={!isValid || isSubmitting}
-          className={`h-[50px] w-full rounded-md ${isValid && !isSubmitting ? 'bg-sub-red' : 'bg-[#CCCCCC]'} font-wanted-sans text-body1 font-medium tracking-tight text-surface`}
+          disabled={!isRegistrationOpen || !isValid || isSubmitting}
+          className={`h-[50px] w-full rounded-md font-wanted-sans text-body1 font-medium tracking-tight text-surface ${
+            !isRegistrationOpen
+              ? 'bg-black'
+              : isValid && !isSubmitting
+                ? 'bg-sub-red'
+                : 'bg-[#CCCCCC]'
+          }`}
         >
-          {isSubmitting ? '신청 중...' : '인스타팅 신청하기'}
+          {!isRegistrationOpen
+            ? `남은시간 ${countdownText}`
+            : isSubmitting
+              ? '신청 중...'
+              : '인스타팅 신청하기'}
         </button>
 
         {/* Notice */}
