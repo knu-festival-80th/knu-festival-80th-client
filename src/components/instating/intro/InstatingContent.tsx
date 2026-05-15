@@ -15,28 +15,44 @@ const steps = [
   {
     step: '1단계',
     title: '매칭 신청하기',
-    description: '프로필을 작성하고 매칭을 신청합니다.',
+    description: (
+      <>
+        <strong>오전 11시 ~ 오후 9시</strong>, 매칭을 신청하세요.
+      </>
+    ),
     bgSrc: step1Bg,
     illustSrc: step1Illust,
   },
   {
     step: '2단계',
-    title: '지정 시간 공개 기다리기',
-    description: 'Time Drop으로 정해진 시간에 결과가 공개됩니다.',
+    title: '밤 10시, 매칭 결과 공개',
+    description: (
+      <>
+        <strong>밤 10시</strong>, 두근두근 당신의 매칭상대가 정해졌어요.
+      </>
+    ),
     bgSrc: step2Bg,
     illustSrc: step2Illust,
   },
   {
     step: '3단계',
-    title: '매칭 결과 확인하기',
-    description: '스크래치 UI로 설렘을 느끼며 결과를 확인합니다.',
+    title: '매칭 상대 확인',
+    description: (
+      <>
+        <strong>밤 10시 ~ 다음 날 11시</strong>, <br /> 복권을 긁어 설레는 결과를 확인하세요.
+      </>
+    ),
     bgSrc: step3Bg,
     illustSrc: step3Illust,
   },
   {
     step: '4단계',
-    title: '인스타그램으로 연결하기',
-    description: '딥링크로 바로 메시지를 보낼 수 있습니다.',
+    title: 'DM으로 먼저 말을 걸어보세요',
+    description: (
+      <>
+        <strong>링크</strong>를 통해 상대방 프로필로 바로 이동할 수 있어요.
+      </>
+    ),
     bgSrc: step4Bg,
     illustSrc: step4Illust,
   },

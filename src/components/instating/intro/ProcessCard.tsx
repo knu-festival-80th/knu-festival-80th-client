@@ -1,7 +1,7 @@
 interface ProcessCardProps {
   step: string;
   title: string;
-  description: string;
+  description: React.ReactNode;
   bgSrc: string;
   illustSrc: string;
 }
