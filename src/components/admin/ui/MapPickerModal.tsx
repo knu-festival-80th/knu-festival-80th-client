@@ -61,11 +61,19 @@ function MapPickerModalInner({
   const scaleRef = useRef(scale);
   const txRef = useRef(tx);
   const tyRef = useRef(ty);
+  const pinRef = useRef(pin);
+  const sizeRef = useRef(size);
   useEffect(() => {
     scaleRef.current = scale;
     txRef.current = tx;
     tyRef.current = ty;
   }, [scale, tx, ty]);
+  useEffect(() => {
+    pinRef.current = pin;
+  }, [pin]);
+  useEffect(() => {
+    sizeRef.current = size;
+  }, [size]);
 
   const markersQuery = useQuery({
     queryKey: ['booths', 'map'],
@@ -85,7 +93,12 @@ function MapPickerModalInner({
     };
   }, []);
 
-  const nudgeStep = 1 / PRECISION;
+  const getNudgeStep = useCallback(() => {
+    const w = sizeRef.current.w;
+    const s = scaleRef.current;
+    if (w <= 0) return 1 / PRECISION;
+    return Math.max(1 / PRECISION, Math.ceil((2 * PRECISION) / (w * s)) / PRECISION);
+  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -93,8 +106,8 @@ function MapPickerModalInner({
         onClose();
         return;
       }
-      if (!pin) return;
-      const step = nudgeStep;
+      if (!pinRef.current) return;
+      const step = getNudgeStep();
       let dx = 0;
       let dy = 0;
       if (e.key === 'ArrowLeft') dx = -step;
@@ -107,7 +120,7 @@ function MapPickerModalInner({
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [onClose, pin, nudgeStep]);
+  }, [onClose, getNudgeStep]);
 
   useLayoutEffect(() => {
     const update = () => {
@@ -393,7 +406,7 @@ function MapPickerModalInner({
                 <div className="flex items-center gap-0.5">
                   <button
                     type="button"
-                    onClick={() => handleNudge(-nudgeStep, 0)}
+                    onClick={() => handleNudge(-getNudgeStep(), 0)}
                     className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
                     aria-label="좌"
                   >
@@ -402,7 +415,7 @@ function MapPickerModalInner({
                   <div className="flex flex-col gap-0.5">
                     <button
                       type="button"
-                      onClick={() => handleNudge(0, -nudgeStep)}
+                      onClick={() => handleNudge(0, -getNudgeStep())}
                       className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
                       aria-label="상"
                     >
@@ -410,7 +423,7 @@ function MapPickerModalInner({
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleNudge(0, nudgeStep)}
+                      onClick={() => handleNudge(0, getNudgeStep())}
                       className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
                       aria-label="하"
                     >
@@ -419,7 +432,7 @@ function MapPickerModalInner({
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleNudge(nudgeStep, 0)}
+                    onClick={() => handleNudge(getNudgeStep(), 0)}
                     className="flex h-7 w-7 items-center justify-center rounded bg-white/10 hover:bg-white/20"
                     aria-label="우"
                   >
