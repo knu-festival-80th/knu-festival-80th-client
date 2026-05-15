@@ -23,7 +23,6 @@ interface MapPickerModalProps {
 const MIN_SCALE = 1;
 const MAX_SCALE = 8;
 const ASPECT = festivalMap.width / festivalMap.height;
-const PIN_ZOOM_SCALE = 3.5;
 const PRECISION = 10000;
 
 const round = (v: number) => Math.round(v * PRECISION) / PRECISION;
@@ -86,7 +85,7 @@ function MapPickerModalInner({
     };
   }, []);
 
-  const nudgeStep = 1 / PRECISION / Math.max(1, scale / 2);
+  const nudgeStep = 1 / PRECISION;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -180,7 +179,7 @@ function MapPickerModalInner({
   const focusOnPin = useCallback(
     (px: number, py: number, targetScale?: number) => {
       if (size.w === 0) return;
-      const s = targetScale ?? Math.max(scaleRef.current, PIN_ZOOM_SCALE);
+      const s = targetScale ?? MAX_SCALE;
       const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, s));
       const centerX = size.w / 2;
       const centerY = size.h / 2;
@@ -234,7 +233,7 @@ function MapPickerModalInner({
     if (ix < 0 || ix > 1 || iy < 0 || iy > 1) return;
     const newPin = { x: round(ix), y: round(iy) };
     setPin(newPin);
-    focusOnPin(newPin.x, newPin.y);
+    focusOnPin(newPin.x, newPin.y, MAX_SCALE);
   };
 
   const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -352,10 +351,11 @@ function MapPickerModalInner({
                   otherMarkers.map((m) => (
                     <div
                       key={m.boothId}
-                      className="pointer-events-none absolute z-[5] -translate-x-1/2 -translate-y-1/2 opacity-40"
+                      className="pointer-events-none absolute z-[5] opacity-40"
                       style={{
                         left: `${(m.xRatio ?? 0) * 100}%`,
                         top: `${(m.yRatio ?? 0) * 100}%`,
+                        transform: `translate(-50%, -50%) scale(${1 / Math.sqrt(scale * MAX_SCALE)})`,
                       }}
                     >
                       <span
@@ -368,10 +368,11 @@ function MapPickerModalInner({
                   ))}
                 {pin && size.w > 0 && (
                   <div
-                    className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2"
+                    className="pointer-events-none absolute z-10"
                     style={{
                       left: `${pin.x * 100}%`,
                       top: `${pin.y * 100}%`,
+                      transform: `translate(-50%, -50%) scale(${1 / Math.sqrt(scale * MAX_SCALE)})`,
                     }}
                   >
                     <span
