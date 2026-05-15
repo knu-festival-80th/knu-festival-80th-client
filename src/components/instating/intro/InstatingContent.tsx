@@ -49,7 +49,7 @@ const InstatingContent = () => {
 
   return (
     <section className="w-full bg-white">
-      <div className="mx-auto flex w-full flex-col items-center gap-12 px-5 pb-16 pt-16">
+      <div className="mx-auto flex w-full flex-col items-center gap-12 px-5 pb-16 pt-8">
         {/* Section header */}
         <div className="flex w-full flex-col gap-4 pt-8">
           <div className="flex flex-col gap-2.5">
