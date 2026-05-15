@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Download, Film, ImagePlus, RotateCcw, Share2 } from 'lucide-react';
 
 import { capturePhoto } from '@/lib/capturePhoto';
+import { downloadPhoto, sharePhoto } from '@/lib/savePhoto';
 import { CHARACTER_LIST } from '@/constants/hobanustagram';
 import { useCamera } from '@/hooks/useCamera';
 import type { CameraState, CharacterKey, TabStep } from '@/types/hobanustagram';
 import { CameraOverlay } from './CameraOverlay';
 import { StepIndicator } from './StepIndicator';
+import { TwoShotOverlay } from './TwoShotOverlay';
 
 export const PhotoboothTab = () => {
   const [tabStep, setTabStep] = useState<TabStep>(1);
@@ -15,6 +17,7 @@ export const PhotoboothTab = () => {
   const [capturedDataUrl, setCapturedDataUrl] = useState<string | null>(null);
   const [showFrameSelector, setShowFrameSelector] = useState(false);
   const [showSaveSheet, setShowSaveSheet] = useState(false);
+  const [twoShotActive, setTwoShotActive] = useState(false);
 
   const { videoRef, isReady, error, facingMode, startCamera, stopCamera, flipCamera } = useCamera();
   const overlayRef = useRef<HTMLImageElement>(null);
@@ -67,45 +70,42 @@ export const PhotoboothTab = () => {
     setTabStep(1);
   };
 
+  const handleTwoShotComplete = (compositedUrl: string) => {
+    setCapturedDataUrl(compositedUrl);
+    setTabStep(2);
+    setTwoShotActive(false);
+  };
+
   const handleSaveButtonClick = () => {
     const testFile = new File([], 'test');
     if (navigator.canShare?.({ files: [testFile] })) {
       setShowSaveSheet(true);
     } else {
-      void downloadPhoto();
+      if (capturedDataUrl) void downloadPhoto(capturedDataUrl);
     }
   };
 
-  const downloadPhoto = async () => {
+  const handleDownload = async () => {
     if (!capturedDataUrl) return;
     setShowSaveSheet(false);
-    const res = await fetch(capturedDataUrl);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'hobanu-photo.png';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    await downloadPhoto(capturedDataUrl);
   };
 
-  const sharePhoto = async () => {
+  const handleShare = async () => {
     if (!capturedDataUrl) return;
     setShowSaveSheet(false);
-    const res = await fetch(capturedDataUrl);
-    const blob = await res.blob();
-    const file = new File([blob], 'hobanu-photo.png', { type: 'image/png' });
-    try {
-      await navigator.share({ files: [file] });
-    } catch {
-      // 사용자 취소 시 무시
-    }
+    await sharePhoto(capturedDataUrl);
   };
 
   return (
     <>
+      {twoShotActive && (
+        <TwoShotOverlay
+          onClose={() => setTwoShotActive(false)}
+          onComplete={handleTwoShotComplete}
+        />
+      )}
+
       {cameraState !== 'idle' && (
         <CameraOverlay
           cameraState={cameraState}
@@ -143,7 +143,7 @@ export const PhotoboothTab = () => {
 
             <button
               type="button"
-              onClick={() => void downloadPhoto()}
+              onClick={() => void handleDownload()}
               className="flex w-full items-center gap-4 rounded-xl px-4 py-4 text-left active:bg-[#F5F5F5]"
             >
               <div className="flex size-12 items-center justify-center rounded-full bg-[#EEEEEE]">
@@ -161,7 +161,7 @@ export const PhotoboothTab = () => {
 
             <button
               type="button"
-              onClick={() => void sharePhoto()}
+              onClick={() => void handleShare()}
               className="flex w-full items-center gap-4 rounded-xl px-4 py-4 text-left active:bg-[#F5F5F5]"
             >
               <div className="flex size-12 items-center justify-center rounded-full bg-[#EEEEEE]">
@@ -178,99 +178,102 @@ export const PhotoboothTab = () => {
         </div>
       )}
 
-      <div className="flex min-h-screen flex-col gap-7 bg-white px-5 py-7">
-        <StepIndicator currentStep={tabStep} />
+      {!twoShotActive && (
+        <div className="flex min-h-screen flex-col gap-7 bg-white px-5 py-7">
+          <StepIndicator currentStep={tabStep} />
 
-        {tabStep === 1 && (
-          <div className="flex flex-col gap-7">
-            <div className="flex flex-col items-center gap-2.5">
-              <p className="font-wanted-sans text-2xl font-bold leading-none tracking-[-0.48px] text-black">
-                포토부스
-              </p>
-              <p className="font-wanted-sans text-base font-normal leading-none tracking-[-0.32px] text-gray">
-                원하는 항목을 선택 후 카메라 권한을 허용해주세요.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              className="flex h-67 w-full flex-col items-center justify-center gap-8 rounded-xl border border-dashed border-sub-red bg-[rgba(255,61,61,0.04)]"
-            >
-              <div className="flex size-20 items-center justify-center rounded-full bg-linear-to-br from-[#ffa855] to-sub-red">
-                <Film className="size-9 text-white" />
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <p className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black">
-                  인생두컷 찍기
+          {tabStep === 1 && (
+            <div className="flex flex-col gap-7">
+              <div className="flex flex-col items-center gap-2.5">
+                <p className="font-wanted-sans text-2xl font-bold leading-none tracking-[-0.48px] text-black">
+                  포토부스
                 </p>
-                <p className="whitespace-pre-line text-center font-wanted-sans text-sm font-normal leading-[1.4] tracking-[-0.28px] text-gray">
-                  {'2가지 필터 중 하나를 선택하고\n4컷을 찍은 뒤 마음에 드는 2장을 골라보세요.'}
+                <p className="font-wanted-sans text-base font-normal leading-none tracking-[-0.32px] text-gray">
+                  원하는 항목을 선택 후 카메라 권한을 허용해주세요.
                 </p>
               </div>
-            </button>
 
-            <button
-              type="button"
-              onClick={handleOpenCamera}
-              className="flex h-67 w-full flex-col items-center justify-center gap-8 rounded-xl border border-dashed border-sub-red bg-[rgba(255,61,61,0.04)]"
-            >
-              <div className="flex size-20 items-center justify-center rounded-full bg-linear-to-br from-[#ffa855] to-sub-red">
-                <ImagePlus className="size-9 text-white" />
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <p className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black">
-                  호반우와 사진찍기
-                </p>
-                <p className="whitespace-pre-line text-center font-wanted-sans text-sm font-normal leading-[1.4] tracking-[-0.28px] text-gray">
-                  {'호반우 프레임과 함께 촬영할 수 있어요.'}
-                </p>
-              </div>
-            </button>
-          </div>
-        )}
-
-        {tabStep === 2 && capturedDataUrl && (
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col items-center gap-2.5">
-              <p className="font-wanted-sans text-2xl font-bold leading-none tracking-[-0.48px] text-black">
-                완성!🎉
-              </p>
-              <p className="font-wanted-sans text-base font-normal leading-none tracking-[-0.32px] text-gray">
-                저장하거나 다시 찍어보세요!
-              </p>
-            </div>
-
-            <img src={capturedDataUrl} alt="완성된 사진" className="w-full rounded-xl" />
-
-            <div className="flex justify-between">
               <button
                 type="button"
-                onClick={handleRestartFromResult}
-                className="flex flex-col items-center gap-2"
+                onClick={() => setTwoShotActive(true)}
+                className="flex h-67 w-full flex-col items-center justify-center gap-8 rounded-xl border border-dashed border-sub-red bg-[rgba(255,61,61,0.04)]"
               >
-                <div className="flex size-20 items-center justify-center rounded-full bg-[#EEEEEE]">
-                  <RotateCcw className="size-9 text-[#333]" />
+                <div className="flex size-20 items-center justify-center rounded-full bg-linear-to-br from-[#ffa855] to-sub-red">
+                  <Film className="size-9 text-white" />
                 </div>
-                <span className="font-wanted-sans text-sm font-medium text-[#808080]">
-                  다시 찍기
-                </span>
+                <div className="flex flex-col items-center gap-2">
+                  <p className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black">
+                    인생두컷 찍기
+                  </p>
+                  <p className="whitespace-pre-line text-center font-wanted-sans text-sm font-normal leading-[1.4] tracking-[-0.28px] text-gray">
+                    {'2가지 필터 중 하나를 선택하고\n4컷을 찍은 뒤 마음에 드는 2장을 골라보세요.'}
+                  </p>
+                </div>
               </button>
+
               <button
                 type="button"
-                onClick={handleSaveButtonClick}
-                className="flex flex-col items-center gap-2"
+                onClick={handleOpenCamera}
+                className="flex h-67 w-full flex-col items-center justify-center gap-8 rounded-xl border border-dashed border-sub-red bg-[rgba(255,61,61,0.04)]"
               >
-                <div className="flex size-20 items-center justify-center rounded-full bg-[#EEEEEE]">
-                  <Download className="size-9 text-[#333]" />
+                <div className="flex size-20 items-center justify-center rounded-full bg-linear-to-br from-[#ffa855] to-sub-red">
+                  <ImagePlus className="size-9 text-white" />
                 </div>
-                <span className="font-wanted-sans text-sm font-medium text-[#808080]">
-                  다운로드
-                </span>
+                <div className="flex flex-col items-center gap-2">
+                  <p className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black">
+                    호반우와 사진찍기
+                  </p>
+                  <p className="whitespace-pre-line text-center font-wanted-sans text-sm font-normal leading-[1.4] tracking-[-0.28px] text-gray">
+                    {'호반우 프레임과 함께 촬영할 수 있어요.'}
+                  </p>
+                </div>
               </button>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+
+          {tabStep === 2 && capturedDataUrl && (
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col items-center gap-2.5">
+                <p className="font-wanted-sans text-2xl font-bold leading-none tracking-[-0.48px] text-black">
+                  완성!🎉
+                </p>
+                <p className="font-wanted-sans text-base font-normal leading-none tracking-[-0.32px] text-gray">
+                  저장하거나 다시 찍어보세요!
+                </p>
+              </div>
+
+              <img src={capturedDataUrl} alt="완성된 사진" className="w-full rounded-xl" />
+
+              <div className="flex justify-between">
+                <button
+                  type="button"
+                  onClick={handleRestartFromResult}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div className="flex size-20 items-center justify-center rounded-full bg-[#EEEEEE]">
+                    <RotateCcw className="size-9 text-[#333]" />
+                  </div>
+                  <span className="font-wanted-sans text-sm font-medium text-[#808080]">
+                    다시 찍기
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveButtonClick}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div className="flex size-20 items-center justify-center rounded-full bg-[#EEEEEE]">
+                    <Download className="size-9 text-[#333]" />
+                  </div>
+                  <span className="font-wanted-sans text-sm font-medium text-[#808080]">
+                    다운로드
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 };
