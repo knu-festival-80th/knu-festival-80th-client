@@ -16,6 +16,9 @@ const CountDownSection = () => {
   } else if (!data.registrationOpen && !data.resultOpen && data.resultOpenAt) {
     label = '인스타팅 매칭 공개까지';
     deadline = new Date(data.resultOpenAt);
+  } else if (!data.registrationOpen && data.resultOpen && data.registrationOpenAt) {
+    label = '결과를 확인하세요.\n결과는 다음날 오전 11시 까지 확인 가능합니다.';
+    deadline = new Date(data.registrationOpenAt);
   } else {
     label = '결과를 확인하세요.\n결과는 다음날 오전 11시 까지 확인 가능합니다.';
     deadline = new Date(0);
