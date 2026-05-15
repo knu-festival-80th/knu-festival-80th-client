@@ -6,7 +6,7 @@ concurrency:
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   workflow_dispatch:
 
 permissions:
@@ -47,17 +47,17 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: [ 'self-hosted', 'frontend' ]
+    runs-on: ['self-hosted', 'frontend']
     env:
       TZ: Asia/Seoul
     steps:
       - name: Set organization name to lowercase
         run: |
           echo "ORG_LC=${ORG,,}" >> $GITHUB_ENV
-          
+
       - name: Login to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login $REGISTRY -u ${{ github.actor }} --password-stdin
-          
+
       - name: Getting current image name
         id: current_img
         run: |
