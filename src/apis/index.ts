@@ -31,6 +31,7 @@ export type {
   BoothMapItem,
   BoothPasswordChangeRequest,
   BoothSummary,
+  BoothType,
   BoothUpdateRequest,
   BoothSort,
 } from '@/apis/modules/booth';

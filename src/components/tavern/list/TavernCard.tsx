@@ -7,6 +7,7 @@ import type { Tavern } from '@/constants/taverns';
 type TavernCardProps = {
   expanded: boolean;
   tavern: Tavern;
+  showWaiting?: boolean;
   onMenuToggle: () => void;
   onRegister: () => void;
   onSelect?: () => void;
@@ -20,6 +21,7 @@ const resolveMenuBoardSrc = (src: string | null) => {
 export default function TavernCard({
   expanded,
   tavern,
+  showWaiting = true,
   onMenuToggle,
   onRegister,
   onSelect,
@@ -60,7 +62,7 @@ export default function TavernCard({
         </p>
         <h3 className="text-[24px] font-bold leading-none tracking-[-0.48px]">{tavern.name}</h3>
       </div>
-      {tavern.waitingOpen && (
+      {showWaiting && tavern.waitingOpen && (
         <div className="flex items-end gap-1">
           <strong className="text-[28px] font-bold leading-[1.4] tracking-[-0.56px] text-[#ff3d3d]">
             {tavern.waitTeams}
@@ -87,23 +89,24 @@ export default function TavernCard({
           ) : (
             <div className="flex flex-col gap-4">{cardSummary}</div>
           )}
-          {tavern.waitingOpen ? (
-            <button
-              type="button"
-              className="h-[50px] w-full rounded-[8px] bg-[#ff3d3d] text-[16px] font-medium tracking-[-0.32px] text-white"
-              onClick={onRegister}
-            >
-              대기 등록하기
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="h-[50px] w-full rounded-[8px] bg-[#e5e5e5] text-[16px] font-medium tracking-[-0.32px] text-[#808080]"
-              disabled
-            >
-              현장 방문해 주세요
-            </button>
-          )}
+          {showWaiting &&
+            (tavern.waitingOpen ? (
+              <button
+                type="button"
+                className="h-[50px] w-full rounded-[8px] bg-[#ff3d3d] text-[16px] font-medium tracking-[-0.32px] text-white"
+                onClick={onRegister}
+              >
+                대기 등록하기
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="h-[50px] w-full rounded-[8px] bg-[#e5e5e5] text-[16px] font-medium tracking-[-0.32px] text-[#808080]"
+                disabled
+              >
+                현장 방문해 주세요
+              </button>
+            ))}
         </div>
         {menuBoardSrc && (
           <>

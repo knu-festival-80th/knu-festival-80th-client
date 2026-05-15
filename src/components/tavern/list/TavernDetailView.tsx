@@ -18,8 +18,9 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
   const singleTavernList = useMemo(() => [tavern], [tavern]);
   const menuBoardSrc = resolveMenuBoardSrc(tavern.menuBoardImageUrl);
   const metaItems = [tavern.department, tavern.location].filter(Boolean);
+  const isBooth = tavern.type === 'BOOTH';
   const description = tavern.department
-    ? `${tavern.department}의 주막입니다. 어서오세요~`
+    ? `${tavern.department}의 ${isBooth ? '부스' : '주막'}입니다. 어서오세요~`
     : '어서오세요~';
 
   return (
@@ -40,7 +41,7 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
               {description}
             </p>
           </div>
-          {tavern.waitingOpen && (
+          {!isBooth && tavern.waitingOpen && (
             <div className="flex items-end gap-1">
               <strong className="text-[28px] font-bold leading-[1.4] tracking-[-0.56px] text-[#ff3d3d]">
                 {tavern.waitTeams}
@@ -50,23 +51,24 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
               </span>
             </div>
           )}
-          {tavern.waitingOpen ? (
-            <button
-              type="button"
-              className="h-[50px] w-full rounded-[8px] bg-[#ff3d3d] text-[16px] font-medium tracking-[-0.32px] text-white"
-              onClick={() => onRegister(tavern)}
-            >
-              대기 등록하기
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="h-[50px] w-full rounded-[8px] bg-[#e5e5e5] text-[16px] font-medium tracking-[-0.32px] text-[#808080]"
-              disabled
-            >
-              현장 방문해 주세요
-            </button>
-          )}
+          {!isBooth &&
+            (tavern.waitingOpen ? (
+              <button
+                type="button"
+                className="h-[50px] w-full rounded-[8px] bg-[#ff3d3d] text-[16px] font-medium tracking-[-0.32px] text-white"
+                onClick={() => onRegister(tavern)}
+              >
+                대기 등록하기
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="h-[50px] w-full rounded-[8px] bg-[#e5e5e5] text-[16px] font-medium tracking-[-0.32px] text-[#808080]"
+                disabled
+              >
+                현장 방문해 주세요
+              </button>
+            ))}
         </div>
       </article>
 

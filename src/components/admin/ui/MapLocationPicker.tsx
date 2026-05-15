@@ -1,7 +1,7 @@
 import { Map as MapIcon } from 'lucide-react';
 import { useState } from 'react';
-import { FiMapPin } from 'react-icons/fi';
 
+import type { BoothType } from '@/apis/modules/booth';
 import tavernMapImage from '@/assets/images/map.svg';
 import { festivalMap } from '@/constants/taverns';
 
@@ -10,12 +10,21 @@ import MapPickerModal from './MapPickerModal';
 type MapLocationPickerProps = {
   xRatio: number | null;
   yRatio: number | null;
+  boothId?: number;
+  boothType?: BoothType;
   onChange: (x: number, y: number) => void;
 };
 
-export default function MapLocationPicker({ xRatio, yRatio, onChange }: MapLocationPickerProps) {
+export default function MapLocationPicker({
+  xRatio,
+  yRatio,
+  boothId,
+  boothType,
+  onChange,
+}: MapLocationPickerProps) {
   const [open, setOpen] = useState(false);
   const hasPin = xRatio !== null && yRatio !== null;
+  const pinColor = boothType === 'BOOTH' ? '#15ccb1' : '#ff3d3d';
 
   return (
     <div className="flex items-start gap-3">
@@ -37,10 +46,14 @@ export default function MapLocationPicker({ xRatio, yRatio, onChange }: MapLocat
         />
         {hasPin && (
           <span
-            className="absolute z-10 flex h-5 w-5 -translate-x-1/2 -translate-y-full items-center justify-center rounded-full border-2 border-white bg-[#ff3d3d] shadow-md"
-            style={{ left: `${(xRatio as number) * 100}%`, top: `${(yRatio as number) * 100}%` }}
+            className="absolute z-10 flex size-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white text-[8px] font-bold text-white shadow-md"
+            style={{
+              left: `${(xRatio as number) * 100}%`,
+              top: `${(yRatio as number) * 100}%`,
+              backgroundColor: pinColor,
+            }}
           >
-            <FiMapPin className="text-white" size={10} />
+            {boothId ?? ''}
           </span>
         )}
       </button>
@@ -69,6 +82,8 @@ export default function MapLocationPicker({ xRatio, yRatio, onChange }: MapLocat
         open={open}
         initialX={xRatio}
         initialY={yRatio}
+        boothId={boothId}
+        boothType={boothType}
         onConfirm={(x, y) => {
           onChange(x, y);
           setOpen(false);
