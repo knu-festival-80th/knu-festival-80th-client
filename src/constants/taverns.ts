@@ -1,4 +1,4 @@
-import type { BoothListItem, BoothMapItem } from '@/apis/modules/booth';
+import type { BoothListItem, BoothMapItem, BoothType } from '@/apis/modules/booth';
 
 export type TavernSortKey = 'popular' | 'shortWait' | 'simple';
 
@@ -21,6 +21,7 @@ export type Tavern = {
   menuBoardImageUrl: string | null;
   xRatio: number;
   yRatio: number;
+  type: BoothType;
 };
 
 const normalizeRatio = (ratio: number | null | undefined) => ratio ?? 0.5;
@@ -38,6 +39,7 @@ export function boothToTavern(booth: BoothListItem): Tavern {
     menuBoardImageUrl: booth.menuBoardImageUrl,
     xRatio: normalizeRatio(booth.xRatio),
     yRatio: normalizeRatio(booth.yRatio),
+    type: booth.type ?? 'TAVERN',
   };
 }
 
@@ -54,6 +56,7 @@ export function mapBoothToTavern(booth: BoothMapItem): Tavern {
     menuBoardImageUrl: null,
     xRatio: normalizeRatio(booth.xRatio),
     yRatio: normalizeRatio(booth.yRatio),
+    type: booth.type ?? 'TAVERN',
   };
 }
 

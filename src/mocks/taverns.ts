@@ -13,6 +13,7 @@ const mockBooths = [
     currentWaitingTeams: 7,
     department: '컴퓨터학부',
     location: '복현회관 인근',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 2,
@@ -25,6 +26,7 @@ const mockBooths = [
     currentWaitingTeams: 4,
     department: '전자공학부',
     location: '일청담 광장 옆',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 3,
@@ -37,6 +39,7 @@ const mockBooths = [
     currentWaitingTeams: 11,
     department: '경영학부',
     location: '대운동장 방향',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 12,
@@ -49,6 +52,7 @@ const mockBooths = [
     currentWaitingTeams: 2,
     department: '국어국문학과',
     location: '분수대 앞',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 13,
@@ -61,6 +65,7 @@ const mockBooths = [
     currentWaitingTeams: 6,
     department: '심리학과',
     location: '학생회관 앞',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 17,
@@ -73,6 +78,7 @@ const mockBooths = [
     currentWaitingTeams: 0,
     department: '건축학부',
     location: '공대 6호관 앞',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 18,
@@ -85,6 +91,7 @@ const mockBooths = [
     currentWaitingTeams: 3,
     department: '사회학과',
     location: '중앙 잔디밭 인근',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 19,
@@ -97,6 +104,7 @@ const mockBooths = [
     currentWaitingTeams: 9,
     department: '화학과',
     location: '자연대 방향',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 20,
@@ -109,6 +117,7 @@ const mockBooths = [
     currentWaitingTeams: 1,
     department: '수학과',
     location: '도서관 입구',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 32,
@@ -121,6 +130,7 @@ const mockBooths = [
     currentWaitingTeams: 15,
     department: '기계공학부',
     location: '공대 광장',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 33,
@@ -133,6 +143,7 @@ const mockBooths = [
     currentWaitingTeams: 8,
     department: '신소재공학부',
     location: '공대 9호관 앞',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 34,
@@ -145,6 +156,7 @@ const mockBooths = [
     currentWaitingTeams: 5,
     department: '경제통상학부',
     location: '경상대 인근',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 35,
@@ -157,6 +169,7 @@ const mockBooths = [
     currentWaitingTeams: 10,
     department: '정치외교학과',
     location: '인문대 방향',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 36,
@@ -169,6 +182,7 @@ const mockBooths = [
     currentWaitingTeams: 0,
     department: '고고인류학과',
     location: '박물관 앞',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 37,
@@ -181,6 +195,7 @@ const mockBooths = [
     currentWaitingTeams: 6,
     department: '영어영문학과',
     location: '인문대 앞',
+    type: 'TAVERN' as const,
   },
   {
     boothId: 38,
@@ -193,6 +208,7 @@ const mockBooths = [
     currentWaitingTeams: 12,
     department: '음악학과',
     location: '예술대 방향',
+    type: 'TAVERN' as const,
   },
 ] satisfies BoothListItem[];
 
@@ -207,11 +223,12 @@ export function getMockBooths(sort: BoothSort) {
 }
 
 export function getMockMapBooths(): BoothMapItem[] {
-  return mockBooths.map(({ boothId, name, xRatio, yRatio }) => ({
+  return mockBooths.map(({ boothId, name, xRatio, yRatio, type }) => ({
     boothId,
     name,
     xRatio,
     yRatio,
+    type,
   }));
 }
 

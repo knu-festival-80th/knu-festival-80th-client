@@ -1,3 +1,4 @@
+import type { BoothType } from '@/apis/modules/booth';
 import { Card, Field, ImageUploadField, Input, MapLocationPicker } from '@/components/admin/ui';
 
 export interface BoothFormState {
@@ -13,12 +14,16 @@ interface BoothFormFieldsProps {
   form: BoothFormState;
   onChange: (patch: Partial<BoothFormState>) => void;
   nameRequired?: boolean;
+  boothId?: number;
+  boothType?: BoothType;
 }
 
 export default function BoothFormFields({
   form,
   onChange,
   nameRequired = false,
+  boothId,
+  boothType,
 }: BoothFormFieldsProps) {
   return (
     <>
@@ -74,6 +79,8 @@ export default function BoothFormFields({
         <MapLocationPicker
           xRatio={form.xRatio}
           yRatio={form.yRatio}
+          boothId={boothId}
+          boothType={boothType}
           onChange={(x, y) => onChange({ xRatio: x, yRatio: y })}
         />
       </Card>
