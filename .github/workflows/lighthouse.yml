@@ -42,11 +42,21 @@ jobs:
 
       - name: Run Lighthouse (local)
         if: ${{ inputs.target == 'local' }}
-        run: pnpm exec lhci collect --url=http://localhost:4173 --start-server-command="pnpm preview" --start-server-ready-pattern="Local"
+        run: pnpm exec lhci collect --config=./lighthouserc.cjs --url=http://localhost:4173 --start-server-command="pnpm preview" --start-server-ready-pattern="Local"
 
       - name: Run Lighthouse (prod)
         if: ${{ inputs.target == 'prod' }}
-        run: pnpm exec lhci collect --url=https://knu-festival-80th-client.vercel.app
+        run: pnpm exec lhci collect --config=./lighthouserc.cjs --url=https://chcse.knu.ac.kr/festival
+
+      - name: Debug - list output files
+        if: always()
+        run: |
+          echo "=== pwd ==="
+          pwd
+          echo "=== .lighthouseci/ ==="
+          ls -la .lighthouseci/ 2>/dev/null || echo "not found"
+          echo "=== find lhr-*.json ==="
+          find . -name "lhr-*.json" 2>/dev/null | head -10
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -54,6 +64,7 @@ jobs:
           name: lighthouse-${{ inputs.target }}-run${{ github.run_number }}
           path: .lighthouseci/
           retention-days: 90
+          include-hidden-files: true
 
       - name: Post PR comment
         uses: actions/github-script@v7
