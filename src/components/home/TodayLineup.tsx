@@ -15,6 +15,7 @@ export default function TodayLineup({ data }: TodayLineupProps) {
   const today = now.getDate();
   const isFestivalDay = now.getMonth() + 1 === FESTIVAL_MONTH && FESTIVAL_DAYS.includes(today);
   const activeDay = isFestivalDay ? today : 21;
+  if (activeDay === 20) return null;
   const dayData = data.find((d) => d.day === activeDay) ?? data[0];
   if (!dayData) return null;
 

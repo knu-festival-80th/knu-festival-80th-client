@@ -126,7 +126,7 @@ export default function HomePage() {
               title="원하는 주막에 실시간 대기 등록하기"
               imageSrc={cardBg1}
               illustrationSrc={illustBooth}
-              illustrationClassName="top-7 scale-120"
+              illustrationClassName="top-7.5 scale-120"
               to="/taverns"
             />
           </div>
