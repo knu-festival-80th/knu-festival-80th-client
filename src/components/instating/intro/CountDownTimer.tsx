@@ -1,37 +1,8 @@
-import { Fragment, useEffect, useState } from 'react';
-
-type TimeLeft = {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-};
-
-const getTimeLeft = (deadline: Date): TimeLeft => {
-  const diff = Math.max(0, isNaN(deadline.getTime()) ? 0 : deadline.getTime() - Date.now());
-  return {
-    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((diff / (1000 * 60)) % 60),
-    seconds: Math.floor((diff / 1000) % 60),
-  };
-};
-
-const isZero = (t: TimeLeft) => t.days === 0 && t.hours === 0 && t.minutes === 0 && t.seconds === 0;
+import { Fragment } from 'react';
+import { getTimeLeft, useTimeLeft } from '@/hooks/instating/useCountdown';
 
 const CountDownTimer = ({ deadline }: { deadline: Date }) => {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => getTimeLeft(deadline));
-
-  useEffect(() => {
-    if (isZero(getTimeLeft(deadline))) return;
-
-    const id = setInterval(() => {
-      const next = getTimeLeft(deadline);
-      setTimeLeft(next);
-      if (isZero(next)) clearInterval(id);
-    }, 1000);
-    return () => clearInterval(id);
-  }, [deadline]);
+  const timeLeft = useTimeLeft(deadline) ?? getTimeLeft(deadline);
 
   const items = [
     { value: String(timeLeft.days).padStart(2, '0'), unit: '일' },
