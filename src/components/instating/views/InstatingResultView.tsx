@@ -2,6 +2,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import InstatingResultModal, { type MatchResult } from '../result/InstatingResultModal';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiClientError, matchingApi } from '@/apis';
 
 type FormValues = {
   instagramId: string;
@@ -13,7 +14,7 @@ const InstatingResultView = () => {
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<FormValues>({ mode: 'onChange' });
 
   const instagramId = useWatch({ control, name: 'instagramId' });
@@ -21,13 +22,38 @@ const InstatingResultView = () => {
   const isValid = !!instagramId && !!phone && !errors.instagramId && !errors.phone;
 
   const [result, setResult] = useState<MatchResult | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const onSubmit = () => {
-    // TODO: API 연동 후 setResult({ matched: true, instagramId: '...' }) 또는 setResult({ matched: false })
-    setResult({ matched: true, instagramId: 'lll_0311' });
+  const onSubmit = async ({ instagramId, phone }: FormValues) => {
+    setSubmitError(null);
+    try {
+      const data = await matchingApi.getMatchingResult({
+        instagramId,
+        phoneNumber: phone,
+      });
 
-    // setResult({ matched: false });
+      if (!data.resultOpen) {
+        setSubmitError('아직 결과 공개 전입니다.');
+        return;
+      }
+
+      if (data.status === 'MATCHED' && data.pickedInstagramId) {
+        setResult({ matched: true, instagramId: data.pickedInstagramId });
+      } else {
+        setResult({ matched: false });
+      }
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        if (err.status === 404) {
+          setSubmitError('신청 정보를 찾을 수 없습니다. 입력 정보를 확인해주세요.');
+        } else {
+          setSubmitError(err.message);
+        }
+      } else {
+        setSubmitError('오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
   };
 
   const handleCloseResult = () => {
@@ -82,12 +108,19 @@ const InstatingResultView = () => {
           </div>
         </div>
 
+        {submitError && (
+          <p className="font-wanted-sans text-body2 text-sub-red" role="alert">
+            {submitError}
+          </p>
+        )}
+
         {/* Submit */}
         <button
           type="submit"
-          className={`h-[50px] w-full rounded-md ${isValid ? 'bg-sub-red' : 'bg-[#CCCCCC]'} font-wanted-sans text-body1 font-medium tracking-tight text-surface`}
+          disabled={!isValid || isSubmitting}
+          className={`h-[50px] w-full rounded-md ${isValid && !isSubmitting ? 'bg-sub-red' : 'bg-[#CCCCCC]'} font-wanted-sans text-body1 font-medium tracking-tight text-surface`}
         >
-          결과 조회하기
+          {isSubmitting ? '조회 중...' : '결과 조회하기'}
         </button>
       </form>
     </>

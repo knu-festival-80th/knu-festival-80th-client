@@ -53,12 +53,17 @@ export type {
 export type {
   ListParticipantsParams,
   MatchingApplicantsCountResponse,
+  MatchingAuthRequest,
+  MatchingCreateRequest,
   MatchingGender,
   MatchingJobResponse,
   MatchingOperationStatus,
   MatchingParticipantAdmin,
   MatchingParticipantStatus,
   MatchingParticipantsAdminResponse,
+  MatchingRegisterResponse,
+  MatchingResultResponse,
   MatchingStatusResponse,
   MatchingStatusUpdateRequest,
+  MatchingUserStatusResponse,
 } from '@/apis/modules/matching';

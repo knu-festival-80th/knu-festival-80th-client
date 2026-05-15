@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-// import { useInstatingScratchCanvas } from '@/hooks/instating/useInstatingScratchCanvas';
 import closeIcon from '@/assets/instating/icon/closeIcon.svg';
 import ScratchCard from './ScratchCard';
 import ResultCard from './ResultCard';

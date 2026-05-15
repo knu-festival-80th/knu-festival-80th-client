@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { ApiClientError, matchingApi } from '@/apis';
 import type { SubmittedData } from '../result/InstatingSuccessModal';
 import InstatingSuccessModal from '../result/InstatingSuccessModal';
 
@@ -12,20 +13,40 @@ type FormValues = {
 
 const InstatingApplyView = () => {
   const [submittedData, setSubmittedData] = useState<SubmittedData | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<FormValues>({ defaultValues: { gender: 'male' }, mode: 'onChange' });
 
   const gender = useWatch({ control, name: 'gender' });
   const ageConfirm = useWatch({ control, name: 'ageConfirm' });
 
-  const onSubmit = ({ gender, instagramId, phone }: FormValues) => {
-    // TODO: API 연동
-    setSubmittedData({ gender, instagramId, phone });
+  const onSubmit = async ({ gender, instagramId, phone }: FormValues) => {
+    setSubmitError(null);
+    try {
+      await matchingApi.registerMatching({
+        gender: gender === 'male' ? 'MALE' : 'FEMALE',
+        instagramId,
+        phoneNumber: phone,
+      });
+      setSubmittedData({ gender, instagramId, phone });
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        if (err.status === 409) {
+          setSubmitError('이미 신청하셨습니다.');
+        } else if (err.status === 403) {
+          setSubmitError('현재 신청이 마감되었습니다.');
+        } else {
+          setSubmitError(err.message);
+        }
+      } else {
+        setSubmitError('오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
   };
 
   return (
@@ -154,12 +175,19 @@ const InstatingApplyView = () => {
           </span>
         </label>
 
+        {submitError && (
+          <p className="font-wanted-sans text-body2 text-sub-red" role="alert">
+            {submitError}
+          </p>
+        )}
+
         {/* Submit */}
         <button
           type="submit"
-          className={`h-[50px] w-full rounded-md ${isValid ? 'bg-sub-red' : 'bg-[#CCCCCC]'} font-wanted-sans text-body1 font-medium tracking-tight text-surface`}
+          disabled={!isValid || isSubmitting}
+          className={`h-[50px] w-full rounded-md ${isValid && !isSubmitting ? 'bg-sub-red' : 'bg-[#CCCCCC]'} font-wanted-sans text-body1 font-medium tracking-tight text-surface`}
         >
-          인스타팅 신청하기
+          {isSubmitting ? '신청 중...' : '인스타팅 신청하기'}
         </button>
 
         {/* Notice */}
