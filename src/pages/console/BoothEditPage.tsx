@@ -85,6 +85,7 @@ export default function BoothEditPage() {
           key={boothId}
           boothId={boothId}
           boothType={(booth.type as BoothType) ?? (boothId <= 38 ? 'TAVERN' : 'BOOTH')}
+          boothColor={booth.color ?? undefined}
           initial={toFormState(booth)}
         />
       )}
@@ -95,10 +96,11 @@ export default function BoothEditPage() {
 interface BoothEditFormProps {
   boothId: number;
   boothType: BoothType;
+  boothColor?: string;
   initial: BoothFormState;
 }
 
-function BoothEditForm({ boothId, boothType, initial }: BoothEditFormProps) {
+function BoothEditForm({ boothId, boothType, boothColor, initial }: BoothEditFormProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<BoothFormState>(initial);
@@ -141,6 +143,7 @@ function BoothEditForm({ boothId, boothType, initial }: BoothEditFormProps) {
           onChange={updateForm}
           boothId={boothId}
           boothType={boothType}
+          boothColor={boothColor}
         />
       </div>
 

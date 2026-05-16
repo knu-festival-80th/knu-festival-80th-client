@@ -17,11 +17,11 @@ const WaitingListPage = lazy(() => import('@/pages/boothManage/WaitingListPage')
 const BoothCreatePage = lazy(() => import('@/pages/console/BoothCreatePage'));
 const BoothEditPage = lazy(() => import('@/pages/console/BoothEditPage'));
 const BoothListPage = lazy(() => import('@/pages/console/BoothListPage'));
+const BulkMapEditorPage = lazy(() => import('@/pages/console/BulkMapEditorPage'));
 const BoothPasswordPage = lazy(() => import('@/pages/console/BoothPasswordPage'));
 const CanvasAdminPage = lazy(() => import('@/pages/console/CanvasAdminPage'));
 const ConsoleLoginPage = lazy(() => import('@/pages/console/ConsoleLoginPage'));
 const MatchingOverviewPage = lazy(() => import('@/pages/console/MatchingOverviewPage'));
-const MatchingParticipantsPage = lazy(() => import('@/pages/console/MatchingParticipantsPage'));
 const CongratVideoPage = lazy(() => import('@/pages/CongratVideoPage'));
 const GoodsPage = lazy(() => import('@/pages/GoodsPage'));
 const HobanustagramPage = lazy(() => import('@/pages/HobanustagramPage'));
@@ -63,10 +63,10 @@ export default function App() {
           >
             <Route index element={<BoothListPage />} />
             <Route path="booths/new" element={<BoothCreatePage />} />
+            <Route path="map-editor" element={<BulkMapEditorPage />} />
             <Route path="booths/:boothId/edit" element={<BoothEditPage />} />
             <Route path="booths/:boothId/password" element={<BoothPasswordPage />} />
             <Route path="matching" element={<MatchingOverviewPage />} />
-            <Route path="matching/participants" element={<MatchingParticipantsPage />} />
             <Route path="canvas" element={<CanvasAdminPage />} />
           </Route>
 

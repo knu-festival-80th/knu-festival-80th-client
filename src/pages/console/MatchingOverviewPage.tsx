@@ -1,20 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  AlertCircle,
-  CheckCircle2,
-  Eye,
-  Pause,
-  Play,
-  PlayCircle,
-  RefreshCw,
-  Users,
-} from 'lucide-react';
+import { AlertCircle, Eye, RotateCcw, Search, Trash2, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import { ApiClientError, matchingApi } from '@/apis';
-import type { MatchingOperationStatus, MatchingStatusResponse } from '@/apis';
-import { Button, Card } from '@/components/admin/ui';
+import type {
+  MatchingGender,
+  MatchingParticipantAdmin,
+  MatchingParticipantStatus,
+  MatchingParticipantsAdminResponse,
+  MatchingStatusResponse,
+} from '@/apis';
+import { Card, OverflowMenu, SegmentedTabs } from '@/components/admin/ui';
 
 function formatIso(iso: string | null | undefined): string {
   if (!iso) return '-';
@@ -33,8 +29,10 @@ function formatIso(iso: string | null | undefined): string {
   }
 }
 
+type StatusFilter = 'ALL' | MatchingParticipantStatus;
+type GenderFilter = 'ALL' | MatchingGender;
+
 export default function MatchingOverviewPage() {
-  const queryClient = useQueryClient();
   const statusQuery = useQuery({
     queryKey: ['admin', 'matchings', 'status'],
     queryFn: matchingApi.getStatus,
@@ -46,7 +44,7 @@ export default function MatchingOverviewPage() {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold text-[var(--admin-text)]">인스타팅</h1>
         <p className="text-sm text-[var(--admin-text-muted)]">
-          사용자가 보는 화면과 동일한 미리보기를 옆에 두고 운영 상태/매칭 잡을 관리합니다.
+          현황 확인 및 신청자 관리를 한 화면에서 처리합니다.
         </p>
       </div>
 
@@ -69,40 +67,9 @@ export default function MatchingOverviewPage() {
       {statusQuery.data && (
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="flex flex-col gap-5">
-            <StatusToggleCard
-              status={statusQuery.data}
-              onChange={() => {
-                queryClient.invalidateQueries({ queryKey: ['admin', 'matchings'] });
-              }}
-            />
-
             <ScheduleCard status={statusQuery.data} />
 
-            <JobsCard
-              festivalDays={statusQuery.data.festivalDays}
-              onJobRun={() => {
-                queryClient.invalidateQueries({ queryKey: ['admin', 'matchings'] });
-              }}
-            />
-
-            <Card padding="md">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="flex items-center gap-2 text-base font-semibold text-[var(--admin-text)]">
-                    <Users size={16} />
-                    신청자 관리
-                  </h2>
-                  <p className="text-xs text-[var(--admin-text-muted)]">
-                    검색·필터·삭제·리셋이 가능한 신청자 목록으로 이동
-                  </p>
-                </div>
-                <Link to="/console/matching/participants">
-                  <Button variant="secondary" size="sm">
-                    신청자 목록 열기
-                  </Button>
-                </Link>
-              </div>
-            </Card>
+            <ParticipantsSection festivalDays={statusQuery.data.festivalDays} />
           </div>
 
           <UserPreviewColumn status={statusQuery.data} />
@@ -124,104 +91,41 @@ function ErrorBanner({ message }: { message: string }) {
   );
 }
 
-interface StatusToggleCardProps {
-  status: MatchingStatusResponse;
-  onChange: () => void;
-}
-
-function StatusToggleCard({ status, onChange }: StatusToggleCardProps) {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [savedTick, setSavedTick] = useState(0);
-
-  const updateMutation = useMutation({
-    mutationFn: (next: MatchingOperationStatus) => matchingApi.updateStatus({ status: next }),
-    onSuccess: () => {
-      setSavedTick((tick) => tick + 1);
-      onChange();
-    },
-    onError: (error: unknown) => {
-      setErrorMessage(
-        error instanceof ApiClientError ? error.message : '상태 변경에 실패했습니다.',
-      );
-    },
-  });
-
-  const handleToggle = (next: MatchingOperationStatus) => {
-    setErrorMessage(null);
-    updateMutation.mutate(next);
-  };
-
-  const isOpen = status.status === 'OPEN';
-
-  return (
-    <Card padding="md" borderLeft={isOpen ? 'var(--admin-success)' : '#b45309'}>
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-base font-semibold text-[var(--admin-text)]">운영 상태</h2>
-            <p className="text-xs text-[var(--admin-text-muted)]">
-              {isOpen ? '신청 접수 활성' : '신청 접수 중단'}
-              {!status.registrationOpen && isOpen && ' · 신청창 외 시간이라 실제 접수는 비활성'}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant={isOpen ? 'primary' : 'secondary'}
-              size="sm"
-              disabled={updateMutation.isPending || isOpen}
-              onClick={() => handleToggle('OPEN')}
-              iconLeft={<Play size={13} />}
-            >
-              OPEN
-            </Button>
-            <Button
-              variant={!isOpen ? 'primary' : 'secondary'}
-              size="sm"
-              disabled={updateMutation.isPending || !isOpen}
-              onClick={() => handleToggle('PAUSED')}
-              iconLeft={<Pause size={13} />}
-            >
-              PAUSE
-            </Button>
-          </div>
-        </div>
-
-        {savedTick > 0 && !updateMutation.isPending && (
-          <span
-            key={savedTick}
-            className="inline-flex items-center gap-1 text-xs text-[var(--admin-success)]"
-          >
-            <CheckCircle2 size={12} /> 적용됨
-          </span>
-        )}
-        {errorMessage && <ErrorBanner message={errorMessage} />}
-      </div>
-    </Card>
-  );
-}
-
 function ScheduleCard({ status }: { status: MatchingStatusResponse }) {
   return (
-    <Card padding="md">
-      <h2 className="mb-3 text-base font-semibold text-[var(--admin-text)]">스케줄</h2>
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        <dt className="text-[var(--admin-text-muted)]">신청창 마감</dt>
-        <dd className="tabular text-right text-[var(--admin-text)]">
-          {formatIso(status.registrationDeadline)}
-        </dd>
-        <dt className="text-[var(--admin-text-muted)]">결과창 오픈</dt>
-        <dd className="tabular text-right text-[var(--admin-text)]">
-          {formatIso(status.resultOpenAt)}
-        </dd>
-        <dt className="text-[var(--admin-text-muted)]">신청창 활성</dt>
-        <dd className="text-right">
-          <Pill on={status.registrationOpen} onLabel="진행 중" offLabel="닫힘" />
-        </dd>
-        <dt className="text-[var(--admin-text-muted)]">결과창 공개</dt>
-        <dd className="text-right">
-          <Pill on={status.resultOpen} onLabel="공개 중" offLabel="닫힘" />
-        </dd>
-      </dl>
+    <Card padding="md" borderLeft={status.status === 'OPEN' ? 'var(--admin-success)' : '#b45309'}>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-[var(--admin-text)]">현황</h2>
+          <Pill on={status.status === 'OPEN'} onLabel="OPEN" offLabel="PAUSED" />
+        </div>
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          <dt className="text-[var(--admin-text-muted)]">신청창 마감</dt>
+          <dd className="tabular text-right text-[var(--admin-text)]">
+            {formatIso(status.registrationDeadline)}
+          </dd>
+          <dt className="text-[var(--admin-text-muted)]">결과창 오픈</dt>
+          <dd className="tabular text-right text-[var(--admin-text)]">
+            {formatIso(status.resultOpenAt)}
+          </dd>
+          <dt className="text-[var(--admin-text-muted)]">신청창 활성</dt>
+          <dd className="text-right">
+            <Pill on={status.registrationOpen} onLabel="진행 중" offLabel="닫힘" />
+          </dd>
+          <dt className="text-[var(--admin-text-muted)]">결과창 공개</dt>
+          <dd className="text-right">
+            <Pill on={status.resultOpen} onLabel="공개 중" offLabel="닫힘" />
+          </dd>
+          <dt className="text-[var(--admin-text-muted)]">대기 / 매칭 / 미매칭</dt>
+          <dd className="tabular text-right text-[var(--admin-text)]">
+            {status.pendingCount} / {status.matchedCount} / {status.unmatchedCount}
+          </dd>
+          <dt className="text-[var(--admin-text-muted)]">신청 (남 / 여)</dt>
+          <dd className="tabular text-right text-[var(--admin-text)]">
+            {status.malePendingCount} / {status.femalePendingCount}
+          </dd>
+        </dl>
+      </div>
     </Card>
   );
 }
@@ -241,17 +145,13 @@ function Pill({ on, onLabel, offLabel }: { on: boolean; onLabel: string; offLabe
   );
 }
 
-interface JobsCardProps {
-  festivalDays: string[];
-  onJobRun: () => void;
-}
+// ---- Participants Section ----
 
-function JobsCard({ festivalDays, onJobRun }: JobsCardProps) {
+function ParticipantsSection({ festivalDays }: { festivalDays: string[] }) {
+  const queryClient = useQueryClient();
+
   const [festivalDay, setFestivalDay] = useState<string>(festivalDays[0] ?? '');
   const [prevFirstDay, setPrevFirstDay] = useState<string>(festivalDays[0] ?? '');
-  const [resultMessage, setResultMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   const firstDay = festivalDays[0] ?? '';
   if (firstDay !== prevFirstDay) {
     setPrevFirstDay(firstDay);
@@ -260,130 +160,442 @@ function JobsCard({ festivalDays, onJobRun }: JobsCardProps) {
     }
   }
 
-  const runNowMutation = useMutation({
-    mutationFn: matchingApi.runJob,
-    onSuccess: (data) => {
-      setErrorMessage(null);
-      setResultMessage(
-        `즉시 실행: ${data.matchedPairCount}쌍 매칭, ${data.unmatchedCount}명 미매칭`,
-      );
-      onJobRun();
-    },
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [genderFilter, setGenderFilter] = useState<GenderFilter>('ALL');
+  const [search, setSearch] = useState('');
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
+
+  const debouncedSearch = useDebouncedValue(search, 300);
+
+  const participantsQuery = useQuery({
+    queryKey: [
+      'admin',
+      'matchings',
+      'participants',
+      { festivalDay, statusFilter, genderFilter, search: debouncedSearch.trim() },
+    ],
+    queryFn: () =>
+      matchingApi.listParticipants({
+        festivalDay,
+        status: statusFilter === 'ALL' ? undefined : statusFilter,
+        gender: genderFilter === 'ALL' ? undefined : genderFilter,
+        search: debouncedSearch.trim() ? debouncedSearch.trim() : undefined,
+      }),
+    enabled: Boolean(festivalDay),
+  });
+
+  const data: MatchingParticipantsAdminResponse | undefined = participantsQuery.data;
+  const participants = useMemo(() => data?.participants ?? [], [data?.participants]);
+
+  const deleteMutation = useMutation({
+    mutationFn: matchingApi.deleteParticipant,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'matchings'] }),
     onError: (error: unknown) => {
-      setResultMessage(null);
-      setErrorMessage(
-        error instanceof ApiClientError ? error.message : '매칭 실행에 실패했습니다.',
-      );
+      setErrorBanner(error instanceof ApiClientError ? error.message : '삭제에 실패했습니다.');
     },
   });
 
-  const runDayMutation = useMutation({
-    mutationFn: (day: string) => matchingApi.runJobForDay(day),
-    onSuccess: (data, day) => {
-      setErrorMessage(null);
-      setResultMessage(
-        `${day} 실행: ${data.matchedPairCount}쌍 매칭, ${data.unmatchedCount}명 미매칭`,
-      );
-      onJobRun();
-    },
+  const resetMutation = useMutation({
+    mutationFn: matchingApi.resetParticipant,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'matchings'] }),
     onError: (error: unknown) => {
-      setResultMessage(null);
-      setErrorMessage(
-        error instanceof ApiClientError ? error.message : '매칭 실행에 실패했습니다.',
-      );
+      setErrorBanner(error instanceof ApiClientError ? error.message : '리셋에 실패했습니다.');
     },
   });
 
-  const handleRunNow = () => {
-    if (!window.confirm('대상 일자를 자동으로 추정해 매칭 잡을 실행합니다. 계속할까요?')) return;
-    runNowMutation.mutate();
+  const updateMatchMutation = useMutation({
+    mutationFn: ({ id, matchedInstagramId }: { id: number; matchedInstagramId: string }) =>
+      matchingApi.updateMatch(id, { matchedInstagramId }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'matchings'] }),
+    onError: (error: unknown) => {
+      setErrorBanner(error instanceof ApiClientError ? error.message : '매칭 변경에 실패했습니다.');
+    },
+  });
+
+  const counts = useMemo(() => {
+    const pending = participants.filter((p) => p.status === 'PENDING').length;
+    const matched = participants.filter((p) => p.status === 'MATCHED').length;
+    const unmatched = participants.filter((p) => p.status === 'UNMATCHED').length;
+    return { all: participants.length, pending, matched, unmatched };
+  }, [participants]);
+
+  const handleDelete = (p: MatchingParticipantAdmin) => {
+    if (!window.confirm(`@${p.instagramId} 삭제할까요? 같은 ID로 재신청 가능해집니다.`)) return;
+    setErrorBanner(null);
+    deleteMutation.mutate(p.participantId);
   };
 
-  const handleRunDay = () => {
-    if (!festivalDay) return;
-    if (!window.confirm(`${festivalDay} 일자의 매칭 잡을 실행할까요?`)) return;
-    runDayMutation.mutate(festivalDay);
+  const handleReset = (p: MatchingParticipantAdmin) => {
+    if (!window.confirm(`@${p.instagramId}을(를) PENDING으로 초기화할까요?`)) return;
+    setErrorBanner(null);
+    resetMutation.mutate(p.participantId);
   };
 
-  const busy = runNowMutation.isPending || runDayMutation.isPending;
+  const busy = deleteMutation.isPending || resetMutation.isPending || updateMatchMutation.isPending;
 
   return (
-    <Card padding="md">
-      <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[var(--admin-text)]">
-        <PlayCircle size={16} />
-        매칭 잡 실행
-      </h2>
-      <p className="mb-4 text-xs text-[var(--admin-text-muted)]">
-        21:00~22:00 사이에는 자동 스케줄러가 동작합니다. 수동 실행이 필요한 경우만 사용하세요.
-      </p>
+    <div className="flex flex-col gap-3">
+      <Card padding="md">
+        <div className="flex flex-col gap-3">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-[var(--admin-text)]">
+            <Users size={16} />
+            신청자 관리
+          </h2>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="flex flex-col gap-2 rounded-lg border border-[var(--admin-border)] p-3">
-          <div className="text-sm font-medium text-[var(--admin-text)]">즉시 실행</div>
-          <div className="text-xs text-[var(--admin-text-muted)]">
-            서버가 추정한 대상 일자에 대해 실행
-          </div>
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={handleRunNow}
-            disabled={busy}
-            iconLeft={<PlayCircle size={13} />}
-          >
-            {runNowMutation.isPending ? '실행 중...' : '지금 실행'}
-          </Button>
-        </div>
-
-        <div className="flex flex-col gap-2 rounded-lg border border-[var(--admin-border)] p-3">
-          <div className="text-sm font-medium text-[var(--admin-text)]">특정 일자 실행</div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-[var(--admin-text-muted)]">축제 일자</span>
             {festivalDays.map((day) => (
               <button
                 key={day}
                 type="button"
                 onClick={() => setFestivalDay(day)}
                 className={[
-                  'rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors',
+                  'rounded-full px-3 py-1 text-xs font-medium transition-colors',
                   day === festivalDay
                     ? 'bg-[var(--admin-primary)] text-[var(--admin-primary-fg)]'
                     : 'bg-[var(--admin-surface-hover)] text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]',
                 ].join(' ')}
               >
-                {day.slice(5)}
+                {day}
               </button>
             ))}
           </div>
-          <Button
-            type="button"
-            variant="secondary"
+
+          <SegmentedTabs<StatusFilter>
+            value={statusFilter}
+            onChange={setStatusFilter}
             size="sm"
-            onClick={handleRunDay}
-            disabled={busy || !festivalDay}
-            iconLeft={<RefreshCw size={13} />}
+            items={[
+              { value: 'ALL', label: '전체', count: counts.all },
+              { value: 'PENDING', label: '대기', count: counts.pending },
+              {
+                value: 'MATCHED',
+                label: '매칭',
+                count: counts.matched,
+                accentVar: '--admin-success',
+              },
+              {
+                value: 'UNMATCHED',
+                label: '미매칭',
+                count: counts.unmatched,
+                accentVar: '--admin-danger',
+              },
+            ]}
+          />
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-1 rounded-md bg-[var(--admin-surface-hover)] p-0.5 text-xs">
+              {[
+                { value: 'ALL' as const, label: '전체' },
+                { value: 'MALE' as const, label: '남' },
+                { value: 'FEMALE' as const, label: '여' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setGenderFilter(opt.value)}
+                  className={[
+                    'rounded-sm px-2.5 py-1 font-medium transition-colors',
+                    genderFilter === opt.value
+                      ? 'bg-[var(--admin-surface)] text-[var(--admin-text)] shadow-sm'
+                      : 'text-[var(--admin-text-muted)] hover:text-[var(--admin-text)]',
+                  ].join(' ')}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative ml-auto flex-1 sm:max-w-xs">
+              <Search
+                size={14}
+                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-[var(--admin-text-faint)]"
+              />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="instagramId 검색"
+                className="h-9 w-full rounded-md border border-[var(--admin-border-strong)] bg-[var(--admin-surface)] pr-3 pl-8 text-sm text-[var(--admin-text)] placeholder:text-[var(--admin-text-faint)] focus:border-[var(--admin-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20"
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {errorBanner && <ErrorBanner message={errorBanner} />}
+
+      {participantsQuery.isError && (
+        <ErrorBanner
+          message={
+            participantsQuery.error instanceof ApiClientError
+              ? participantsQuery.error.message
+              : '신청자 목록을 불러오지 못했습니다.'
+          }
+        />
+      )}
+
+      {participantsQuery.isLoading && (
+        <Card padding="sm">
+          <ul className="flex flex-col gap-2">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <li
+                key={idx}
+                className="h-12 animate-pulse rounded bg-[var(--admin-surface-hover)]"
+              />
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {participantsQuery.data && participants.length === 0 && (
+        <Card padding="lg">
+          <p className="text-center text-sm text-[var(--admin-text-muted)]">
+            조건에 맞는 신청자가 없습니다.
+          </p>
+        </Card>
+      )}
+
+      {participantsQuery.data && participants.length > 0 && (
+        <Card padding="none">
+          <div className="hidden border-b border-[var(--admin-border)] px-5 py-2.5 text-xs font-medium text-[var(--admin-text-muted)] sm:grid sm:grid-cols-[1.5rem_1fr_3.5rem_4.5rem_7rem_8rem_3.5rem] sm:items-center sm:gap-3">
+            <div></div>
+            <div>Instagram ID</div>
+            <div>성별</div>
+            <div>상태</div>
+            <div>매칭 상대</div>
+            <div>휴대폰</div>
+            <div className="text-right">액션</div>
+          </div>
+          <ul>
+            {participants.map((participant, idx) => (
+              <ParticipantRow
+                key={participant.participantId}
+                participant={participant}
+                even={idx % 2 === 1}
+                onDelete={() => handleDelete(participant)}
+                onReset={() => handleReset(participant)}
+                onUpdateMatch={(matchedId) =>
+                  updateMatchMutation.mutate({
+                    id: participant.participantId,
+                    matchedInstagramId: matchedId,
+                  })
+                }
+                busy={busy}
+              />
+            ))}
+          </ul>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+interface ParticipantRowProps {
+  participant: MatchingParticipantAdmin;
+  even: boolean;
+  onDelete: () => void;
+  onReset: () => void;
+  onUpdateMatch: (matchedInstagramId: string) => void;
+  busy: boolean;
+}
+
+function ParticipantRow({
+  participant,
+  even,
+  onDelete,
+  onReset,
+  onUpdateMatch,
+  busy,
+}: ParticipantRowProps) {
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState(participant.matchedInstagramId ?? '');
+
+  const genderLabel = participant.gender === 'MALE' ? '남' : '여';
+  const genderTone =
+    participant.gender === 'MALE' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700';
+  const statusBadge = (() => {
+    switch (participant.status) {
+      case 'PENDING':
+        return 'bg-[var(--admin-surface-hover)] text-[var(--admin-text-muted)]';
+      case 'MATCHED':
+        return 'bg-[var(--admin-success-soft)] text-[var(--admin-success)]';
+      case 'UNMATCHED':
+        return 'bg-[var(--admin-danger-soft)] text-[var(--admin-danger)]';
+    }
+  })();
+  const statusLabel =
+    participant.status === 'PENDING'
+      ? '대기'
+      : participant.status === 'MATCHED'
+        ? '매칭'
+        : '미매칭';
+
+  const handleEditSubmit = () => {
+    const trimmed = editValue.trim().replace(/^@/, '');
+    if (!trimmed || trimmed === participant.matchedInstagramId) {
+      setEditing(false);
+      return;
+    }
+    onUpdateMatch(trimmed);
+    setEditing(false);
+  };
+
+  const matchCell =
+    participant.status === 'MATCHED' ? (
+      editing ? (
+        <input
+          autoFocus
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleEditSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleEditSubmit();
+            if (e.key === 'Escape') setEditing(false);
+          }}
+          className="h-6 w-full min-w-0 rounded border border-[var(--admin-primary)] bg-white px-1.5 text-xs outline-none"
+          placeholder="instagram ID"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setEditValue(participant.matchedInstagramId ?? '');
+            setEditing(true);
+          }}
+          className="min-w-0 truncate text-left text-[var(--admin-text-muted)] hover:text-[var(--admin-primary)] hover:underline"
+        >
+          @{participant.matchedInstagramId}
+        </button>
+      )
+    ) : (
+      <span className="text-[var(--admin-text-faint)]">-</span>
+    );
+
+  return (
+    <li
+      className={[
+        'group border-b border-[var(--admin-border)] last:border-b-0',
+        even ? 'bg-[var(--admin-surface-hover)]/40' : '',
+        'hover:bg-[var(--admin-surface-hover)]',
+      ].join(' ')}
+    >
+      <div className="hidden px-5 py-3 sm:grid sm:grid-cols-[1.5rem_1fr_3.5rem_4.5rem_7rem_8rem_3.5rem] sm:items-center sm:gap-3 sm:text-sm">
+        <div className="tabular text-[11px] text-[var(--admin-text-faint)]">
+          #{participant.participantId}
+        </div>
+        <div className="min-w-0 truncate">
+          <a
+            href={`https://instagram.com/${participant.instagramId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-[var(--admin-text)] hover:underline"
           >
-            {runDayMutation.isPending ? '실행 중...' : `${festivalDay} 실행`}
-          </Button>
+            @{participant.instagramId}
+          </a>
+        </div>
+        <div>
+          <span
+            className={[
+              'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
+              genderTone,
+            ].join(' ')}
+          >
+            {genderLabel}
+          </span>
+        </div>
+        <div>
+          <span
+            className={[
+              'inline-flex rounded-full px-2 py-0.5 text-xs font-medium',
+              statusBadge,
+            ].join(' ')}
+          >
+            {statusLabel}
+          </span>
+        </div>
+        <div>{matchCell}</div>
+        <div className="tabular text-[var(--admin-text-muted)]">{participant.maskedPhone}</div>
+        <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            type="button"
+            onClick={onReset}
+            disabled={busy || participant.status === 'PENDING'}
+            className="flex h-6 w-6 items-center justify-center rounded text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-hover)] hover:text-[var(--admin-text)] disabled:opacity-30"
+            title="리셋"
+          >
+            <RotateCcw size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={busy}
+            className="flex h-6 w-6 items-center justify-center rounded text-[var(--admin-text-muted)] hover:bg-[var(--admin-danger-soft)] hover:text-[var(--admin-danger)] disabled:opacity-30"
+            title="삭제"
+          >
+            <Trash2 size={13} />
+          </button>
         </div>
       </div>
 
-      {resultMessage && (
-        <div
-          role="status"
-          className="mt-3 flex items-center gap-2 rounded-md border border-[var(--admin-success)]/30 bg-[var(--admin-success-soft)] px-3 py-2 text-sm text-[var(--admin-success)]"
-        >
-          <CheckCircle2 size={14} />
-          <span>{resultMessage}</span>
+      <div className="flex flex-col gap-1.5 px-3 py-2.5 sm:hidden">
+        <div className="flex items-center gap-2">
+          <a
+            href={`https://instagram.com/${participant.instagramId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="min-w-0 flex-1 truncate text-[14px] font-semibold text-[var(--admin-text)] hover:underline"
+          >
+            @{participant.instagramId}
+          </a>
+          <span
+            className={[
+              'shrink-0 rounded-full px-1.5 py-0.5 text-[11px] font-medium',
+              genderTone,
+            ].join(' ')}
+          >
+            {genderLabel}
+          </span>
+          <span
+            className={[
+              'shrink-0 rounded-full px-1.5 py-0.5 text-[11px] font-medium',
+              statusBadge,
+            ].join(' ')}
+          >
+            {statusLabel}
+          </span>
+          <OverflowMenu
+            items={[
+              {
+                label: '리셋 (PENDING)',
+                onClick: onReset,
+                disabled: busy || participant.status === 'PENDING',
+              },
+              {
+                label: '매칭 상대 변경',
+                onClick: () => {
+                  setEditValue(participant.matchedInstagramId ?? '');
+                  setEditing(true);
+                },
+                disabled: participant.status !== 'MATCHED',
+              },
+              { label: '삭제', onClick: onDelete, danger: true, disabled: busy },
+            ]}
+          />
         </div>
-      )}
-      {errorMessage && (
-        <div className="mt-3">
-          <ErrorBanner message={errorMessage} />
+        <div className="flex items-center gap-3 text-[11px] text-[var(--admin-text-muted)]">
+          <span className="tabular">{participant.maskedPhone}</span>
+          {editing
+            ? matchCell
+            : participant.matchedInstagramId && (
+                <span className="truncate">→ @{participant.matchedInstagramId}</span>
+              )}
         </div>
-      )}
-    </Card>
+      </div>
+    </li>
   );
 }
+
+// ---- User Preview ----
 
 function UserPreviewColumn({ status }: { status: MatchingStatusResponse }) {
   return (
@@ -407,11 +619,10 @@ function PhoneFrame({ children }: { children: React.ReactNode }) {
 }
 
 function UserInstatingPreview({ status }: { status: MatchingStatusResponse }) {
-  const isPaused = status.status === 'PAUSED';
   return (
     <div className="flex flex-col">
       <nav className="flex gap-7 border-b border-border bg-white px-5">
-        {['소개', '신청', '결과'].map((label, i) => (
+        {['소개', '인스타팅 신청하기', '결과 조회'].map((label, i) => (
           <span
             key={label}
             className={`relative py-2.5 font-wanted-sans text-[13px] tracking-tight ${
@@ -437,14 +648,6 @@ function UserInstatingPreview({ status }: { status: MatchingStatusResponse }) {
         </h2>
       </div>
 
-      {isPaused && (
-        <div className="border-b border-border bg-[#fff7f8] px-5 py-3">
-          <p className="font-wanted-sans text-[13px] leading-[1.4] tracking-tight text-sub-red">
-            매칭 신청이 일시중단되었습니다.
-          </p>
-        </div>
-      )}
-
       <PreviewCountDown deadlineIso={status.registrationDeadline} resultOpen={status.resultOpen} />
 
       <div className="flex w-full flex-col gap-3 bg-white px-5 pb-5">
@@ -457,37 +660,20 @@ function UserInstatingPreview({ status }: { status: MatchingStatusResponse }) {
           </p>
         </div>
         <div className="flex gap-2">
-          <ApplicantPreviewCard
-            label="남성"
-            count={status.malePendingCount}
-            colorClass="text-[#1893ff]"
-          />
-          <ApplicantPreviewCard
-            label="여성"
-            count={status.femalePendingCount}
-            colorClass="text-[#ff6568]"
-          />
+          <div className="flex flex-1 flex-col gap-2 rounded-lg bg-[rgba(85,255,150,0.1)] p-3">
+            <p className="font-wanted-sans text-[12px] tracking-tight text-[#808080]">남성</p>
+            <p className="font-wanted-sans text-[18px] font-bold tabular-nums text-[#0cc493]">
+              {status.malePendingCount}명
+            </p>
+          </div>
+          <div className="flex flex-1 flex-col gap-2 rounded-lg bg-[rgba(255,240,101,0.15)] p-3">
+            <p className="font-wanted-sans text-[12px] tracking-tight text-[#808080]">여성</p>
+            <p className="font-wanted-sans text-[18px] font-bold tabular-nums text-[#f89100]">
+              {status.femalePendingCount}명
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ApplicantPreviewCard({
-  label,
-  count,
-  colorClass,
-}: {
-  label: string;
-  count: number;
-  colorClass: string;
-}) {
-  return (
-    <div className="flex flex-1 flex-col gap-2 rounded-lg bg-[#f9f9f9] p-3">
-      <p className="font-wanted-sans text-[12px] tracking-tight text-[#808080]">{label}</p>
-      <p className={`font-wanted-sans text-[18px] font-bold tabular-nums ${colorClass}`}>
-        {count}명
-      </p>
     </div>
   );
 }
@@ -568,4 +754,13 @@ function calcTimeLeft(deadline: Date | null) {
     minutes: Math.floor((diff / (1000 * 60)) % 60),
     seconds: Math.floor((diff / 1000) % 60),
   };
+}
+
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const handle = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handle);
+  }, [value, delay]);
+  return debounced;
 }

@@ -18,6 +18,7 @@ export interface BoothListItem {
   department: string | null;
   location: string | null;
   type: BoothType | null;
+  color: string | null;
 }
 
 export interface BoothMapItem {
@@ -26,13 +27,7 @@ export interface BoothMapItem {
   xRatio: number | null;
   yRatio: number | null;
   type: BoothType | null;
-}
-
-export interface BoothMapItem {
-  boothId: number;
-  name: string;
-  xRatio: number | null;
-  yRatio: number | null;
+  color: string | null;
 }
 
 export interface BoothSummary {

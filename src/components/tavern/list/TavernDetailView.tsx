@@ -1,8 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
-import { imagePathToSrc } from '@/apis';
+import { boothApi, imagePathToSrc } from '@/apis';
 import CampusMap from '@/components/tavern/map/CampusMap';
-import type { Tavern } from '@/constants/taverns';
+import { mapBoothToTavern, type Tavern } from '@/constants/taverns';
 
 type TavernDetailViewProps = {
   tavern: Tavern;
@@ -15,7 +16,20 @@ const resolveMenuBoardSrc = (src: string | null) => {
 };
 
 export default function TavernDetailView({ tavern, onRegister }: TavernDetailViewProps) {
-  const singleTavernList = useMemo(() => [tavern], [tavern]);
+  const allBoothsQuery = useQuery({
+    queryKey: ['booths', 'map'],
+    queryFn: boothApi.listMapBooths,
+    staleTime: 60_000,
+  });
+  const allTaverns = useMemo(
+    () =>
+      allBoothsQuery.data
+        ? allBoothsQuery.data
+            .filter((b) => b.xRatio != null && b.yRatio != null)
+            .map(mapBoothToTavern)
+        : [tavern],
+    [allBoothsQuery.data, tavern],
+  );
   const menuBoardSrc = resolveMenuBoardSrc(tavern.menuBoardImageUrl);
   const metaItems = [tavern.department].filter(Boolean);
   const isBooth = tavern.type === 'BOOTH';
@@ -25,8 +39,8 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
 
   return (
     <section className="flex flex-col gap-5 px-5 py-5">
-      <article className="overflow-hidden rounded-[12px] bg-white">
-        <div className="flex flex-col gap-2.5 pb-2.5">
+      <article className="overflow-hidden bg-white">
+        <div className="flex flex-col gap-4.5 pb-2.5">
           <div className="flex flex-col gap-2.5">
             <p className="flex gap-1 text-[16px] font-medium leading-none tracking-[-0.32px] text-[#808080]">
               {metaItems.map((item, index) => (
@@ -92,8 +106,9 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
         </h2>
         <CampusMap
           interactive={false}
-          taverns={singleTavernList}
+          taverns={allTaverns}
           selectedTavern={tavern}
+          focusSelected
           onSelectTavern={() => undefined}
         />
       </div>
