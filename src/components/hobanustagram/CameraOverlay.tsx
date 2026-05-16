@@ -1,4 +1,5 @@
 import type React from 'react';
+import { useState } from 'react';
 import { Aperture, ChevronDown, ImageDown, RotateCcw, SwitchCamera, X } from 'lucide-react';
 
 import { CHARACTER_LIST } from '@/constants/hobanustagram';
@@ -45,8 +46,20 @@ export const CameraOverlay = ({
   onRetake,
   onUsePhoto,
 }: CameraOverlayProps) => {
+  const [showFlash, setShowFlash] = useState(false);
+
+  const handleShutterClick = () => {
+    setShowFlash(true);
+    setTimeout(() => setShowFlash(false), 300);
+    onShutter();
+  };
+
   return (
     <div className="fixed inset-0 z-100 bg-black">
+      <div
+        className={`pointer-events-none absolute inset-0 z-50 bg-white transition-opacity ${showFlash ? 'opacity-80 duration-0' : 'opacity-0 duration-300'}`}
+      />
+
       {cameraState === 'shooting' && (
         <>
           <video
@@ -149,7 +162,7 @@ export const CameraOverlay = ({
 
             <button
               type="button"
-              onClick={onShutter}
+              onClick={handleShutterClick}
               disabled={!isReady}
               className="size-16 rounded-full border-4 border-sub-red bg-white disabled:opacity-40"
             />

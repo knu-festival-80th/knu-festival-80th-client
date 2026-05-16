@@ -37,6 +37,7 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
   const [capturedPhotos, setCapturedPhotos] = useState<string[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [slotAspect, setSlotAspect] = useState<number | null>(null);
+  const [showFlash, setShowFlash] = useState(false);
 
   const { videoRef, isReady, error, facingMode, startCamera, stopCamera, flipCamera } = useCamera();
 
@@ -57,6 +58,8 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
     if (!videoRef.current || !isReady || slotAspect === null) return;
     const dataUrl = captureVideoFrame(videoRef.current, facingMode === 'user', slotAspect);
     if (!dataUrl) return;
+    setShowFlash(true);
+    setTimeout(() => setShowFlash(false), 300);
     const newPhotos = [...capturedPhotos, dataUrl];
     setCapturedPhotos(newPhotos);
     if (newPhotos.length >= 4) {
@@ -171,6 +174,10 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
             />
           </div>
         )}
+
+        <div
+          className={`pointer-events-none absolute inset-0 bg-white transition-opacity ${showFlash ? 'opacity-80 duration-0' : 'opacity-0 duration-300'}`}
+        />
 
         {error && (
           <div className="absolute inset-0 flex items-center justify-center px-8">
