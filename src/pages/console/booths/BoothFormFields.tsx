@@ -16,6 +16,7 @@ interface BoothFormFieldsProps {
   nameRequired?: boolean;
   boothId?: number;
   boothType?: BoothType;
+  boothColor?: string;
 }
 
 export default function BoothFormFields({
@@ -24,6 +25,7 @@ export default function BoothFormFields({
   nameRequired = false,
   boothId,
   boothType,
+  boothColor,
 }: BoothFormFieldsProps) {
   return (
     <>
@@ -81,6 +83,7 @@ export default function BoothFormFields({
           yRatio={form.yRatio}
           boothId={boothId}
           boothType={boothType}
+          boothColor={boothColor}
           onChange={(x, y) => onChange({ xRatio: x, yRatio: y })}
         />
       </Card>

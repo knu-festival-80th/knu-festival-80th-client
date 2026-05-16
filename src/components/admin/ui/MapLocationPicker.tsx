@@ -12,6 +12,7 @@ type MapLocationPickerProps = {
   yRatio: number | null;
   boothId?: number;
   boothType?: BoothType;
+  boothColor?: string;
   onChange: (x: number, y: number) => void;
 };
 
@@ -20,11 +21,12 @@ export default function MapLocationPicker({
   yRatio,
   boothId,
   boothType,
+  boothColor,
   onChange,
 }: MapLocationPickerProps) {
   const [open, setOpen] = useState(false);
   const hasPin = xRatio !== null && yRatio !== null;
-  const pinColor = boothType === 'BOOTH' ? '#15ccb1' : '#ff3d3d';
+  const pinColor = boothColor ?? (boothType === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
 
   return (
     <div className="flex items-start gap-3">
@@ -84,6 +86,7 @@ export default function MapLocationPicker({
         initialY={yRatio}
         boothId={boothId}
         boothType={boothType}
+        boothColor={boothColor}
         onConfirm={(x, y) => {
           onChange(x, y);
           setOpen(false);
