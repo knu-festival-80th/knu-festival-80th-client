@@ -56,6 +56,8 @@ export const ENDPOINTS = {
       `/admin/matchings/participants/${participantId}`,
     matchingParticipantReset: (participantId: number) =>
       `/admin/matchings/participants/${participantId}/reset`,
+    matchingParticipantMatch: (participantId: number) =>
+      `/admin/matchings/participants/${participantId}/match`,
 
     canvas: {
       boards: '/admin/canvas/boards',
