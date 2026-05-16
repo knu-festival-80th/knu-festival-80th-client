@@ -34,8 +34,9 @@ const RollingPaperIntroPage = lazy(() => import('@/pages/RollingPaperIntroPage')
 const TavernDetailPage = lazy(() => import('@/pages/TavernDetailPage'));
 const TavernMapPage = lazy(() => import('@/pages/TavernMapPage'));
 const TimeTablePage = lazy(() => import('@/pages/TimeTablePage'));
-const StampTourPage = lazy(() => import('@/pages/stampTour/StampTourPage'));
-const StampBoothListPage = lazy(() => import('@/pages/stampTour/StampBoothListPage'));
+const StampTourPage = lazy(() => import('@/pages/StampTourPage'));
+const StampTourIntroView = lazy(() => import('@/components/stampTour/views/StampTourIntroView'));
+const StampBoothListView = lazy(() => import('@/components/stampTour/views/StampBoothListView'));
 const InstatingPage = lazy(() => import('@/pages/InstatingPage'));
 const InstatingIntroView = lazy(() => import('@/components/instating/views/InstatingIntroView'));
 const InstatingApplyView = lazy(() => import('@/components/instating/views/InstatingApplyView'));
@@ -93,8 +94,10 @@ export default function App() {
             <Route path="/taverns/:boothId" element={<TavernDetailPage />} />
             <Route path="/timetable" element={<TimeTablePage />} />
             <Route path="/goods" element={<GoodsPage />} />
-            <Route path="/stamptour" element={<StampTourPage />} />
-            <Route path="/stamptour/booths" element={<StampBoothListPage />} />
+            <Route path="/stamptour" element={<StampTourPage />}>
+              <Route index element={<StampTourIntroView />} />
+              <Route path="booths" element={<StampBoothListView />} />
+            </Route>
             <Route path="/hobanustagram" element={<HobanustagramPage />} />
             <Route path="/instating" element={<InstatingPage />}>
               <Route index element={<InstatingIntroView />} />

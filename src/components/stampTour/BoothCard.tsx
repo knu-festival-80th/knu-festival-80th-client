@@ -1,4 +1,4 @@
-import arrowDown from '@/assets/stampTour/arrow_down.svg';
+import { ChevronDown } from 'lucide-react';
 import ZoneBadge from './ZoneBadge';
 
 type BoothCardProps = {
@@ -57,7 +57,12 @@ const BoothCard = ({
               </p>
             </div>
             <div className="aspect-[335/269] w-full overflow-hidden rounded-[8px]">
-              <img src={imageSrc} alt={imageAlt ?? name} className="size-full object-cover" />
+              <img
+                src={imageSrc}
+                alt={imageAlt ?? name}
+                loading="lazy"
+                className="size-full object-cover"
+              />
             </div>
           </div>
         </div>
@@ -66,16 +71,17 @@ const BoothCard = ({
       <button
         type="button"
         onClick={onDetailClick}
+        aria-expanded={isExpanded}
+        aria-label={`${name} 상세정보`}
         className="flex h-6 w-[72px] items-center justify-center self-center gap-1"
       >
         <span className="font-wanted-sans text-[14px] font-medium leading-none tracking-[-0.02em] text-right text-gray whitespace-nowrap">
           상세정보
         </span>
-        <img
-          src={arrowDown}
-          alt=""
+        <ChevronDown
           aria-hidden
-          className={`size-4 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+          size={16}
+          className={`text-gray transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
         />
       </button>
     </article>
