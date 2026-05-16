@@ -31,7 +31,7 @@ const BOOTHS: Booth[] = [
     time: '13:00~18:00',
     target: '경북대학교 재적생 및 방문자',
     imageSrc: boothMap1,
-    imageAlt: '부스 지도',
+    imageAlt: '장미덩쿨 부스 위치 지도',
   },
   {
     id: 2,
@@ -43,7 +43,7 @@ const BOOTHS: Booth[] = [
     time: '13:00~18:00',
     target: '경북대학교 재적생 및 방문자',
     imageSrc: boothMap2,
-    imageAlt: '부스 지도',
+    imageAlt: '오락실 부스 위치 지도',
   },
   {
     id: 3,
@@ -55,7 +55,7 @@ const BOOTHS: Booth[] = [
     time: '13:00~18:00',
     target: '경북대학교 재적생 및 방문자',
     imageSrc: boothMap3,
-    imageAlt: '부스 지도',
+    imageAlt: '포토부스 부스 위치 지도',
   },
   {
     id: 4,
@@ -67,7 +67,7 @@ const BOOTHS: Booth[] = [
     time: '13:00~18:00',
     target: '경북대학교 재적생 및 방문자',
     imageSrc: boothMap4,
-    imageAlt: '부스 지도',
+    imageAlt: '경대고사 부스 위치 지도',
   },
   {
     id: 5,
@@ -79,7 +79,7 @@ const BOOTHS: Booth[] = [
     time: '13:00~18:00',
     target: '경북대학교 재적생 및 방문자',
     imageSrc: boothMap5,
-    imageAlt: '부스 지도',
+    imageAlt: '분필 아트 부스 위치 지도',
   },
   {
     id: 6,
@@ -91,7 +91,7 @@ const BOOTHS: Booth[] = [
     time: '13:00~18:00',
     target: '경북대학교 재적생 및 방문자',
     imageSrc: boothMap6,
-    imageAlt: '부스 지도',
+    imageAlt: '전통놀이 부스 위치 지도',
   },
   {
     id: 7,
@@ -103,7 +103,7 @@ const BOOTHS: Booth[] = [
     time: '13:00~18:00',
     target: '경북대학교 재적생 및 방문자',
     imageSrc: boothMap7,
-    imageAlt: '부스 지도',
+    imageAlt: '점프! 그림그리기 부스 위치 지도',
   },
 ];
 

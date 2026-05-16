@@ -75,6 +75,28 @@ const [openBoothId, setOpenBoothId] = useState<number | null>(BOOTHS[0]?.id ?? n
 
 부스 상세 아코디언 카드. `isExpanded` 상태에 따라 진행장소·시간·대상·지도 이미지를 CSS grid로 애니메이션 展開한다.
 
+## 이미지 에셋
+
+모든 이미지는 WebP 포맷으로 관리한다. `src/assets/stampTour/` 디렉토리에 위치한다.
+
+| 파일                   | 용도                            | 비고                                                     |
+| ---------------------- | ------------------------------- | -------------------------------------------------------- |
+| `stampHero.webp`       | 소개 탭 히어로 이미지           | `fetchPriority="high"`, `width`/`height` 명시 (CLS 방지) |
+| `step_{1~3}.webp`      | ProcessCard 일러스트            | `loading="lazy"`                                         |
+| `step_{1~3}_bg.webp`   | ProcessCard 배경                | `loading="lazy"`                                         |
+| `prize_{1~3}.webp`     | 경품 이미지 (468px, @3x)        | `loading="lazy"`                                         |
+| `prize_stars.webp`     | 경품 별 장식                    | `loading="lazy"`                                         |
+| `booth_map_{1~7}.webp` | 부스 위치 지도 (861×692px, @3x) | `loading="lazy"`, Figma @3x export                       |
+
+> SVG/PNG → WebP 변환으로 `/stamptour` 페이지 이미지 총량이 약 18MB에서 ~566KB로 감소했다.
+
+## 접근성
+
+- **heading 계층**: `GradientBanner`가 `h1`을 렌더링한다. `StampTourContext`의 섹션 제목은 `h2`, `BoothCard`의 부스명은 `h3`으로 계층이 유지된다.
+- **TabNavigation**: 활성 탭 버튼에 `aria-current="page"` 적용.
+- **BoothCard 토글 버튼**: `aria-expanded={isExpanded}`, `aria-label="{부스명} 상세정보"` 적용.
+- **부스 지도 이미지 alt**: `'{부스명} 부스 위치 지도'` 형식으로 각 부스별 의미있는 alt 텍스트 제공.
+
 ## 파일 구조
 
 ```

@@ -76,7 +76,14 @@ const StampTourContext = () => {
           <OutlineButton label="부스 위치 확인하기" showArrow variant="red" onClick={goToBooths} />
         </div>
 
-        <img src={stampHero} alt="스탬프 투어 카드" className="w-[297px]" />
+        <img
+          src={stampHero}
+          alt="스탬프 투어 카드"
+          fetchPriority="high"
+          width={297}
+          height={245}
+          className="w-[297px]"
+        />
 
         {/* Step cards */}
         <ol className="flex w-full flex-col gap-[30px]">
@@ -110,6 +117,7 @@ const StampTourContext = () => {
                         src={prizeStars}
                         alt=""
                         aria-hidden
+                        loading="lazy"
                         className="pointer-events-none size-full object-bottom"
                       />
                     </div>
@@ -126,6 +134,7 @@ const StampTourContext = () => {
                 <img
                   src={imgSrc}
                   alt={name.replace('\n', ' ')}
+                  loading="lazy"
                   className="shrink-0 size-[156px] object-contain"
                 />
               </li>
