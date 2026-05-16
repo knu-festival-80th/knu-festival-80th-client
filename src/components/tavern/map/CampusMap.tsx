@@ -14,6 +14,8 @@ import { festivalMap, type Tavern } from '@/constants/taverns';
 const MAP_BASE_VIEWPORT_SIZE = 335;
 const MAP_RENDER_WIDTH = 3942.121;
 const MAP_RENDER_HEIGHT = MAP_RENDER_WIDTH * (festivalMap.height / festivalMap.width);
+const MAP_CANVAS_WIDTH = 3200;
+const MAP_CANVAS_HEIGHT = Math.round(MAP_CANVAS_WIDTH * (festivalMap.height / festivalMap.width));
 const MAP_RENDER_OFFSET_X = -2965;
 const MAP_RENDER_OFFSET_Y = -2927;
 const MAP_RENDER_SCALE = MAP_RENDER_WIDTH / festivalMap.width;
@@ -405,15 +407,12 @@ export default function CampusMap({
             transition: isGestureActive
               ? 'none'
               : 'transform 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            willChange: 'transform',
+            contain: 'layout paint size',
+            backfaceVisibility: 'hidden',
           }}
         >
-          <img
-            src={tavernMapImage}
-            alt="대동제 주막 지도"
-            className="pointer-events-none absolute h-auto max-w-none select-none"
-            style={mapImageStyle}
-            draggable={false}
-          />
+          <CanvasMapImage />
           {taverns.map((tavern) => {
             const selected = selectedTavern?.id === tavern.id;
 
@@ -499,5 +498,61 @@ export default function CampusMap({
         </div>
       )}
     </div>
+  );
+}
+
+function CanvasMapImage() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasReady, setCanvasReady] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const context = canvas.getContext('2d', { alpha: true });
+    if (!context) return;
+
+    let cancelled = false;
+    const image = new Image();
+
+    image.decoding = 'async';
+    image.onload = () => {
+      if (cancelled) return;
+
+      canvas.width = MAP_CANVAS_WIDTH;
+      canvas.height = MAP_CANVAS_HEIGHT;
+      context.clearRect(0, 0, MAP_CANVAS_WIDTH, MAP_CANVAS_HEIGHT);
+      context.drawImage(image, 0, 0, MAP_CANVAS_WIDTH, MAP_CANVAS_HEIGHT);
+      setCanvasReady(true);
+    };
+    image.src = tavernMapImage;
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <>
+      {!canvasReady && (
+        <img
+          src={tavernMapImage}
+          alt="대동제 주막 지도"
+          className="pointer-events-none absolute h-auto max-w-none select-none"
+          style={mapImageStyle}
+          draggable={false}
+        />
+      )}
+      <canvas
+        ref={canvasRef}
+        aria-label="대동제 주막 지도"
+        className={`pointer-events-none absolute h-auto max-w-none select-none ${
+          canvasReady ? '' : 'opacity-0'
+        }`}
+        style={mapImageStyle}
+        width={MAP_CANVAS_WIDTH}
+        height={MAP_CANVAS_HEIGHT}
+      />
+    </>
   );
 }
