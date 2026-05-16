@@ -18,6 +18,7 @@ type PendingChange = { xRatio: number; yRatio: number };
 
 export default function BulkMapEditorPage() {
   const queryClient = useQueryClient();
+  const outerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [scale, setScale] = useState(1);
@@ -70,8 +71,9 @@ export default function BulkMapEditorPage() {
       setSize({ w: rect.width, h: rect.height });
     };
     update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    const ro = new ResizeObserver(update);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
   }, []);
 
   const clampPan = useCallback(
@@ -100,6 +102,22 @@ export default function BulkMapEditorPage() {
       setTimeout(() => setAnimating(false), 350);
     },
     [clampPan],
+  );
+
+  const focusOnPin = useCallback(
+    (px: number, py: number) => {
+      if (size.w === 0) return;
+      const clamped = MAX_SCALE;
+      const ntx = size.w / 2 - px * size.w * clamped;
+      const nty = size.h / 2 - py * size.h * clamped;
+      const { tx: ftx, ty: fty } = clampPan(ntx, nty, clamped);
+      setAnimating(true);
+      setScale(clamped);
+      setTx(ftx);
+      setTy(fty);
+      setTimeout(() => setAnimating(false), 350);
+    },
+    [size.w, size.h, clampPan],
   );
 
   useEffect(() => {
@@ -177,16 +195,7 @@ export default function BulkMapEditorPage() {
       xRatio: booth.xRatio ?? 0.5,
       yRatio: booth.yRatio ?? 0.5,
     };
-    const targetScale = Math.max(scale, 4);
-    const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, targetScale));
-    const ntx = size.w / 2 - pos.xRatio * size.w * clamped;
-    const nty = size.h / 2 - pos.yRatio * size.h * clamped;
-    const { tx: ftx, ty: fty } = clampPan(ntx, nty, clamped);
-    setAnimating(true);
-    setScale(clamped);
-    setTx(ftx);
-    setTy(fty);
-    setTimeout(() => setAnimating(false), 350);
+    focusOnPin(pos.xRatio, pos.yRatio);
   };
 
   const handlePrevNext = (dir: -1 | 1) => {
@@ -251,12 +260,17 @@ export default function BulkMapEditorPage() {
   const markerColor = (b: BoothMapItem) => b.color ?? (b.type === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
 
   return (
-    <div className="flex h-[calc(100dvh-64px)] flex-col">
-      <div className="flex shrink-0 items-center justify-between border-b border-[var(--admin-border)] px-4 py-2">
+    <div
+      ref={outerRef}
+      className="-mx-6 -mt-6 -mb-6 flex flex-col sm:-mt-8 sm:-mb-8"
+      style={{ height: 'calc(100dvh - var(--console-header-h, 88px))' }}
+    >
+      {/* Top bar */}
+      <div className="flex shrink-0 items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2">
         <div className="flex items-center gap-2">
-          <h1 className="text-base font-bold text-[var(--admin-text)]">위치 일괄 편집</h1>
+          <h1 className="text-sm font-bold text-[var(--admin-text)]">위치 일괄 편집</h1>
           {changedCount > 0 && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-700">
               {changedCount}개 변경됨
             </span>
           )}
@@ -265,101 +279,116 @@ export default function BulkMapEditorPage() {
           type="button"
           onClick={handleSave}
           disabled={changedCount === 0 || saveMutation.isPending}
-          className="flex items-center gap-1.5 rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          className="flex items-center gap-1.5 rounded-lg bg-[var(--admin-primary)] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
         >
-          <Save size={14} />
+          <Save size={12} />
           {saveMutation.isPending ? '저장 중...' : '전체 저장'}
         </button>
       </div>
 
       {saveMutation.isSuccess && (
-        <div className="shrink-0 bg-green-50 px-4 py-2 text-center text-sm font-medium text-green-700">
+        <div className="shrink-0 bg-green-50 px-4 py-1.5 text-center text-xs font-medium text-green-700">
           저장 완료
         </div>
       )}
 
-      <div className="flex min-h-0 flex-1 items-center justify-center bg-neutral-100 p-3">
-        <div
-          ref={containerRef}
-          className="relative w-full cursor-crosshair overflow-hidden rounded-xl bg-white shadow-sm"
-          style={{
-            aspectRatio: ASPECT,
-            maxWidth: `min(1200px, calc((100dvh - 200px) * ${ASPECT}))`,
-            touchAction: 'none',
-          }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={() => {
-            dragRef.current = null;
-          }}
-        >
+      {/* Map area — fills all remaining space */}
+      <div className="relative min-h-0 flex-1 bg-neutral-100">
+        <div className="absolute inset-0 flex items-center justify-center p-2">
           <div
-            className="absolute left-0 top-0 origin-top-left"
+            ref={containerRef}
+            className="relative cursor-crosshair overflow-hidden rounded-xl bg-white shadow-sm"
             style={{
               width: '100%',
               height: '100%',
-              transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
-              transition: transitionStyle,
+              maxWidth: `calc(100% * 1)`,
+              maxHeight: `calc(100% * 1)`,
+              aspectRatio: ASPECT,
+              touchAction: 'none',
+            }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={() => {
+              dragRef.current = null;
             }}
           >
-            <img
-              src={tavernMapImage}
-              alt=""
-              draggable={false}
-              className="pointer-events-none size-full select-none"
-            />
-            {size.w > 0 &&
-              sorted.map((b) => {
-                const pos = getPosition(b);
-                const isSelected = b.boothId === selectedId;
-                const isChanged = changes.has(b.boothId);
-                const color = markerColor(b);
-                return (
-                  <div
-                    key={b.boothId}
-                    className="absolute z-10"
-                    style={{
-                      left: `${pos.x * 100}%`,
-                      top: `${pos.y * 100}%`,
-                      transform: `translate(-50%, -50%) scale(${1 / Math.sqrt(scale * MAX_SCALE)})`,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectBooth(b.boothId);
-                      }}
-                      onPointerDown={(e) => e.stopPropagation()}
-                      className={`flex items-center justify-center rounded-full border-2 text-xs font-bold leading-none transition-shadow ${
-                        isSelected ? 'z-30 size-9 ring-4 ring-blue-400/50' : 'size-6'
-                      }`}
+            <div
+              className="absolute left-0 top-0 origin-top-left"
+              style={{
+                width: '100%',
+                height: '100%',
+                transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
+                transition: transitionStyle,
+              }}
+            >
+              <img
+                src={tavernMapImage}
+                alt=""
+                draggable={false}
+                className="pointer-events-none size-full select-none"
+              />
+              {size.w > 0 &&
+                sorted.map((b) => {
+                  const pos = getPosition(b);
+                  const isSelected = b.boothId === selectedId;
+                  const isChanged = changes.has(b.boothId);
+                  const color = markerColor(b);
+                  return (
+                    <div
+                      key={b.boothId}
+                      className={`absolute ${isSelected ? 'z-20' : 'z-10'}`}
                       style={{
-                        borderColor: isSelected ? '#3b82f6' : '#fff',
-                        backgroundColor: isSelected ? '#fff' : color,
-                        color: isSelected ? color : '#fff',
-                        boxShadow: isChanged ? '0 0 0 2px #f59e0b' : undefined,
+                        left: `${pos.x * 100}%`,
+                        top: `${pos.y * 100}%`,
+                        transform: `translate(-50%, -50%) scale(${1 / Math.sqrt(scale * MAX_SCALE)})`,
                       }}
                     >
-                      {b.boothId}
-                    </button>
-                  </div>
-                );
-              })}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectBooth(b.boothId);
+                        }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        className={
+                          isSelected
+                            ? 'flex size-7 items-center justify-center rounded-[14.5px] border-2 border-white text-[14px] font-bold leading-none text-white shadow-lg'
+                            : `flex size-5 items-center justify-center rounded-full border border-white text-[9px] font-bold leading-none text-white ${isChanged ? '' : 'opacity-60'}`
+                        }
+                        style={{
+                          backgroundColor: color,
+                          boxShadow: isChanged && !isSelected ? '0 0 0 2px #f59e0b' : undefined,
+                        }}
+                      >
+                        {b.boothId}
+                      </button>
+                    </div>
+                  );
+                })}
+            </div>
+
+            {!selectedId && sorted.length > 0 && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <div className="rounded-lg bg-black/60 px-4 py-2 text-sm text-white">
+                  마커를 클릭하거나 아래에서 부스를 선택하세요
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 border-t border-[var(--admin-border)] px-4 py-2">
+      {/* Bottom bar */}
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2">
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => handlePrevNext(-1)}
             disabled={sorted.length === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--admin-border)] hover:bg-neutral-50 disabled:opacity-30"
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--admin-border)] hover:bg-neutral-50 disabled:opacity-30"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={14} />
           </button>
           <select
             value={selectedId ?? ''}
@@ -367,7 +396,7 @@ export default function BulkMapEditorPage() {
               const v = Number(e.target.value);
               if (v) handleSelectBooth(v);
             }}
-            className="h-8 rounded-lg border border-[var(--admin-border)] bg-white px-2 text-sm"
+            className="h-7 max-w-[180px] rounded-md border border-[var(--admin-border)] bg-white px-2 text-xs"
           >
             <option value="">부스 선택</option>
             {sorted.map((b) => (
@@ -380,25 +409,20 @@ export default function BulkMapEditorPage() {
             type="button"
             onClick={() => handlePrevNext(1)}
             disabled={sorted.length === 0}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--admin-border)] hover:bg-neutral-50 disabled:opacity-30"
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--admin-border)] hover:bg-neutral-50 disabled:opacity-30"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={14} />
           </button>
         </div>
 
         {selectedBooth && (
-          <div className="flex items-center gap-2 text-xs text-[var(--admin-text-muted)]">
+          <div className="flex items-center gap-2 text-[11px] text-[var(--admin-text-muted)]">
             <span className="font-medium text-[var(--admin-text)]">
               #{selectedBooth.boothId} {selectedBooth.name}
             </span>
-            {(() => {
-              const pos = getPosition(selectedBooth);
-              return (
-                <span className="tabular-nums">
-                  ({pos.x.toFixed(4)}, {pos.y.toFixed(4)})
-                </span>
-              );
-            })()}
+            <span className="tabular-nums">
+              ({getPosition(selectedBooth).x.toFixed(4)}, {getPosition(selectedBooth).y.toFixed(4)})
+            </span>
             {changes.has(selectedBooth.boothId) && (
               <button
                 type="button"
@@ -416,38 +440,30 @@ export default function BulkMapEditorPage() {
           <button
             type="button"
             onClick={() => smoothZoomTo(scale * 0.7, size.w / 2, size.h / 2)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--admin-border)] hover:bg-neutral-50"
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--admin-border)] hover:bg-neutral-50"
           >
-            <ZoomOut size={14} />
+            <ZoomOut size={12} />
           </button>
-          <span className="w-10 text-center text-xs tabular-nums text-[var(--admin-text-muted)]">
+          <span className="w-9 text-center text-[11px] tabular-nums text-[var(--admin-text-muted)]">
             {Math.round(scale * 100)}%
           </span>
           <button
             type="button"
             onClick={() => smoothZoomTo(scale * 1.4, size.w / 2, size.h / 2)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--admin-border)] hover:bg-neutral-50"
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--admin-border)] hover:bg-neutral-50"
           >
-            <ZoomIn size={14} />
+            <ZoomIn size={12} />
           </button>
           <button
             type="button"
             onClick={handleResetView}
-            className="flex h-8 items-center gap-1 rounded-lg border border-[var(--admin-border)] px-2 text-xs hover:bg-neutral-50"
+            className="flex h-7 items-center gap-1 rounded-md border border-[var(--admin-border)] px-2 text-[11px] hover:bg-neutral-50"
           >
-            <RotateCcw size={12} />
+            <RotateCcw size={10} />
             원본
           </button>
         </div>
       </div>
-
-      {!selectedId && sorted.length > 0 && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="rounded-lg bg-black/60 px-4 py-2 text-sm text-white">
-            마커를 클릭하거나 아래에서 부스를 선택하세요
-          </div>
-        </div>
-      )}
     </div>
   );
 }
