@@ -6,6 +6,7 @@ export interface SectionTitleProps {
   description?: string;
   ctaLabel?: string;
   ctaHref?: string;
+  onCtaClick?: () => void;
 }
 
 export const SectionTitle = ({
@@ -14,7 +15,19 @@ export const SectionTitle = ({
   description,
   ctaLabel,
   ctaHref,
+  onCtaClick,
 }: SectionTitleProps) => {
+  const ctaClassName =
+    'flex w-fit items-center gap-1.5 rounded-full border border-[#ff3d3d] py-2.5 pl-5 pr-3.5';
+  const ctaContent = (
+    <>
+      <span className="font-wanted-sans text-sm font-medium leading-none tracking-[-0.02em] text-[#ff3d3d] whitespace-nowrap">
+        {ctaLabel}
+      </span>
+      <ArrowRight className="size-6 text-[#ff3d3d]" />
+    </>
+  );
+
   return (
     <div className="flex w-full max-w-3xl flex-col gap-4">
       <div className="flex flex-col gap-2.5">
@@ -30,17 +43,21 @@ export const SectionTitle = ({
           </p>
         )}
       </div>
-      {ctaLabel && (
-        <a
-          href={ctaHref ?? '#'}
-          className="flex w-fit items-center gap-1.5 rounded-full border border-[#ff3d3d] py-2.5 pl-5 pr-3.5"
-        >
-          <span className="font-wanted-sans text-sm font-medium leading-none tracking-[-0.02em] text-[#ff3d3d] whitespace-nowrap">
-            {ctaLabel}
-          </span>
-          <ArrowRight className="size-6 text-[#ff3d3d]" />
-        </a>
-      )}
+      {ctaLabel &&
+        (onCtaClick ? (
+          <button type="button" onClick={onCtaClick} className={ctaClassName}>
+            {ctaContent}
+          </button>
+        ) : (
+          <a
+            href={ctaHref ?? '#'}
+            target={ctaHref ? '_blank' : undefined}
+            rel={ctaHref ? 'noopener noreferrer' : undefined}
+            className={ctaClassName}
+          >
+            {ctaContent}
+          </a>
+        ))}
     </div>
   );
 };
