@@ -21,9 +21,9 @@ const InstatingApplyView = () => {
 
   const { data: status } = useMatchingStatus();
   const isRegistrationOpen = status?.registrationOpen ?? true;
-
-  // TODO: registrationOpenAt 서버 연동 후 status?.registrationOpenAt으로 교체
-  const registrationOpenAt: Date | null = null;
+  const registrationOpenAt = status?.registrationOpenAt
+    ? new Date(status.registrationOpenAt)
+    : null;
   const countdownText = useCountdown(registrationOpenAt);
 
   const {

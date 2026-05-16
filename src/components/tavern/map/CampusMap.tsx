@@ -139,15 +139,19 @@ const getMarkerLabel = (tavern: Tavern) => String(tavern.boothId);
 
 const getSelectedLabel = (tavern: Tavern) => tavern.name;
 
-const getMarkerClassName = (selected: boolean) =>
-  `flex size-7 items-center justify-center rounded-[14.5px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px] ${
-    selected ? 'border-[#ff3d3d] bg-white text-[#ff3d3d]' : 'border-white bg-[#ff3d3d] text-white'
-  }`;
+const getTypeColor = (tavern: Tavern) => (tavern.type === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
 
-const getLabelClassName = (tavern: Tavern) =>
-  `absolute bottom-[34px] z-20 whitespace-nowrap rounded-[4px] border border-[#ff3d3d] bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] text-[#ff3d3d] shadow-sm ${getSelectedLabelClassName(
-    tavern,
-  )}`;
+const getMarkerStyle = (selected: boolean, tavern: Tavern): CSSProperties => {
+  const color = getTypeColor(tavern);
+  return selected
+    ? { borderColor: color, backgroundColor: '#fff', color }
+    : { borderColor: '#fff', backgroundColor: color, color: '#fff' };
+};
+
+const getLabelStyle = (tavern: Tavern): CSSProperties => {
+  const color = getTypeColor(tavern);
+  return { borderColor: color, color };
+};
 
 type CampusMapProps = {
   interactive?: boolean;
@@ -330,7 +334,9 @@ export default function CampusMap({
           className="absolute left-0 top-0 size-full origin-top-left"
           style={{
             transform: `translate3d(${mapPan.x}px, ${mapPan.y}px, 0) scale(${mapScale})`,
-            transition: isGestureActive ? 'none' : 'transform 180ms ease-out',
+            transition: isGestureActive
+              ? 'none'
+              : 'transform 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           }}
         >
           <img
@@ -349,17 +355,27 @@ export default function CampusMap({
                 type="button"
                 aria-label={`${tavern.name} 지도 위치: ${tavern.location}`}
                 aria-pressed={selected}
-                className={`absolute z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center ${
-                  interactive ? '' : 'pointer-events-none'
-                }`}
+                className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center ${
+                  selected ? 'z-30' : 'z-10'
+                } ${interactive ? '' : 'pointer-events-none'}`}
                 style={getMapMarkerStyle(tavern)}
                 onPointerDown={(event) => event.stopPropagation()}
                 onClick={() => handleSelectTavern(tavern)}
               >
                 {selected && (
-                  <span className={getLabelClassName(tavern)}>{getSelectedLabel(tavern)}</span>
+                  <span
+                    className={`absolute bottom-[34px] z-30 whitespace-nowrap rounded-[4px] border bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] shadow-sm ${getSelectedLabelClassName(tavern)}`}
+                    style={getLabelStyle(tavern)}
+                  >
+                    {getSelectedLabel(tavern)}
+                  </span>
                 )}
-                <span className={getMarkerClassName(selected)}>{getMarkerLabel(tavern)}</span>
+                <span
+                  className="flex size-7 items-center justify-center rounded-[14.5px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px]"
+                  style={getMarkerStyle(selected, tavern)}
+                >
+                  {getMarkerLabel(tavern)}
+                </span>
               </button>
             );
           })}

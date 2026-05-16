@@ -4,6 +4,8 @@ import { getMockBooth, getMockBooths, getMockMapBooths } from '@/mocks/taverns';
 
 export type BoothSort = 'likes' | 'waiting-asc';
 
+export type BoothType = 'TAVERN' | 'BOOTH';
+
 export interface BoothListItem {
   boothId: number;
   name: string;
@@ -15,6 +17,15 @@ export interface BoothListItem {
   currentWaitingTeams: number;
   department: string | null;
   location: string | null;
+  type: BoothType | null;
+}
+
+export interface BoothMapItem {
+  boothId: number;
+  name: string;
+  xRatio: number | null;
+  yRatio: number | null;
+  type: BoothType | null;
 }
 
 export interface BoothMapItem {

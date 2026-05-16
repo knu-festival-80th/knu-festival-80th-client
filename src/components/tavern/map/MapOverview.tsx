@@ -42,6 +42,7 @@ export default function MapOverview({
         <TavernCard
           expanded={expandedMenuId === selectedTavern.id}
           tavern={selectedTavern}
+          showWaiting={selectedTavern.type !== 'BOOTH'}
           onMenuToggle={() =>
             onMenuToggle(expandedMenuId === selectedTavern.id ? null : selectedTavern.id)
           }

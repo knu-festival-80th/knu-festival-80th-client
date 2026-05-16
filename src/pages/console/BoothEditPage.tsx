@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ApiClientError, boothApi, imageUrlToPath } from '@/apis';
-import type { BoothListItem, BoothUpdateRequest } from '@/apis';
+import type { BoothListItem, BoothUpdateRequest, BoothType } from '@/apis';
 import { Button } from '@/components/admin/ui';
 
 import BoothFormFields, { type BoothFormState } from './booths/BoothFormFields';
@@ -80,17 +80,25 @@ export default function BoothEditPage() {
         </div>
       )}
 
-      {booth && <BoothEditForm key={boothId} boothId={boothId} initial={toFormState(booth)} />}
+      {booth && (
+        <BoothEditForm
+          key={boothId}
+          boothId={boothId}
+          boothType={(booth.type as BoothType) ?? (boothId <= 38 ? 'TAVERN' : 'BOOTH')}
+          initial={toFormState(booth)}
+        />
+      )}
     </div>
   );
 }
 
 interface BoothEditFormProps {
   boothId: number;
+  boothType: BoothType;
   initial: BoothFormState;
 }
 
-function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
+function BoothEditForm({ boothId, boothType, initial }: BoothEditFormProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<BoothFormState>(initial);
@@ -128,7 +136,12 @@ function BoothEditForm({ boothId, initial }: BoothEditFormProps) {
   return (
     <form onSubmit={handleSubmit} noValidate>
       <div className="flex flex-col gap-4">
-        <BoothFormFields form={form} onChange={updateForm} />
+        <BoothFormFields
+          form={form}
+          onChange={updateForm}
+          boothId={boothId}
+          boothType={boothType}
+        />
       </div>
 
       {errorMessage && (

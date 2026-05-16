@@ -34,7 +34,7 @@ export default function BoothListPage() {
     }
   };
 
-  const booths = boothsQuery.data ?? [];
+  const booths = [...(boothsQuery.data ?? [])].sort((a, b) => a.boothId - b.boothId);
   const activeCount = booths.filter((b) => b.waitingOpen).length;
   const totalWaiting = booths.reduce((sum, b) => sum + b.currentWaitingTeams, 0);
 

@@ -1,4 +1,5 @@
 export type RuntimeEnvKey =
+  | 'VITE_BASE_PATH'
   | 'VITE_API_BASE_URL'
   | 'VITE_API_TIMEOUT_MS'
   | 'VITE_SENTRY_DSN'
@@ -16,6 +17,7 @@ declare global {
 }
 
 const buildTimeEnv: RuntimeEnv = {
+  VITE_BASE_PATH: import.meta.env.VITE_BASE_PATH,
   VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
   VITE_API_TIMEOUT_MS: import.meta.env.VITE_API_TIMEOUT_MS,
   VITE_SENTRY_DSN: import.meta.env.VITE_SENTRY_DSN,
@@ -41,4 +43,10 @@ export function getRuntimeEnv(key: RuntimeEnvKey): string {
 export function getRuntimeEnvNumber(key: RuntimeEnvKey, fallback: number): number {
   const parsedValue = Number(getRuntimeEnv(key));
   return Number.isFinite(parsedValue) ? parsedValue : fallback;
+}
+
+export function getRuntimeBasePath(): string {
+  const basePath = getRuntimeEnv('VITE_BASE_PATH').trim();
+  if (!basePath || basePath === '/') return '';
+  return `/${basePath.replace(/^\/+|\/+$/g, '')}`;
 }
