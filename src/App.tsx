@@ -10,6 +10,7 @@ import ConsoleGuard from '@/components/guards/ConsoleGuard';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import PostHogPageView from '@/utils/PostHogPageView';
 import PageLoader from '@/components/common/PageLoader';
+import ErrorBoundary from '@/components/error/ErrorBoundary';
 
 const BoothManageLoginPage = lazy(() => import('@/pages/boothManage/BoothManageLoginPage'));
 const BoothProfilePage = lazy(() => import('@/pages/boothManage/BoothProfilePage'));
@@ -47,82 +48,87 @@ export default function App() {
     <>
       <GoogleAnalytics />
       <PostHogPageView />
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<HomePage />} />
-          </Route>
-
-          <Route path="/console/login" element={<ConsoleLoginPage />} />
-          <Route
-            path="/console"
-            element={
-              <ConsoleGuard>
-                <ConsoleShell />
-              </ConsoleGuard>
-            }
-          >
-            <Route index element={<BoothListPage />} />
-            <Route path="booths/new" element={<BoothCreatePage />} />
-            <Route path="map-editor" element={<BulkMapEditorPage />} />
-            <Route path="booths/:boothId/edit" element={<BoothEditPage />} />
-            <Route path="booths/:boothId/password" element={<BoothPasswordPage />} />
-            <Route path="matching" element={<MatchingOverviewPage />} />
-            <Route path="canvas" element={<CanvasAdminPage />} />
-          </Route>
-
-          <Route path="/booth/manage/login" element={<BoothManageLoginPage />} />
-          <Route
-            path="/booth/manage"
-            element={
-              <BoothManageGuard>
-                <BoothManageShell />
-              </BoothManageGuard>
-            }
-          >
-            <Route index element={<BoothProfilePage />} />
-            <Route path="waitings" element={<WaitingListPage />} />
-            <Route
-              path="waitings/insert"
-              element={<Navigate to="/booth/manage/waitings" replace />}
-            />
-          </Route>
-
-          <Route element={<DefaultLayout />}>
-            <Route path="/map" element={<TavernMapPage />} />
-            <Route path="/taverns" element={<TavernMapPage />} />
-            <Route path="/taverns/:boothId" element={<TavernDetailPage />} />
-            <Route path="/timetable" element={<TimeTablePage />} />
-            <Route path="/goods" element={<GoodsPage />} />
-            <Route path="/stamptour" element={<StampTourPage />}>
-              <Route index element={<StampTourIntroView />} />
-              <Route path="booths" element={<StampBoothListView />} />
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<HomePage />} />
             </Route>
-            <Route path="/hobanustagram" element={<HobanustagramPage />} />
-            <Route path="/instating" element={<InstatingPage />}>
-              <Route index element={<InstatingIntroView />} />
-              <Route path="apply" element={<InstatingApplyView />} />
-              <Route path="result" element={<InstatingResultView />} />
+
+            <Route path="/console/login" element={<ConsoleLoginPage />} />
+            <Route
+              path="/console"
+              element={
+                <ConsoleGuard>
+                  <ConsoleShell />
+                </ConsoleGuard>
+              }
+            >
+              <Route index element={<BoothListPage />} />
+              <Route path="booths/new" element={<BoothCreatePage />} />
+              <Route path="map-editor" element={<BulkMapEditorPage />} />
+              <Route path="booths/:boothId/edit" element={<BoothEditPage />} />
+              <Route path="booths/:boothId/password" element={<BoothPasswordPage />} />
+              <Route path="matching" element={<MatchingOverviewPage />} />
+              <Route path="canvas" element={<CanvasAdminPage />} />
             </Route>
-            <Route path="/congrat-video" element={<CongratVideoPage />} />
-            <Route path="/rolling-paper" element={<RollingPaperIntroPage />} />
-            <Route path="/rolling-paper/categories" element={<RollingPaperCategorySelectPage />} />
+
+            <Route path="/booth/manage/login" element={<BoothManageLoginPage />} />
             <Route
-              path="/rolling-paper/categories/:categoryId/channels"
-              element={<RollingPaperChannelSelectPage />}
-            />
-            <Route path="/rolling-paper/board" element={<RollingPaperBoardPage />} />
-            <Route
-              path="/rolling-paper/board/:categoryId/:channelId"
-              element={<RollingPaperBoardPage />}
-            />
+              path="/booth/manage"
+              element={
+                <BoothManageGuard>
+                  <BoothManageShell />
+                </BoothManageGuard>
+              }
+            >
+              <Route index element={<BoothProfilePage />} />
+              <Route path="waitings" element={<WaitingListPage />} />
+              <Route
+                path="waitings/insert"
+                element={<Navigate to="/booth/manage/waitings" replace />}
+              />
+            </Route>
+
+            <Route element={<DefaultLayout />}>
+              <Route path="/map" element={<TavernMapPage />} />
+              <Route path="/taverns" element={<TavernMapPage />} />
+              <Route path="/taverns/:boothId" element={<TavernDetailPage />} />
+              <Route path="/timetable" element={<TimeTablePage />} />
+              <Route path="/goods" element={<GoodsPage />} />
+              <Route path="/stamptour" element={<StampTourPage />}>
+                <Route index element={<StampTourIntroView />} />
+                <Route path="booths" element={<StampBoothListView />} />
+              </Route>
+              <Route path="/hobanustagram" element={<HobanustagramPage />} />
+              <Route path="/instating" element={<InstatingPage />}>
+                <Route index element={<InstatingIntroView />} />
+                <Route path="apply" element={<InstatingApplyView />} />
+                <Route path="result" element={<InstatingResultView />} />
+              </Route>
+              <Route path="/congrat-video" element={<CongratVideoPage />} />
+              <Route path="/rolling-paper" element={<RollingPaperIntroPage />} />
+              <Route
+                path="/rolling-paper/categories"
+                element={<RollingPaperCategorySelectPage />}
+              />
+              <Route
+                path="/rolling-paper/categories/:categoryId/channels"
+                element={<RollingPaperChannelSelectPage />}
+              />
+              <Route path="/rolling-paper/board" element={<RollingPaperBoardPage />} />
+              <Route
+                path="/rolling-paper/board/:categoryId/:channelId"
+                element={<RollingPaperBoardPage />}
+              />
+              <Route path="/404" element={<NotFoundPage />} />
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Route>
             <Route path="/404" element={<NotFoundPage />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
-          </Route>
-          <Route path="/404" element={<NotFoundPage />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
-      </Suspense>
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
       <Analytics />
     </>
   );
