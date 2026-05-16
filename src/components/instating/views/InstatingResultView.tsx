@@ -108,7 +108,13 @@ const InstatingResultView = () => {
               id="instagramId"
               type="text"
               placeholder="인스타 아이디를 입력해주세요"
-              {...register('instagramId', { required: '인스타 ID를 입력해주세요.' })}
+              {...register('instagramId', {
+                required: '인스타 ID를 입력해주세요.',
+                pattern: {
+                  value: /^[a-zA-Z0-9_.]{1,30}$/,
+                  message: '올바른 인스타그램 ID를 입력해주세요.',
+                },
+              })}
               className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
             />
             {errors.instagramId && (
