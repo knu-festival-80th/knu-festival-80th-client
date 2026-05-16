@@ -283,22 +283,26 @@ export default function RollingPaperBoardCanvas({
       </div>
 
       {focusedNote && focusedNotePosition && (
-        <div
-          className="pointer-events-none absolute z-20 transition-[left,top,width] duration-200 [container-type:inline-size]"
+        <button
+          type="button"
+          aria-label={`포스트잇 다시 확대: ${focusedNote.message}`}
+          className="absolute z-20 block touch-manipulation border-0 bg-transparent p-0 text-left transition-[left,top,width] duration-200 [container-type:inline-size] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sub-red/80"
           style={{
             left: `${focusedNotePosition.x}px`,
             top: `${focusedNotePosition.y}px`,
             width: `${focusedNoteWidth}px`,
             transform: 'translate(-50%, -50%)',
           }}
-          aria-hidden="true"
+          onClick={() => focusNote(focusedNote)}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
         >
           <RollingPaperSticker
             colorId={focusedNote.colorId}
             message={focusedNote.message}
             className="w-full"
           />
-        </div>
+        </button>
       )}
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-28 bg-gradient-to-b from-white/95 to-white/0" />

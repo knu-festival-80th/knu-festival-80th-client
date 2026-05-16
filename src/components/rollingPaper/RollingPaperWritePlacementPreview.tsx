@@ -290,7 +290,7 @@ export default function RollingPaperWritePlacementPreview({
           <img
             src={rollingPaperBoardFrames[boardVariant] ?? rollingPaperBoardFrames[0]}
             alt=""
-            className="absolute object-contain"
+            className="absolute object-contain opacity-78 saturate-75"
             style={{
               left: `${frameRect.x}px`,
               top: `${frameRect.y}px`,

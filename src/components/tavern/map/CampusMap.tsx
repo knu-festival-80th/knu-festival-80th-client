@@ -380,15 +380,21 @@ export default function CampusMap({
             );
           })}
         </div>
-        <div className="absolute right-[13px] top-[13px] z-20 flex w-[50px] flex-col gap-0.5">
-          <span className="flex h-[18px] items-center justify-center bg-[#ff3d3d] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-white">
+        <div className="absolute right-[13px] top-[13px] z-30 flex w-[50px] flex-col gap-0.5">
+          <span className="flex h-[18px] items-center justify-center bg-[#FFD4D6] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-[#66666]">
             주막
           </span>
-          <span className="flex h-[18px] items-center justify-center bg-[#0e9bf3] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-white">
+          <span className="flex h-[18px] items-center justify-center bg-[#BFDAF4] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-[#66666]">
             일청담 광장
           </span>
-          <span className="flex h-[18px] items-center justify-center bg-[#15ccb1] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-white">
+          <span className="flex h-[18px] items-center justify-center bg-[#C6F2EB] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-[#66666]">
             부스
+          </span>
+          <span className="flex h-[18px] items-center justify-center bg-[#FFDBF5] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-[#66666]">
+            스탬프 투어
+          </span>
+          <span className="flex h-[18px] items-center justify-center bg-[#FFFBD3] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-[#66666]">
+            이벤트존
           </span>
         </div>
       </div>

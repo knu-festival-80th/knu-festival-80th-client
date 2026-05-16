@@ -4,8 +4,8 @@ import mapIconImage from '@/assets/images/map-icon.png';
 import reservationIconImage from '@/assets/images/reservation-icon.png';
 import tavernGuideMapImage from '@/assets/images/tavern-guide-map.png';
 import tavernGuideReservationImage from '@/assets/images/tavern-guide-reservation.png';
-import tavernHeroBgImage from '@/assets/images/tavern-hero-bg.png';
 import tavernMapImage from '@/assets/images/map.svg';
+import { INTRO_HERO_BACKGROUND_IMAGE } from '@/components/common/GradientBanner';
 import ContentCard from '@/components/home/ContentCard';
 import SectionBlock from '@/components/home/SectionBlock';
 import SectionHeading from '@/components/tavern/shared/SectionHeading';
@@ -19,15 +19,10 @@ type IntroOverviewProps = {
 export default function IntroOverview({ onTabChange }: IntroOverviewProps) {
   return (
     <>
-      <section className="relative flex h-[270px] flex-col justify-center overflow-hidden px-5 py-[42px]">
-        <img
-          src={tavernHeroBgImage}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 size-full object-cover object-bottom"
-        />
-        <div className="absolute inset-0 mix-blend-screen bg-[linear-gradient(-55.793deg,#ffe76e_4.7427%,#ff6568_82.479%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-white/0 mix-blend-soft-light" />
+      <section
+        className="relative flex h-[270px] flex-col justify-center overflow-hidden px-5 py-[42px]"
+        style={{ backgroundImage: INTRO_HERO_BACKGROUND_IMAGE }}
+      >
         <div className="relative flex flex-col gap-[30px]">
           <h1 className="text-[40px] font-bold leading-[1.4] tracking-[-0.8px] text-[#1a1a1a]">
             지도 및

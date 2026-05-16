@@ -4,7 +4,7 @@ import StampTourContext from '@/components/stampTour/StampTourContext';
 const StampTourPage = () => {
   return (
     <div>
-      <GradientBanner title="대동제 스탬프 투어" />
+      <GradientBanner title={'축제의\n스탬프 투어'} />
       <StampTourContext />
     </div>
   );
