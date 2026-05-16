@@ -56,7 +56,29 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
 
   const handleShutter = () => {
     if (!videoRef.current || !isReady || slotAspect === null) return;
-    const dataUrl = captureVideoFrame(videoRef.current, facingMode === 'user', slotAspect);
+
+    const containerW = Math.min(window.innerWidth, 600);
+    const containerH = window.innerHeight;
+    const videoAreaH = containerH - 96;
+
+    const zoneW = Math.min(containerW, videoAreaH * slotAspect);
+    const zoneH = Math.min(videoAreaH, containerW / slotAspect);
+    const zoneLeft = (containerW - zoneW) / 2;
+    const zoneTop = (videoAreaH - zoneH) / 2;
+
+    const vw = videoRef.current.videoWidth;
+    const vh = videoRef.current.videoHeight;
+
+    const s = Math.max(containerW / vw, containerH / vh);
+    const offsetX = (containerW - vw * s) / 2;
+    const offsetY = (containerH - vh * s) / 2;
+
+    const sx = Math.max(0, (zoneLeft - offsetX) / s);
+    const sy = Math.max(0, (zoneTop - offsetY) / s);
+    const sw = Math.min(vw - sx, zoneW / s);
+    const sh = Math.min(vh - sy, zoneH / s);
+
+    const dataUrl = captureVideoFrame(videoRef.current, facingMode === 'user', { sx, sy, sw, sh });
     if (!dataUrl) return;
     setShowFlash(true);
     setTimeout(() => setShowFlash(false), 300);
@@ -149,9 +171,11 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
   if (step === 'shooting') {
     const shotNumber = Math.min(capturedPhotos.length + 1, 4);
     const bottomBarH = 96;
-    const videoAreaH = window.innerHeight - bottomBarH;
     const containerW = Math.min(window.innerWidth, 600);
-    const zoneH = slotAspect ? Math.min(containerW / slotAspect, videoAreaH) : 0;
+    const videoAreaH = window.innerHeight - bottomBarH;
+    const zoneW = slotAspect ? Math.min(containerW, videoAreaH * slotAspect) : 0;
+    const zoneH = slotAspect ? Math.min(videoAreaH, containerW / slotAspect) : 0;
+    const zoneLeft = (containerW - zoneW) / 2;
     const topH = (videoAreaH - zoneH) / 2;
 
     return (
@@ -169,12 +193,16 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute inset-x-0 top-0 bg-black/50" style={{ height: topH }} />
               <div
-                className="absolute inset-x-0 border-2 border-white/70"
-                style={{ top: topH, height: zoneH }}
-              />
+                className="absolute flex"
+                style={{ top: topH, height: zoneH, left: 0, width: containerW }}
+              >
+                <div className="bg-black/50" style={{ width: zoneLeft }} />
+                <div className="flex-1 border-2 border-white/70" />
+                <div className="bg-black/50" style={{ width: zoneLeft }} />
+              </div>
               <div
                 className="absolute inset-x-0 bg-black/50"
-                style={{ top: topH + zoneH, height: videoAreaH - topH - zoneH }}
+                style={{ top: topH + zoneH, bottom: 0 }}
               />
             </div>
           )}
