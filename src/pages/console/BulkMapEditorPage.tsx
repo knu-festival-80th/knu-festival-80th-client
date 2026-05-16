@@ -37,6 +37,7 @@ export default function BulkMapEditorPage() {
     startTy: number;
     moved: boolean;
   } | null>(null);
+  const skipMarkerClickRef = useRef(false);
   const scaleRef = useRef(scale);
   const txRef = useRef(tx);
   const tyRef = useRef(ty);
@@ -214,6 +215,23 @@ export default function BulkMapEditorPage() {
       yRatio: booth.yRatio ?? 0.5,
     };
     focusOnPin(pos.xRatio, pos.yRatio);
+  };
+
+  const handleMarkerPointerDown = (e: React.PointerEvent<HTMLButtonElement>, boothId: number) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.stopPropagation();
+    skipMarkerClickRef.current = true;
+    dragRef.current = null;
+    handleSelectBooth(boothId);
+  };
+
+  const handleMarkerClick = (e: React.MouseEvent<HTMLButtonElement>, boothId: number) => {
+    e.stopPropagation();
+    if (skipMarkerClickRef.current) {
+      skipMarkerClickRef.current = false;
+      return;
+    }
+    handleSelectBooth(boothId);
   };
 
   const handlePrevNext = (dir: -1 | 1) => {
@@ -395,11 +413,10 @@ export default function BulkMapEditorPage() {
                     >
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectBooth(b.boothId);
-                        }}
-                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => handleMarkerClick(e, b.boothId)}
+                        onPointerDown={(e) => handleMarkerPointerDown(e, b.boothId)}
+                        onPointerUp={(e) => e.stopPropagation()}
+                        onPointerCancel={(e) => e.stopPropagation()}
                         className={
                           isSelected
                             ? 'flex size-7 items-center justify-center rounded-[14.5px] border-2 border-white text-[14px] font-bold leading-none text-white shadow-lg'
