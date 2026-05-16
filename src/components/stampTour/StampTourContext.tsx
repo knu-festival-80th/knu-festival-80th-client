@@ -15,28 +15,34 @@ import ProcessCard from './ProcessCard';
 
 const steps = [
   {
-    step: 1,
+    step: 'Step 1',
     title: '축제 구석구석 부스 방문하기',
-    description:
-      '축제 지도에 표시된 다양한 테마 부스를\n탐방해 보세요. 축제 맵(Map)을 확인하면\n더 효율적으로 이동할 수 있어요!',
+    description: (
+      <>
+        축제 지도에 표시된 다양한 테마 부스를
+        <br />
+        탐방해 보세요. 축제 맵(Map)을 확인하면
+        <br />더 효율적으로 이동할 수 있어요!
+      </>
+    ),
     bgSrc: step1Bg,
-    imgSrc: step1Img,
+    illustSrc: step1Img,
   },
   {
-    step: 2,
+    step: 'Step 2',
     title: '미션 수행하고 스탬프 받기',
     description:
       '총 16개의 부스에서 준비한 간단한 미션이나 퀴즈를 완료해 주세요. 미션 성공 시, 스탬프 북에 소중한 참여 인증 도장을 찍어드립니다.',
     bgSrc: step2Bg,
-    imgSrc: step2Img,
+    illustSrc: step2Img,
   },
   {
-    step: 3,
+    step: 'Step 3',
     title: '스탬프 모아 상품 응모하기',
     description:
       '모든 미션을 완료해 경품 응모권으로 교환하거나, 럭키 드로우에 참여할 기회를 잡으세요.',
     bgSrc: step3Bg,
-    imgSrc: step3Img,
+    illustSrc: step3Img,
   },
 ];
 
@@ -76,7 +82,7 @@ const StampTourContext = () => {
         <ol className="flex w-full flex-col gap-[30px]">
           {steps.map((s) => (
             <li key={s.step}>
-              <ProcessCard {...s} onButtonClick={goToBooths} />
+              <ProcessCard {...s} />
             </li>
           ))}
         </ol>
