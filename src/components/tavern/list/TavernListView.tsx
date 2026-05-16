@@ -58,13 +58,13 @@ function TavernCompactCard({ tavern, onSelect }: { tavern: Tavern; onSelect: () 
     <button
       type="button"
       onClick={onSelect}
-      className="flex w-full items-center justify-between rounded-[12px] border border-[#e5e5e5] bg-white px-5 py-4"
+      className="flex w-full items-center justify-between rounded-[12px] border border-[#e5e5e5] bg-white px-5 py-4 text-left"
     >
-      <div className="flex flex-col items-start gap-1.5">
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
         <span className="text-[13px] font-medium tracking-[-0.26px] text-[#808080]">
           자세히 보기 &gt;
         </span>
-        <span className="text-[18px] font-bold leading-none tracking-[-0.36px] text-black">
+        <span className="w-full text-left text-[18px] font-bold leading-[1.2] tracking-[-0.36px] text-black">
           {tavern.name}
         </span>
       </div>

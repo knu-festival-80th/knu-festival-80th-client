@@ -8,7 +8,9 @@ export type RollingPaperWriteModalProps = {
   boardVariant: number;
   placedNotes: PlacedRollingPaperNote[];
   isSubmitting?: boolean;
+  placementErrorMessage?: string | null;
   onClose: () => void;
+  onPlacementErrorClear?: () => void;
   onPlace: (note: PlacedRollingPaperNote) => void | Promise<void>;
 };
 

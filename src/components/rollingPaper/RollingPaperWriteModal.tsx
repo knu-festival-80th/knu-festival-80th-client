@@ -28,7 +28,9 @@ export default function RollingPaperWriteModal({
   boardVariant,
   placedNotes,
   isSubmitting = false,
+  placementErrorMessage,
   onClose,
+  onPlacementErrorClear,
   onPlace,
 }: RollingPaperWriteModalProps) {
   const [step, setStep] = useState<RollingPaperWriteStep>('compose');
@@ -80,6 +82,8 @@ export default function RollingPaperWriteModal({
   };
 
   const handleBack = () => {
+    onPlacementErrorClear?.();
+
     if (step === 'compose') {
       onClose();
       return;
@@ -89,6 +93,7 @@ export default function RollingPaperWriteModal({
   };
 
   const handleNext = () => {
+    onPlacementErrorClear?.();
     resetPlacementStep();
     setStep('place');
   };
@@ -104,6 +109,11 @@ export default function RollingPaperWriteModal({
       y: selectedPlacement.y,
       boardVariant,
     });
+  };
+
+  const handlePlacementChange = (placement: RollingPaperPlacement) => {
+    onPlacementErrorClear?.();
+    setRequestedPlacement(placement);
   };
 
   return createPortal(
@@ -135,12 +145,13 @@ export default function RollingPaperWriteModal({
             occupiedNotes={occupiedNotes}
             selectedPlacement={selectedPlacement}
             isPlacementAvailable={isPlacementAvailable}
+            placementErrorMessage={placementErrorMessage}
             scale={scale}
             pan={pan}
-            onPlacementChange={setRequestedPlacement}
+            onPlacementChange={handlePlacementChange}
             onScaleChange={setScale}
             onPanChange={setPan}
-            onPlaceDisabled={!canPlace}
+            onPlaceDisabled={!canPlace || Boolean(placementErrorMessage)}
             isSubmitting={isSubmitting}
             onPlace={handlePlace}
           />

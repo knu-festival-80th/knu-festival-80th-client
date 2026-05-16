@@ -1,6 +1,6 @@
 import { ENDPOINTS, http, omitUndefined, unwrapApiResponse, unwrapVoidApiResponse } from '@/apis';
 import type { ApiResponse } from '@/apis/types';
-import { getMockBooth, getMockBooths, getMockMapBooths } from '@/mocks/taverns';
+import { getMockBooth, getMockBooths } from '@/mocks/taverns';
 
 export type BoothSort = 'likes' | 'waiting-asc';
 
@@ -77,10 +77,6 @@ export async function listBooths(sort: BoothSort = 'likes'): Promise<BoothListIt
 }
 
 export async function listMapBooths(): Promise<BoothMapItem[]> {
-  if (import.meta.env.DEV) {
-    return getMockMapBooths();
-  }
-
   const response = await http.get<ApiResponse<BoothMapItem[]>>(ENDPOINTS.booths.map);
   return unwrapApiResponse(response.data);
 }

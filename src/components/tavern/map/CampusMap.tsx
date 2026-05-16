@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+  type PointerEvent,
+} from 'react';
 import { FiCircle, FiMinus, FiPlus } from 'react-icons/fi';
 
 import tavernMapImage from '@/assets/images/map.svg';
@@ -7,6 +14,8 @@ import { festivalMap, type Tavern } from '@/constants/taverns';
 const MAP_BASE_VIEWPORT_SIZE = 335;
 const MAP_RENDER_WIDTH = 3942.121;
 const MAP_RENDER_HEIGHT = MAP_RENDER_WIDTH * (festivalMap.height / festivalMap.width);
+const MAP_CANVAS_WIDTH = 3200;
+const MAP_CANVAS_HEIGHT = Math.round(MAP_CANVAS_WIDTH * (festivalMap.height / festivalMap.width));
 const MAP_RENDER_OFFSET_X = -2965;
 const MAP_RENDER_OFFSET_Y = -2927;
 const MAP_RENDER_SCALE = MAP_RENDER_WIDTH / festivalMap.width;
@@ -128,13 +137,6 @@ const getAnchoredPan = (
   };
 };
 
-const getSelectedLabelClassName = (tavern: Tavern) => {
-  const { x } = getMapPoint(tavern);
-  if (x < 74) return 'left-0 translate-x-0';
-  if (x > MAP_BASE_VIEWPORT_SIZE - 74) return 'right-0 translate-x-0';
-  return 'left-1/2 -translate-x-1/2';
-};
-
 const getMarkerLabel = (tavern: Tavern) => String(tavern.boothId);
 
 const getSelectedLabel = (tavern: Tavern) => tavern.name;
@@ -176,10 +178,10 @@ export default function CampusMap({
   const pointerMapRef = useRef(new Map<number, MapPoint>());
   const lastDragPointRef = useRef<MapPoint | null>(null);
   const pinchStateRef = useRef<PinchState | null>(null);
+  const skipMarkerClickRef = useRef(false);
   const scaleRef = useRef(MAP_DEFAULT_SCALE);
   const panRef = useRef(getScaledInitialMapPan(MAP_BASE_VIEWPORT_SIZE));
-
-  const initialFocusDone = useRef(false);
+  const selectedTavernRef = useRef<Tavern | null>(selectedTavern);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -189,11 +191,10 @@ export default function CampusMap({
       const nextSize = viewport.getBoundingClientRect().width;
       if (nextSize <= 0) return;
 
-      if (focusSelected && selectedTavern && !initialFocusDone.current) {
-        initialFocusDone.current = true;
+      if (focusSelected && selectedTavernRef.current) {
         const focusScale = clampScale(MAP_FOCUS_SCALE);
         const focusPan = clampMapPan(
-          getFocusedMapPan(selectedTavern, focusScale, nextSize),
+          getFocusedMapPan(selectedTavernRef.current, focusScale, nextSize),
           focusScale,
           nextSize,
         );
@@ -219,7 +220,29 @@ export default function CampusMap({
     resizeObserver.observe(viewport);
 
     return () => resizeObserver.disconnect();
-  }, [focusSelected, selectedTavern]);
+  }, [focusSelected]);
+
+  useEffect(() => {
+    selectedTavernRef.current = selectedTavern;
+
+    if (!focusSelected || !selectedTavern || viewportSize <= 0) return;
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      const focusScale = clampScale(MAP_FOCUS_SCALE);
+      const focusPan = clampMapPan(
+        getFocusedMapPan(selectedTavern, focusScale, viewportSize),
+        focusScale,
+        viewportSize,
+      );
+
+      scaleRef.current = focusScale;
+      panRef.current = focusPan;
+      setMapScale(focusScale);
+      setMapPan(focusPan);
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [focusSelected, selectedTavern, viewportSize]);
 
   const applyMapViewport = (nextScale: number, nextPan: MapPoint) => {
     const clampedScale = clampScale(nextScale);
@@ -338,6 +361,33 @@ export default function CampusMap({
     applyMapViewport(nextScale, nextPan);
   };
 
+  const resetPointerGesture = () => {
+    pointerMapRef.current.clear();
+    lastDragPointRef.current = null;
+    pinchStateRef.current = null;
+    setIsGestureActive(false);
+  };
+
+  const handleMarkerPointerDown = (event: PointerEvent<HTMLButtonElement>, tavern: Tavern) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+    event.stopPropagation();
+    skipMarkerClickRef.current = true;
+    resetPointerGesture();
+    handleSelectTavern(tavern);
+  };
+
+  const handleMarkerClick = (event: MouseEvent<HTMLButtonElement>, tavern: Tavern) => {
+    event.stopPropagation();
+
+    if (skipMarkerClickRef.current) {
+      skipMarkerClickRef.current = false;
+      return;
+    }
+
+    handleSelectTavern(tavern);
+  };
+
   return (
     <div className="flex w-full flex-col gap-5">
       <div
@@ -357,15 +407,12 @@ export default function CampusMap({
             transition: isGestureActive
               ? 'none'
               : 'transform 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            willChange: 'transform',
+            contain: 'layout paint size',
+            backfaceVisibility: 'hidden',
           }}
         >
-          <img
-            src={tavernMapImage}
-            alt="대동제 주막 지도"
-            className="pointer-events-none absolute h-auto max-w-none select-none"
-            style={mapImageStyle}
-            draggable={false}
-          />
+          <CanvasMapImage />
           {taverns.map((tavern) => {
             const selected = selectedTavern?.id === tavern.id;
 
@@ -375,23 +422,25 @@ export default function CampusMap({
                 type="button"
                 aria-label={`${tavern.name} 지도 위치: ${tavern.location}`}
                 aria-pressed={selected}
-                className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center ${
+                className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center p-3 ${
                   selected ? 'z-30' : 'z-10'
                 } ${interactive ? '' : 'pointer-events-none'}`}
                 style={getMapMarkerStyle(tavern)}
-                onPointerDown={(event) => event.stopPropagation()}
-                onClick={() => handleSelectTavern(tavern)}
+                onPointerDown={(event) => handleMarkerPointerDown(event, tavern)}
+                onPointerUp={(event) => event.stopPropagation()}
+                onPointerCancel={(event) => event.stopPropagation()}
+                onClick={(event) => handleMarkerClick(event, tavern)}
               >
                 {selected && (
                   <span
-                    className={`absolute bottom-[34px] z-30 whitespace-nowrap rounded-[4px] border bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] shadow-sm ${getSelectedLabelClassName(tavern)}`}
+                    className="absolute bottom-[55px] left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-[4px] border bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] shadow-sm"
                     style={getLabelStyle(tavern)}
                   >
                     {getSelectedLabel(tavern)}
                   </span>
                 )}
                 <span
-                  className="flex size-7 items-center justify-center rounded-[14.5px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px]"
+                  className="flex size-9.5 items-center justify-center rounded-[20px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px]"
                   style={getMarkerStyle(selected, tavern)}
                 >
                   {getMarkerLabel(tavern)}
@@ -449,5 +498,61 @@ export default function CampusMap({
         </div>
       )}
     </div>
+  );
+}
+
+function CanvasMapImage() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasReady, setCanvasReady] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const context = canvas.getContext('2d', { alpha: true });
+    if (!context) return;
+
+    let cancelled = false;
+    const image = new Image();
+
+    image.decoding = 'async';
+    image.onload = () => {
+      if (cancelled) return;
+
+      canvas.width = MAP_CANVAS_WIDTH;
+      canvas.height = MAP_CANVAS_HEIGHT;
+      context.clearRect(0, 0, MAP_CANVAS_WIDTH, MAP_CANVAS_HEIGHT);
+      context.drawImage(image, 0, 0, MAP_CANVAS_WIDTH, MAP_CANVAS_HEIGHT);
+      setCanvasReady(true);
+    };
+    image.src = tavernMapImage;
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <>
+      {!canvasReady && (
+        <img
+          src={tavernMapImage}
+          alt="대동제 주막 지도"
+          className="pointer-events-none absolute h-auto max-w-none select-none"
+          style={mapImageStyle}
+          draggable={false}
+        />
+      )}
+      <canvas
+        ref={canvasRef}
+        aria-label="대동제 주막 지도"
+        className={`pointer-events-none absolute h-auto max-w-none select-none ${
+          canvasReady ? '' : 'opacity-0'
+        }`}
+        style={mapImageStyle}
+        width={MAP_CANVAS_WIDTH}
+        height={MAP_CANVAS_HEIGHT}
+      />
+    </>
   );
 }
