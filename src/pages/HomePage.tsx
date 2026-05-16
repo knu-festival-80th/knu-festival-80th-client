@@ -32,6 +32,7 @@ export default function HomePage() {
           <img
             src={heroBg}
             alt=""
+            fetchPriority="high"
             className="absolute inset-0 size-full max-w-none object-bottom"
           />
           <div
