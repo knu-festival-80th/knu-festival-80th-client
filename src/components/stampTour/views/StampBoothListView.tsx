@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import BoothCard from '@/components/stampTour/BoothCard';
-import boothMap1 from '@/assets/stampTour/booth_map_1.svg';
-import boothMap2 from '@/assets/stampTour/booth_map_2.svg';
-import boothMap3 from '@/assets/stampTour/booth_map_3.svg';
-import boothMap4 from '@/assets/stampTour/booth_map_4.svg';
-import boothMap5 from '@/assets/stampTour/booth_map_5.svg';
-import boothMap6 from '@/assets/stampTour/booth_map_6.svg';
-import boothMap7 from '@/assets/stampTour/booth_map_7.svg';
+import boothMap1 from '@/assets/stampTour/booth_map_1.webp';
+import boothMap2 from '@/assets/stampTour/booth_map_2.webp';
+import boothMap3 from '@/assets/stampTour/booth_map_3.webp';
+import boothMap4 from '@/assets/stampTour/booth_map_4.webp';
+import boothMap5 from '@/assets/stampTour/booth_map_5.webp';
+import boothMap6 from '@/assets/stampTour/booth_map_6.webp';
+import boothMap7 from '@/assets/stampTour/booth_map_7.webp';
 
 type Booth = {
   id: number;
