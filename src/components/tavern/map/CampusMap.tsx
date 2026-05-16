@@ -135,13 +135,6 @@ const getAnchoredPan = (
   };
 };
 
-const getSelectedLabelClassName = (tavern: Tavern) => {
-  const { x } = getMapPoint(tavern);
-  if (x < 74) return 'left-0 translate-x-0';
-  if (x > MAP_BASE_VIEWPORT_SIZE - 74) return 'right-0 translate-x-0';
-  return 'left-1/2 -translate-x-1/2';
-};
-
 const getMarkerLabel = (tavern: Tavern) => String(tavern.boothId);
 
 const getSelectedLabel = (tavern: Tavern) => tavern.name;
@@ -430,7 +423,7 @@ export default function CampusMap({
                 type="button"
                 aria-label={`${tavern.name} 지도 위치: ${tavern.location}`}
                 aria-pressed={selected}
-                className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center ${
+                className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center p-3 ${
                   selected ? 'z-30' : 'z-10'
                 } ${interactive ? '' : 'pointer-events-none'}`}
                 style={getMapMarkerStyle(tavern)}
@@ -441,14 +434,14 @@ export default function CampusMap({
               >
                 {selected && (
                   <span
-                    className={`absolute bottom-[34px] z-30 whitespace-nowrap rounded-[4px] border bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] shadow-sm ${getSelectedLabelClassName(tavern)}`}
+                    className="absolute bottom-[55px] left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-[4px] border bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] shadow-sm"
                     style={getLabelStyle(tavern)}
                   >
                     {getSelectedLabel(tavern)}
                   </span>
                 )}
                 <span
-                  className="flex size-7 items-center justify-center rounded-[14.5px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px]"
+                  className="flex size-9.5 items-center justify-center rounded-[20px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px]"
                   style={getMarkerStyle(selected, tavern)}
                 >
                   {getMarkerLabel(tavern)}
