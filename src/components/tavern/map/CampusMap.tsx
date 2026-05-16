@@ -155,6 +155,7 @@ const getLabelStyle = (tavern: Tavern): CSSProperties => {
 
 type CampusMapProps = {
   interactive?: boolean;
+  focusSelected?: boolean;
   taverns: Tavern[];
   selectedTavern: Tavern | null;
   onSelectTavern: (tavern: Tavern) => void;
@@ -162,6 +163,7 @@ type CampusMapProps = {
 
 export default function CampusMap({
   interactive = true,
+  focusSelected = false,
   taverns,
   selectedTavern,
   onSelectTavern,
@@ -177,6 +179,8 @@ export default function CampusMap({
   const scaleRef = useRef(MAP_DEFAULT_SCALE);
   const panRef = useRef(getScaledInitialMapPan(MAP_BASE_VIEWPORT_SIZE));
 
+  const initialFocusDone = useRef(false);
+
   useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
@@ -184,6 +188,22 @@ export default function CampusMap({
     const updateViewportSize = () => {
       const nextSize = viewport.getBoundingClientRect().width;
       if (nextSize <= 0) return;
+
+      if (focusSelected && selectedTavern && !initialFocusDone.current) {
+        initialFocusDone.current = true;
+        const focusScale = clampScale(MAP_FOCUS_SCALE);
+        const focusPan = clampMapPan(
+          getFocusedMapPan(selectedTavern, focusScale, nextSize),
+          focusScale,
+          nextSize,
+        );
+        setViewportSize(nextSize);
+        scaleRef.current = focusScale;
+        panRef.current = focusPan;
+        setMapScale(focusScale);
+        setMapPan(focusPan);
+        return;
+      }
 
       const nextPan = getScaledInitialMapPan(nextSize);
       setViewportSize(nextSize);
@@ -199,7 +219,7 @@ export default function CampusMap({
     resizeObserver.observe(viewport);
 
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [focusSelected, selectedTavern]);
 
   const applyMapViewport = (nextScale: number, nextPan: MapPoint) => {
     const clampedScale = clampScale(nextScale);
