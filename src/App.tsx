@@ -12,6 +12,7 @@ import WaitingListPage from '@/pages/boothManage/WaitingListPage';
 import BoothCreatePage from '@/pages/console/BoothCreatePage';
 import BoothEditPage from '@/pages/console/BoothEditPage';
 import BoothListPage from '@/pages/console/BoothListPage';
+import BulkMapEditorPage from '@/pages/console/BulkMapEditorPage';
 import BoothPasswordPage from '@/pages/console/BoothPasswordPage';
 import CanvasAdminPage from '@/pages/console/CanvasAdminPage';
 import ConsoleLoginPage from '@/pages/console/ConsoleLoginPage';
@@ -59,6 +60,7 @@ export default function App() {
         >
           <Route index element={<BoothListPage />} />
           <Route path="booths/new" element={<BoothCreatePage />} />
+          <Route path="map-editor" element={<BulkMapEditorPage />} />
           <Route path="booths/:boothId/edit" element={<BoothEditPage />} />
           <Route path="booths/:boothId/password" element={<BoothPasswordPage />} />
           <Route path="matching" element={<MatchingOverviewPage />} />
