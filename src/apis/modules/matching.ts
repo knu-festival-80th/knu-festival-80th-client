@@ -188,6 +188,21 @@ export async function resetParticipant(participantId: number): Promise<MatchingS
   return unwrapApiResponse(response.data);
 }
 
+export interface MatchingMatchUpdateRequest {
+  matchedInstagramId: string;
+}
+
+export async function updateMatch(
+  participantId: number,
+  payload: MatchingMatchUpdateRequest,
+): Promise<MatchingStatusResponse> {
+  const response = await http.patch<ApiResponse<MatchingStatusResponse>>(
+    ENDPOINTS.admin.matchingParticipantMatch(participantId),
+    payload,
+  );
+  return unwrapApiResponse(response.data);
+}
+
 export async function getApplicantsCount(): Promise<MatchingApplicantsCountResponse> {
   const response = await http.get<ApiResponse<MatchingApplicantsCountResponse>>(
     ENDPOINTS.matchings.applicantsCount,
