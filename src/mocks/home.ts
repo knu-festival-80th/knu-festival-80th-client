@@ -1,11 +1,11 @@
 import type { DayLineup } from '@/types/home';
-import kwoneunbi from '@/assets/lineup/권은비.png';
-import nctWish from '@/assets/lineup/NCT위시.png';
-import aichillin from '@/assets/lineup/아이칠린.png';
-import zico from '@/assets/lineup/지코.jpg';
-import sunmi from '@/assets/lineup/선미.png';
-import leeyoungji from '@/assets/lineup/이영지.png';
-import ambio from '@/assets/lineup/AMbiO.jpg';
+import kwoneunbi from '@/assets/lineup/권은비.webp';
+import nctWish from '@/assets/lineup/NCT위시.webp';
+import aichillin from '@/assets/lineup/아이칠린.webp';
+import zico from '@/assets/lineup/지코.webp';
+import sunmi from '@/assets/lineup/선미.webp';
+import leeyoungji from '@/assets/lineup/이영지.webp';
+import ambio from '@/assets/lineup/AMbiO.webp';
 
 export const MOCK_LINEUP: DayLineup[] = [
   {
