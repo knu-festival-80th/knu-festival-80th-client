@@ -1,16 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  AlertCircle,
-  CheckCircle2,
-  Edit3,
-  Eye,
-  PlayCircle,
-  RotateCcw,
-  Search,
-  Trash2,
-  Users,
-  X,
-} from 'lucide-react';
+import { AlertCircle, Eye, RotateCcw, Search, Trash2, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import { ApiClientError, matchingApi } from '@/apis';
@@ -21,7 +10,7 @@ import type {
   MatchingParticipantsAdminResponse,
   MatchingStatusResponse,
 } from '@/apis';
-import { Button, Card, OverflowMenu, SegmentedTabs } from '@/components/admin/ui';
+import { Card, OverflowMenu, SegmentedTabs } from '@/components/admin/ui';
 
 function formatIso(iso: string | null | undefined): string {
   if (!iso) return '-';
@@ -44,7 +33,6 @@ type StatusFilter = 'ALL' | MatchingParticipantStatus;
 type GenderFilter = 'ALL' | MatchingGender;
 
 export default function MatchingOverviewPage() {
-  const queryClient = useQueryClient();
   const statusQuery = useQuery({
     queryKey: ['admin', 'matchings', 'status'],
     queryFn: matchingApi.getStatus,
@@ -56,7 +44,7 @@ export default function MatchingOverviewPage() {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold text-[var(--admin-text)]">인스타팅</h1>
         <p className="text-sm text-[var(--admin-text-muted)]">
-          현황 확인, 매칭 실행, 신청자 관리를 한 화면에서 처리합니다.
+          현황 확인 및 신청자 관리를 한 화면에서 처리합니다.
         </p>
       </div>
 
@@ -80,12 +68,6 @@ export default function MatchingOverviewPage() {
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="flex flex-col gap-5">
             <ScheduleCard status={statusQuery.data} />
-
-            <JobsCard
-              onJobRun={() => {
-                queryClient.invalidateQueries({ queryKey: ['admin', 'matchings'] });
-              }}
-            />
 
             <ParticipantsSection festivalDays={statusQuery.data.festivalDays} />
           </div>
@@ -163,77 +145,7 @@ function Pill({ on, onLabel, offLabel }: { on: boolean; onLabel: string; offLabe
   );
 }
 
-interface JobsCardProps {
-  onJobRun: () => void;
-}
-
-function JobsCard({ onJobRun }: JobsCardProps) {
-  const [resultMessage, setResultMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const runNowMutation = useMutation({
-    mutationFn: matchingApi.runJob,
-    onSuccess: (data) => {
-      setErrorMessage(null);
-      setResultMessage(`${data.matchedPairCount}쌍 매칭, ${data.unmatchedCount}명 미매칭`);
-      onJobRun();
-    },
-    onError: (error: unknown) => {
-      setResultMessage(null);
-      setErrorMessage(
-        error instanceof ApiClientError ? error.message : '매칭 실행에 실패했습니다.',
-      );
-    },
-  });
-
-  const handleRunNow = () => {
-    if (!window.confirm('매칭 잡을 실행합니다. 계속할까요?')) return;
-    runNowMutation.mutate();
-  };
-
-  return (
-    <Card padding="md">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="flex items-center gap-2 text-base font-semibold text-[var(--admin-text)]">
-            <PlayCircle size={16} />
-            매칭 실행
-          </h2>
-          <p className="text-xs text-[var(--admin-text-muted)]">
-            21:00~22:00 자동 실행. 수동 실행이 필요한 경우만 사용하세요.
-          </p>
-        </div>
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          onClick={handleRunNow}
-          disabled={runNowMutation.isPending}
-          iconLeft={<PlayCircle size={13} />}
-        >
-          {runNowMutation.isPending ? '실행 중...' : '지금 실행'}
-        </Button>
-      </div>
-
-      {resultMessage && (
-        <div
-          role="status"
-          className="mt-3 flex items-center gap-2 rounded-md border border-[var(--admin-success)]/30 bg-[var(--admin-success-soft)] px-3 py-2 text-sm text-[var(--admin-success)]"
-        >
-          <CheckCircle2 size={14} />
-          <span>{resultMessage}</span>
-        </div>
-      )}
-      {errorMessage && (
-        <div className="mt-3">
-          <ErrorBanner message={errorMessage} />
-        </div>
-      )}
-    </Card>
-  );
-}
-
-// ---- Participants Section (inlined from MatchingParticipantsPage) ----
+// ---- Participants Section ----
 
 function ParticipantsSection({ festivalDays }: { festivalDays: string[] }) {
   const queryClient = useQueryClient();
@@ -445,7 +357,7 @@ function ParticipantsSection({ festivalDays }: { festivalDays: string[] }) {
 
       {participantsQuery.data && participants.length > 0 && (
         <Card padding="none">
-          <div className="hidden border-b border-[var(--admin-border)] px-5 py-2.5 text-xs font-medium text-[var(--admin-text-muted)] sm:grid sm:grid-cols-[1.5rem_1fr_5rem_6rem_7rem_8rem_7rem] sm:items-center sm:gap-3">
+          <div className="hidden border-b border-[var(--admin-border)] px-5 py-2.5 text-xs font-medium text-[var(--admin-text-muted)] sm:grid sm:grid-cols-[1.5rem_1fr_3.5rem_4.5rem_7rem_8rem_3.5rem] sm:items-center sm:gap-3">
             <div></div>
             <div>Instagram ID</div>
             <div>성별</div>
@@ -520,60 +432,44 @@ function ParticipantRow({
 
   const handleEditSubmit = () => {
     const trimmed = editValue.trim().replace(/^@/, '');
-    if (!trimmed) return;
+    if (!trimmed || trimmed === participant.matchedInstagramId) {
+      setEditing(false);
+      return;
+    }
     onUpdateMatch(trimmed);
     setEditing(false);
   };
 
-  const matchCell = editing ? (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleEditSubmit();
-      }}
-      className="flex items-center gap-1"
-    >
-      <input
-        autoFocus
-        value={editValue}
-        onChange={(e) => setEditValue(e.target.value)}
-        className="h-6 w-24 rounded border border-[var(--admin-primary)] bg-white px-1.5 text-xs outline-none"
-        placeholder="instagram ID"
-      />
-      <button
-        type="submit"
-        className="text-[var(--admin-success)] hover:opacity-70"
-        disabled={busy}
-      >
-        <CheckCircle2 size={14} />
-      </button>
-      <button
-        type="button"
-        onClick={() => setEditing(false)}
-        className="text-[var(--admin-text-muted)] hover:opacity-70"
-      >
-        <X size={14} />
-      </button>
-    </form>
-  ) : (
-    <div className="flex items-center gap-1 min-w-0">
-      <span className="truncate text-[var(--admin-text-muted)]">
-        {participant.matchedInstagramId ? `@${participant.matchedInstagramId}` : '-'}
-      </span>
-      {participant.status === 'MATCHED' && (
+  const matchCell =
+    participant.status === 'MATCHED' ? (
+      editing ? (
+        <input
+          autoFocus
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleEditSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleEditSubmit();
+            if (e.key === 'Escape') setEditing(false);
+          }}
+          className="h-6 w-full min-w-0 rounded border border-[var(--admin-primary)] bg-white px-1.5 text-xs outline-none"
+          placeholder="instagram ID"
+        />
+      ) : (
         <button
           type="button"
           onClick={() => {
             setEditValue(participant.matchedInstagramId ?? '');
             setEditing(true);
           }}
-          className="shrink-0 text-[var(--admin-text-faint)] hover:text-[var(--admin-primary)]"
+          className="min-w-0 truncate text-left text-[var(--admin-text-muted)] hover:text-[var(--admin-primary)] hover:underline"
         >
-          <Edit3 size={11} />
+          @{participant.matchedInstagramId}
         </button>
-      )}
-    </div>
-  );
+      )
+    ) : (
+      <span className="text-[var(--admin-text-faint)]">-</span>
+    );
 
   return (
     <li
@@ -583,7 +479,7 @@ function ParticipantRow({
         'hover:bg-[var(--admin-surface-hover)]',
       ].join(' ')}
     >
-      <div className="hidden px-5 py-3 sm:grid sm:grid-cols-[1.5rem_1fr_5rem_6rem_7rem_8rem_7rem] sm:items-center sm:gap-3 sm:text-sm">
+      <div className="hidden px-5 py-3 sm:grid sm:grid-cols-[1.5rem_1fr_3.5rem_4.5rem_7rem_8rem_3.5rem] sm:items-center sm:gap-3 sm:text-sm">
         <div className="tabular text-[11px] text-[var(--admin-text-faint)]">
           #{participant.participantId}
         </div>
@@ -620,26 +516,24 @@ function ParticipantRow({
         <div>{matchCell}</div>
         <div className="tabular text-[var(--admin-text-muted)]">{participant.maskedPhone}</div>
         <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button
+          <button
             type="button"
-            variant="secondary"
-            size="sm"
             onClick={onReset}
             disabled={busy || participant.status === 'PENDING'}
-            iconLeft={<RotateCcw size={12} />}
+            className="flex h-6 w-6 items-center justify-center rounded text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-hover)] hover:text-[var(--admin-text)] disabled:opacity-30"
+            title="리셋"
           >
-            리셋
-          </Button>
-          <Button
+            <RotateCcw size={13} />
+          </button>
+          <button
             type="button"
-            variant="danger"
-            size="sm"
             onClick={onDelete}
             disabled={busy}
-            iconLeft={<Trash2 size={12} />}
+            className="flex h-6 w-6 items-center justify-center rounded text-[var(--admin-text-muted)] hover:bg-[var(--admin-danger-soft)] hover:text-[var(--admin-danger)] disabled:opacity-30"
+            title="삭제"
           >
-            삭제
-          </Button>
+            <Trash2 size={13} />
+          </button>
         </div>
       </div>
 
