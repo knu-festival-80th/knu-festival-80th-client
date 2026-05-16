@@ -31,7 +31,7 @@ const BoothCard = ({
       <div className="flex w-full flex-col items-start gap-5">
         <ZoneBadge label={zone} />
         <h3 className="font-wanted-sans text-heading2 font-bold tracking-tight text-ink">{name}</h3>
-        <p className="font-wanted-sans text-body1 leading-[1.4] tracking-tight text-[#4d4d4d]">
+        <p className="font-wanted-sans text-body1 leading-[1.4] tracking-tight text-[#4d4d4d] whitespace-pre-line">
           {description}
         </p>
       </div>
