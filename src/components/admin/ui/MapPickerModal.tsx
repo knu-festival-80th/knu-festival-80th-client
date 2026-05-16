@@ -333,10 +333,10 @@ function MapPickerModalInner({
           <div className="flex min-h-0 flex-1 items-center justify-center px-3">
             <div
               ref={containerRef}
-              className="relative w-full max-w-[1200px] cursor-grab overflow-hidden rounded-xl bg-white select-none active:cursor-grabbing"
+              className="relative w-full cursor-grab overflow-hidden rounded-xl bg-white select-none active:cursor-grabbing"
               style={{
                 aspectRatio: ASPECT,
-                maxHeight: 'calc(100dvh - 180px)',
+                maxWidth: `min(1200px, calc((100dvh - 180px) * ${ASPECT}))`,
                 touchAction: 'none',
               }}
               onPointerDown={handlePointerDown}
