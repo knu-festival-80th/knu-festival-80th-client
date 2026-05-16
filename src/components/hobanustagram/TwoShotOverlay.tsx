@@ -99,35 +99,36 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
           </button>
         </div>
 
-        <div className="shrink-0 px-5 mb-5">
-          <p className="font-wanted-sans text-xl font-bold tracking-[-0.4px] text-black">
-            인생두컷 프레임 미리보기
-          </p>
-          <p className="mt-2 font-wanted-sans text-sm text-gray">
-            4장을 찍은 뒤 2장을 고르고, 마지막에 원하는 프레임을 선택해요.
-          </p>
+        <div className="flex-1 min-h-0 flex flex-col justify-center px-5 overflow-hidden">
+          <div className="shrink-0 mb-4">
+            <p className="font-wanted-sans text-xl font-bold tracking-[-0.4px] text-black">
+              인생두컷 프레임 미리보기
+            </p>
+            <p className="mt-2 font-wanted-sans text-sm text-gray">
+              아래 프레임은 예시예요.
+              <br />
+              4장을 찍은 뒤 2장을 고르고, 마지막에 원하는 프레임을 선택해요.
+            </p>
+          </div>
+
+          <div className="shrink-0 flex gap-3">
+            {([1, 2] as const).map((filterId) => (
+              <div key={filterId} className="relative flex-1 min-w-0 overflow-hidden rounded-2xl">
+                <div className="absolute top-2 left-2 z-10 rounded bg-black/60 px-1.5 py-0.5">
+                  <span className="font-wanted-sans text-xs text-white">미리보기</span>
+                </div>
+                <img
+                  src={FRAME_URLS[filterId]}
+                  alt={`프레임 ${filterId}`}
+                  className="block w-full h-auto"
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="flex-1 min-h-0 flex items-center justify-center gap-3 px-5 overflow-hidden">
-          {([1, 2] as const).map((filterId) => (
-            <button
-              key={filterId}
-              type="button"
-              onClick={() => setSelectedFilter(filterId)}
-              className={`flex-1 min-w-0 overflow-hidden rounded-2xl border-2 transition-colors ${
-                selectedFilter === filterId ? 'border-sub-red' : 'border-[#EEEEEE]'
-              }`}
-            >
-              <img
-                src={FRAME_URLS[filterId]}
-                alt={`프레임 ${filterId}`}
-                className="block h-auto w-full"
-              />
-            </button>
-          ))}
-        </div>
-
-        <div className="shrink-0 px-5 pt-5 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+        <div className="shrink-0 px-5 pt-3 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+          <p className="mb-3 font-wanted-sans text-sm text-gray text-center">촬영 후 선택 가능</p>
           <button
             type="button"
             onClick={() => setStep('shooting')}
