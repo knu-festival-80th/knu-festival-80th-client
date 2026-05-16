@@ -1,24 +1,9 @@
 export function captureVideoFrame(
   video: HTMLVideoElement,
   mirror: boolean,
-  slotAspect: number,
+  crop: { sx: number; sy: number; sw: number; sh: number },
 ): string {
-  const vw = video.videoWidth;
-  const vh = video.videoHeight;
-
-  let sx: number, sy: number, sw: number, sh: number;
-  if (vw / vh > slotAspect) {
-    sh = vh;
-    sw = vh * slotAspect;
-    sx = (vw - sw) / 2;
-    sy = 0;
-  } else {
-    sw = vw;
-    sh = vw / slotAspect;
-    sx = 0;
-    sy = (vh - sh) / 2;
-  }
-
+  const { sx, sy, sw, sh } = crop;
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(sw);
   canvas.height = Math.round(sh);

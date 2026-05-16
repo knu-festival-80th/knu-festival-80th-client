@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ChevronDown, Plus } from 'lucide-react';
-import { rollingPaperApi } from '@/apis';
+import { ApiClientError, rollingPaperApi } from '@/apis';
 import {
   getRollingPaperBoardPath,
   getRollingPaperCategory,
@@ -42,6 +42,9 @@ import { rollingPaperItemMotion } from './rollingPaperMotion';
 const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
 const PENDING_POSTIT_REFETCH_INTERVAL_MS = 5000;
 const PENDING_POSTIT_LOCAL_VISIBLE_MS = 60000;
+const POSTIT_POSITION_CONFLICT_CODE = 'CP008';
+const POSTIT_POSITION_CONFLICT_MESSAGE =
+  '이미 다른 사용자가 같은 위치에 메시지를 붙였어요. 다른 위치에 다시 시도해주세요.';
 
 type RollingPaperBoardProps = {
   categoryId?: string;
@@ -125,6 +128,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   const [boardScale, setBoardScale] = useState<number>(ROLLING_PAPER_ZOOM.default);
   const [boardPan, setBoardPan] = useState<RollingPaperPan>(INITIAL_BOARD_PAN);
   const [focusedNoteId, setFocusedNoteId] = useState<string | null>(null);
+  const [placementErrorMessage, setPlacementErrorMessage] = useState<string | null>(null);
   const postitsQuery = useQuery({
     queryKey: ['rollingPaper', 'postits', boardId],
     queryFn: () => rollingPaperApi.listPostits(boardId!),
@@ -204,6 +208,8 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   };
 
   const handlePlaceNote = async (note: PlacedRollingPaperNote) => {
+    setPlacementErrorMessage(null);
+
     if (!boardId || currentBoardNotes.length >= boardCapacity) {
       return;
     }
@@ -221,13 +227,31 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       return;
     }
 
-    const createdPostit = await createPostitMutation.mutateAsync({
-      ...note,
-      boardId,
-      boardVariant: boardIndex,
-      categoryId: category.id,
-      channelId: channel.id,
-    });
+    let createdPostit: Awaited<ReturnType<typeof rollingPaperApi.createPostit>>;
+
+    try {
+      createdPostit = await createPostitMutation.mutateAsync({
+        ...note,
+        boardId,
+        boardVariant: boardIndex,
+        categoryId: category.id,
+        channelId: channel.id,
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError && error.code === POSTIT_POSITION_CONFLICT_CODE) {
+        setPlacementErrorMessage(POSTIT_POSITION_CONFLICT_MESSAGE);
+        await queryClient.refetchQueries({ queryKey: ['rollingPaper', 'postits', boardId] });
+        await queryClient.invalidateQueries({ queryKey: ['rollingPaper', 'boards', questionId] });
+        return;
+      }
+
+      setPlacementErrorMessage(
+        error instanceof ApiClientError
+          ? error.message
+          : '메시지를 붙이지 못했어요. 잠시 후 다시 시도해주세요.',
+      );
+      return;
+    }
 
     if (createdPostit.moderationStatus === 'PENDING') {
       const pendingNote = {
@@ -289,7 +313,10 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
                 isCurrentBoardFull || !boardId ? 'hidden' : 'bg-sub-red'
               }`}
               disabled={isCurrentBoardFull || !boardId}
-              onClick={() => setIsWriteModalOpen(true)}
+              onClick={() => {
+                setPlacementErrorMessage(null);
+                setIsWriteModalOpen(true);
+              }}
             >
               <Plus className="size-4" />
               <span>메시지 남기기</span>
@@ -356,7 +383,12 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
           boardVariant={boardIndex}
           placedNotes={scopedPlacedNotes}
           isSubmitting={createPostitMutation.isPending}
-          onClose={() => setIsWriteModalOpen(false)}
+          placementErrorMessage={placementErrorMessage}
+          onClose={() => {
+            setPlacementErrorMessage(null);
+            setIsWriteModalOpen(false);
+          }}
+          onPlacementErrorClear={() => setPlacementErrorMessage(null)}
           onPlace={handlePlaceNote}
         />
       )}

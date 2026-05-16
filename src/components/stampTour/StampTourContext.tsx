@@ -1,42 +1,48 @@
-import stampHero from '@/assets/stampTour/stampHero.svg';
-import step1Bg from '@/assets/stampTour/step_1_bg.png';
-import step1Img from '@/assets/stampTour/step_1.svg';
-import step2Bg from '@/assets/stampTour/step_2_bg.png';
-import step2Img from '@/assets/stampTour/step_2.svg';
-import step3Bg from '@/assets/stampTour/step_3_bg.png';
-import step3Img from '@/assets/stampTour/step_3.svg';
-import prizeStars from '@/assets/stampTour/prize_stars.png';
-import prize1 from '@/assets/stampTour/prize_1.svg';
-import prize2 from '@/assets/stampTour/prize_2.svg';
-import prize3 from '@/assets/stampTour/prize_3.svg';
+import stampHero from '@/assets/stampTour/stampHero.webp';
+import step1Bg from '@/assets/stampTour/step_1_bg.webp';
+import step1Img from '@/assets/stampTour/step_1.webp';
+import step2Bg from '@/assets/stampTour/step_2_bg.webp';
+import step2Img from '@/assets/stampTour/step_2.webp';
+import step3Bg from '@/assets/stampTour/step_3_bg.webp';
+import step3Img from '@/assets/stampTour/step_3.webp';
+import prizeStars from '@/assets/stampTour/prize_stars.webp';
+import prize1 from '@/assets/stampTour/prize_1.webp';
+import prize2 from '@/assets/stampTour/prize_2.webp';
+import prize3 from '@/assets/stampTour/prize_3.webp';
 import { useNavigate } from 'react-router-dom';
-import OutlineButton from './OutlineButton';
-import ProcessCard from './ProcessCard';
+import OutlineButton from '@/components/common/OutlineButton';
+import ProcessCard from '@/components/common/ProcessCard';
 
 const steps = [
   {
-    step: 1,
+    step: 'Step 1',
     title: '축제 구석구석 부스 방문하기',
-    description:
-      '축제 지도에 표시된 다양한 테마 부스를\n탐방해 보세요. 축제 맵(Map)을 확인하면\n더 효율적으로 이동할 수 있어요!',
+    description: (
+      <>
+        축제 지도에 표시된 다양한 테마 부스를
+        <br />
+        탐방해 보세요. 축제 맵(Map)을 확인하면
+        <br />더 효율적으로 이동할 수 있어요!
+      </>
+    ),
     bgSrc: step1Bg,
-    imgSrc: step1Img,
+    illustSrc: step1Img,
   },
   {
-    step: 2,
+    step: 'Step 2',
     title: '미션 수행하고 스탬프 받기',
     description:
       '총 16개의 부스에서 준비한 간단한 미션이나 퀴즈를 완료해 주세요. 미션 성공 시, 스탬프 북에 소중한 참여 인증 도장을 찍어드립니다.',
     bgSrc: step2Bg,
-    imgSrc: step2Img,
+    illustSrc: step2Img,
   },
   {
-    step: 3,
+    step: 'Step 3',
     title: '스탬프 모아 상품 응모하기',
     description:
       '모든 미션을 완료해 경품 응모권으로 교환하거나, 럭키 드로우에 참여할 기회를 잡으세요.',
     bgSrc: step3Bg,
-    imgSrc: step3Img,
+    illustSrc: step3Img,
   },
 ];
 
@@ -70,13 +76,20 @@ const StampTourContext = () => {
           <OutlineButton label="부스 위치 확인하기" showArrow variant="red" onClick={goToBooths} />
         </div>
 
-        <img src={stampHero} alt="스탬프 투어 카드" className="w-[297px]" />
+        <img
+          src={stampHero}
+          alt="스탬프 투어 카드"
+          fetchPriority="high"
+          width={297}
+          height={245}
+          className="w-[297px]"
+        />
 
         {/* Step cards */}
         <ol className="flex w-full flex-col gap-[30px]">
           {steps.map((s) => (
             <li key={s.step}>
-              <ProcessCard {...s} onButtonClick={goToBooths} />
+              <ProcessCard {...s} />
             </li>
           ))}
         </ol>
@@ -104,6 +117,7 @@ const StampTourContext = () => {
                         src={prizeStars}
                         alt=""
                         aria-hidden
+                        loading="lazy"
                         className="pointer-events-none size-full object-bottom"
                       />
                     </div>
@@ -120,6 +134,7 @@ const StampTourContext = () => {
                 <img
                   src={imgSrc}
                   alt={name.replace('\n', ' ')}
+                  loading="lazy"
                   className="shrink-0 size-[156px] object-contain"
                 />
               </li>

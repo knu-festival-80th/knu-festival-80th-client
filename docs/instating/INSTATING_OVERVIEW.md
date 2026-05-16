@@ -16,6 +16,8 @@
 
 세 화면은 상단 탭 네비게이션(`TabNavigation`)을 공유하고 `<Outlet />`으로 렌더링된다. 탭 전환 시 Framer Motion의 `layoutId`를 활용한 슬라이딩 인디케이터가 적용된다.
 
+탭 네비게이션은 `src/components/common/TabNavigation`의 공통 컴포넌트를 사용한다. `src/components/instating/TabNavigation`은 공통 컴포넌트에 인스타팅 탭 목록을 주입하는 래퍼다. 자세한 스펙은 [공통 컴포넌트 문서](../COMMON_COMPONENTS.md#tabnavigation)를 참고한다.
+
 ## 운영 상태 흐름
 
 백엔드는 `registrationOpen`, `resultOpen`, `registrationDeadline`, `resultOpenAt` 네 필드로 현재 단계를 표현한다.
@@ -186,16 +188,18 @@ src/
 │   └── console/
 │       ├── MatchingOverviewPage.tsx
 │       └── MatchingParticipantsPage.tsx
+├── components/common/            ← 공통 컴포넌트 (docs/COMMON_COMPONENTS.md 참고)
+│   ├── TabNavigation.tsx         ← 탭 목록을 props로 받는 공통 탭 네비게이션
+│   ├── OutlineButton.tsx         ← variant 기반 테두리 버튼 (dark/default/red/glass)
+│   └── ProcessCard.tsx           ← 배경+일러스트 스텝 카드
 └── components/instating/
     ├── AlertModal.tsx            ← 공통 에러 모달
-    ├── TabNavigation.tsx
-    ├── OutlineButton.tsx
+    ├── TabNavigation.tsx         ← 공통 TabNavigation에 인스타팅 탭을 주입하는 래퍼
     ├── intro/
     │   ├── ApplicantsNumberSection.tsx
     │   ├── CountDownSection.tsx
     │   ├── CountDownTimer.tsx
-    │   ├── InstatingContent.tsx
-    │   └── ProcessCard.tsx
+    │   └── InstatingContent.tsx  ← OutlineButton, ProcessCard를 공통 컴포넌트에서 import
     ├── result/
     │   ├── FailureCard.tsx
     │   ├── InstatingResultModal.tsx
