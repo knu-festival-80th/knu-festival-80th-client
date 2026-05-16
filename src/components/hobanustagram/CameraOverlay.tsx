@@ -14,7 +14,11 @@ export interface CameraOverlayProps {
   isReady: boolean;
   error: string | null;
   selectedCharacter: CharacterKey;
-  selectedCharacterData: { src: string; overlayStyle: OverlayStyle };
+  selectedCharacterData: {
+    src: string;
+    overlayStyle: OverlayStyle;
+    mirrorOverlayStyle?: OverlayStyle;
+  };
   capturedDataUrl: string | null;
   showFrameSelector: boolean;
   onClose: () => void;
@@ -83,12 +87,9 @@ export const CameraOverlay = ({
               alt="캐릭터 오버레이"
               className="pointer-events-none absolute"
               style={{
-                ...selectedCharacterData.overlayStyle,
-                transform:
-                  facingMode === 'user'
-                    ? (selectedCharacterData.overlayStyle.mirrorTransform ??
-                      `scaleX(-1)${selectedCharacterData.overlayStyle.transform ? ` ${selectedCharacterData.overlayStyle.transform}` : ''}`)
-                    : selectedCharacterData.overlayStyle.transform,
+                ...(facingMode === 'user' && selectedCharacterData.mirrorOverlayStyle
+                  ? selectedCharacterData.mirrorOverlayStyle
+                  : selectedCharacterData.overlayStyle),
               }}
               crossOrigin="anonymous"
             />

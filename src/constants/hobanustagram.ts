@@ -9,18 +9,21 @@ export const CHARACTER_LIST: {
   src: string;
   label: string;
   overlayStyle: OverlayStyle;
+  mirrorOverlayStyle?: OverlayStyle;
 }[] = [
   {
     key: 'hobanu',
     src: hobanuImg,
     label: '기본',
     overlayStyle: { left: '8.3%', top: '38%', width: '83.7%' },
+    mirrorOverlayStyle: { right: '8.3%', top: '38%', width: '83.7%' },
   },
   {
     key: 'smile_hobanu',
     src: smileHobanuImg,
     label: '웃는',
-    overlayStyle: { left: '7.5%', top: '41%', width: '83.7%' },
+    overlayStyle: { left: '6.0%', top: '41%', width: '83.7%' },
+    mirrorOverlayStyle: { right: '10.0%', top: '41%', width: '83.7%' },
   },
   {
     key: 'smile_hobanu_incline',
@@ -31,7 +34,12 @@ export const CHARACTER_LIST: {
       bottom: 'calc(6rem - 36vw)',
       width: '83.7%',
       transform: 'rotate(21.5deg)',
-      mirrorTransform: 'scaleX(-1) rotate(-21.5deg)',
+    },
+    mirrorOverlayStyle: {
+      left: '-27%',
+      bottom: 'calc(6rem - 36vw)',
+      width: '83.7%',
+      transform: 'rotate(21.5deg)',
     },
   },
 ];
