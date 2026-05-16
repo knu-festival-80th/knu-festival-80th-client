@@ -197,6 +197,20 @@ InstatingPage
 
 **Apply/Result 뷰에서 별도 처리가 불필요한 이유**: `isRegistrationOpen`과 `isResultOpen` 기본값이 `true`라서 API 실패 시 폼이 활성화된 상태로 렌더된다. 잘못된 시간에 제출해도 서버에서 거부(403, 결과 미공개)하므로 클라이언트 추가 처리가 불필요하다.
 
+## 접근성 개선
+
+### 폼 레이블 연결 (`InstatingApplyView`, `InstatingResultView`)
+
+기존 `<label>`이 `htmlFor` 없이 단독 사용되어 스크린리더가 입력 필드와 레이블을 연결하지 못했다. 인스타 ID와 연락처 입력 필드에 `id`를 부여하고, 레이블에 `htmlFor`를 추가해 연결했다.
+
+### 모달 시맨틱 (`AlertModal`, `InstatingSuccessModal`, `InstatingResultModal`)
+
+세 모달 모두 `role="dialog"`, `aria-modal="true"`, `aria-labelledby`를 추가했다. `aria-labelledby`는 각 모달의 제목 요소(`h1`/`h2`) `id`를 참조한다. `InstatingSuccessModal`의 닫기 버튼(아이콘만)에도 `aria-label="닫기"`, 아이콘에 `aria-hidden="true"`를 추가했다.
+
+### 장식 이미지 alt 처리 (`ResultCard`, `FailureCard`)
+
+카드 내 호반우 이미지는 카드 텍스트가 결과를 충분히 설명하므로 장식 이미지로 처리(`alt=""`)했다.
+
 ## 이미지 최적화
 
 모든 이미지 에셋을 WebP로 변환했다. SVG는 내부에 base64 래스터 이미지가 임베드된 구조라 sharp(librsvg 내장)로 WebP 변환이 가능하다.

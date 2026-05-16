@@ -133,10 +133,14 @@ const InstatingApplyView = () => {
           <div className="flex flex-col gap-[18px]">
             {/* Instagram ID */}
             <div className="flex flex-col gap-2">
-              <label className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink">
+              <label
+                htmlFor="instagramId"
+                className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink"
+              >
                 인스타 ID
               </label>
               <input
+                id="instagramId"
                 type="text"
                 placeholder="honggildong"
                 {...register('instagramId', { required: '인스타 ID를 입력해주세요.' })}
@@ -151,12 +155,16 @@ const InstatingApplyView = () => {
 
             {/* Phone */}
             <div className="flex flex-col gap-2">
-              <label className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink">
+              <label
+                htmlFor="phone"
+                className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink"
+              >
                 연락처
               </label>
               <input
+                id="phone"
                 type="tel"
-                placeholder="01012345678"
+                placeholder="번호를 입력해주세요 ('-' 없이 번호만)"
                 {...register('phone', {
                   required: '연락처를 입력해주세요.',
                   pattern: {

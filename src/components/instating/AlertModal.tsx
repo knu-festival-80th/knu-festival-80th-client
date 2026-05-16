@@ -12,6 +12,9 @@ const AlertModal = ({ title, description, buttonLabel = '돌아가기', onClose 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-5">
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="alert-modal-title"
         initial={{ opacity: 0, scale: 0.95, y: 8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
@@ -20,7 +23,10 @@ const AlertModal = ({ title, description, buttonLabel = '돌아가기', onClose 
         <div className="flex w-full flex-col items-center gap-[30px]">
           <div className="flex w-full flex-col items-start gap-5">
             <div className="flex w-full items-center justify-center px-5">
-              <h2 className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black">
+              <h2
+                id="alert-modal-title"
+                className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black"
+              >
                 {title}
               </h2>
             </div>

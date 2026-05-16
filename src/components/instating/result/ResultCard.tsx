@@ -29,7 +29,7 @@ const ResultCard = ({ instagramId, copied, onCopy }: ResultCardProps) => (
       className="absolute overflow-hidden"
       style={{ left: 63, top: 78, width: 201, height: 190 }}
     >
-      <img src={happyHobanwoo} alt="호반우" className="h-full w-full object-contain" />
+      <img src={happyHobanwoo} alt="" className="h-full w-full object-contain" />
     </div>
 
     <div
