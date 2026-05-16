@@ -12,9 +12,9 @@ export const GradientBanner = ({ title }: GradientBannerProps) => {
       style={{ backgroundImage: INTRO_HERO_BACKGROUND_IMAGE }}
     >
       {title && (
-        <h2 className="relative font-wanted-sans text-[2.5rem] font-bold leading-[1.4] tracking-[-0.05rem] text-ink whitespace-pre-line">
+        <h1 className="relative font-wanted-sans text-[2.5rem] font-bold leading-[1.4] tracking-[-0.05rem] text-ink whitespace-pre-line">
           {title}
-        </h2>
+        </h1>
       )}
     </div>
   );

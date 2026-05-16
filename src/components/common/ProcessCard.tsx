@@ -11,7 +11,7 @@ export interface ProcessCardProps {
 const ProcessCard = ({ step, title, description, bgSrc, illustSrc }: ProcessCardProps) => (
   <article className="relative flex aspect-4/5 w-full flex-col overflow-hidden rounded-md p-6">
     <div aria-hidden className="pointer-events-none absolute inset-0">
-      <img src={bgSrc} alt="" className="absolute inset-0 size-full object-cover" />
+      <img src={bgSrc} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
       <div
         className="absolute inset-0"
         style={{
@@ -36,6 +36,7 @@ const ProcessCard = ({ step, title, description, bgSrc, illustSrc }: ProcessCard
         aria-hidden
         src={illustSrc}
         alt=""
+        loading="lazy"
         className="pointer-events-none absolute inset-0 size-full object-contain object-bottom"
       />
     </div>

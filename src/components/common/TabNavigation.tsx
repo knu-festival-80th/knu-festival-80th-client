@@ -29,6 +29,7 @@ const TabNavigation = ({ tabs, layoutId = 'tab-indicator' }: TabNavigationProps)
             key={path}
             type="button"
             onClick={() => navigate(path)}
+            aria-current={active ? 'page' : undefined}
             className={`relative py-2.5 font-wanted-sans text-body1 tracking-tight transition-colors ${
               active ? 'font-bold text-ink' : 'text-gray'
             }`}
