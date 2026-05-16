@@ -1,7 +1,7 @@
-import frame1PngUrl from '@/assets/hobanustagram/twoframephoto_frame1.png';
-import frame2PngUrl from '@/assets/hobanustagram/twoframephoto_frame2.png';
+import frame1WebpUrl from '@/assets/hobanustagram/twoframephoto_frame1.webp';
+import frame2WebpUrl from '@/assets/hobanustagram/twoframephoto_frame2.webp';
 
-const FRAME_PNG_URLS: Record<1 | 2, string> = { 1: frame1PngUrl, 2: frame2PngUrl };
+const FRAME_WEBP_URLS: Record<1 | 2, string> = { 1: frame1WebpUrl, 2: frame2WebpUrl };
 
 const PHOTO_SLOT_RATIOS: Record<
   1 | 2,
@@ -61,7 +61,7 @@ function drawCoverImage(
 
 export async function compositeTwoShot(photos: [string, string], filterId: 1 | 2): Promise<string> {
   const [frameImg, photo1Img, photo2Img] = await Promise.all([
-    loadImage(FRAME_PNG_URLS[filterId]),
+    loadImage(FRAME_WEBP_URLS[filterId]),
     loadImage(photos[0]),
     loadImage(photos[1]),
   ]);

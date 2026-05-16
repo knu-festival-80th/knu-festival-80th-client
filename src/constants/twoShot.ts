@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
-import frame1Url from '@/assets/hobanustagram/twoframephoto_frame1.png?url';
-import frame2Url from '@/assets/hobanustagram/twoframephoto_frame2.png?url';
-import preview1Url from '@/assets/hobanustagram/twoframephoto_preview1.svg?url';
-import preview2Url from '@/assets/hobanustagram/twoframephoto_preview2.svg?url';
+import frame1Url from '@/assets/hobanustagram/twoframephoto_frame1.webp?url';
+import frame2Url from '@/assets/hobanustagram/twoframephoto_frame2.webp?url';
+import preview1Url from '@/assets/hobanustagram/twoframephoto_preview1.webp?url';
+import preview2Url from '@/assets/hobanustagram/twoframephoto_preview2.webp?url';
 
 export const TWO_SHOT_FRAME_URLS: Record<1 | 2, string> = { 1: frame1Url, 2: frame2Url };
 export const TWO_SHOT_PREVIEW_URLS: Record<1 | 2, string> = { 1: preview1Url, 2: preview2Url };

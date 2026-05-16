@@ -1,4 +1,4 @@
-import isMakingUrl from '@/assets/hobanustagram/hobanu_ismaking.svg?url';
+import isMakingUrl from '@/assets/hobanustagram/hobanu_ismaking.webp?url';
 
 export const TwoShotCompositingStep = () => {
   return (

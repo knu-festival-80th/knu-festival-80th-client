@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 
-import photoboothImage from '@/assets/hobanustagram/photobooth.png';
+import photoboothImage from '@/assets/hobanustagram/photobooth.webp';
 import { ContactSection } from '@/components/common/ContactSection';
 import { FaqAccordion } from '@/components/common/FaqAccordion';
 import { GradientBanner } from '@/components/common/GradientBanner';
