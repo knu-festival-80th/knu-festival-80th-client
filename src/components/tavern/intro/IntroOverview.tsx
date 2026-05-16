@@ -1,10 +1,10 @@
 import { FiArrowRight, FiChevronDown } from 'react-icons/fi';
 
 import mapIconImage from '@/assets/images/map-icon.png';
+import mapPreviewImage from '@/assets/images/map-preview.png';
 import reservationIconImage from '@/assets/images/reservation-icon.png';
 import tavernGuideMapImage from '@/assets/images/tavern-guide-map.png';
 import tavernGuideReservationImage from '@/assets/images/tavern-guide-reservation.png';
-import tavernMapImage from '@/assets/images/map.svg';
 import { INTRO_HERO_BACKGROUND_IMAGE } from '@/components/common/GradientBanner';
 import ContentCard from '@/components/home/ContentCard';
 import SectionBlock from '@/components/home/SectionBlock';
@@ -15,6 +15,8 @@ import { tavernFaqs } from '@/constants/taverns';
 type IntroOverviewProps = {
   onTabChange: (tab: TopTab) => void;
 };
+
+const MAP_PREVIEW_OBJECT_POSITION = '20% 70%';
 
 export default function IntroOverview({ onTabChange }: IntroOverviewProps) {
   return (
@@ -137,10 +139,14 @@ function IntroPillButton({ label, onClick }: { label: string; onClick: () => voi
 function MapPreviewIllustration() {
   return (
     <div className="relative h-[240px] overflow-hidden bg-[#f9f9f9]">
+      <span className="absolute left-3 top-3 z-10 rounded-full bg-black/30 px-2.5 py-1 text-[10px] font-medium leading-none tracking-[-0.22px] text-white">
+        미리보기
+      </span>
       <img
-        src={tavernMapImage}
+        src={mapPreviewImage}
         alt="주막 지도 미리보기"
-        className="absolute left-1/2 top-1/2 w-[235%] max-w-none -translate-x-[73%] -translate-y-[57%]"
+        className="size-full object-cover"
+        style={{ objectPosition: MAP_PREVIEW_OBJECT_POSITION }}
       />
     </div>
   );
