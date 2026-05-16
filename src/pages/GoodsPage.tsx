@@ -4,9 +4,14 @@ import { SectionTitle } from '@/components/common/SectionTitle';
 import { GoodsModal } from '@/components/goods/GoodsModal';
 import { ALL_GOODS, POPULAR_GOODS } from '@/mocks/goods';
 import { useGoodsModal } from '@/hooks/useGoodsModal';
+import { ArrowRight } from 'lucide-react';
 
 export default function GoodsPage() {
   const { selectedGoods, openModal, closeModal } = useGoodsModal();
+
+  const scrollToPopularGoods = () => {
+    document.getElementById('popular-goods')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div className="flex flex-col">
@@ -21,14 +26,14 @@ export default function GoodsPage() {
               '축제의 특별한 굿즈를 만나보세요!\n대동제의 무드를 담은 다양한 아이템들이 준비되어 있습니다. 마음에 드는 굿즈를 선택해 축제의 순간을 오래 간직해보세요.'
             }
             ctaLabel="굿즈 살펴보기"
-            ctaHref="#all-goods"
+            onCtaClick={scrollToPopularGoods}
           />
           <img src={goodsbox} alt="2026 대동제 굿즈" className="h-auto w-full object-contain" />
         </div>
       </section>
 
       <section className="flex flex-col gap-32 bg-white px-5 pb-32 pt-7">
-        <div className="flex flex-col gap-5">
+        <div id="popular-goods" className="flex flex-col gap-5">
           <p className="font-wanted-sans text-xl font-bold leading-none tracking-[-0.02em] text-ink">
             현재 인기있는 굿즈
           </p>
@@ -98,13 +103,36 @@ export default function GoodsPage() {
           </div>
         </div>
 
-        <div className="py-4.5">
+        <div className="py-4.5 flex flex-col gap-5">
           <SectionTitle
             label="Buy Now"
             title="지금 바로 구매하기"
             description={'대동제의 순간을 소장할 수 있는 특별한 기회를\n놓치지 마세요!'}
-            ctaLabel="굿즈 구매 페이지 이동하기"
           />
+          <div className="flex flex-col gap-3">
+            <a
+              href="https://www.instagram.com/p/DXv43Z9kzgo/?img_index=1"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-fit items-center gap-1.5 rounded-full border border-[#ff3d3d] py-2.5 pl-5 pr-3.5"
+            >
+              <span className="font-wanted-sans text-sm font-medium leading-none tracking-[-0.02em] text-[#ff3d3d] whitespace-nowrap">
+                굿즈 현장 구매 안내
+              </span>
+              <ArrowRight className="size-6 text-[#ff3d3d]" />
+            </a>
+            <a
+              href="https://www.instagram.com/p/DXv5AK6EyOI/?img_index=1"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-fit items-center gap-1.5 rounded-full border border-[#ff3d3d] py-2.5 pl-5 pr-3.5"
+            >
+              <span className="font-wanted-sans text-sm font-medium leading-none tracking-[-0.02em] text-[#ff3d3d] whitespace-nowrap">
+                굿즈 품목 상세 안내
+              </span>
+              <ArrowRight className="size-6 text-[#ff3d3d]" />
+            </a>
+          </div>
         </div>
       </section>
 
