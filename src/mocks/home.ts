@@ -1,10 +1,11 @@
 import type { DayLineup } from '@/types/home';
-import kwoneunbi from '@/assets/lineup/권은비.png';
-import nctWish from '@/assets/lineup/NCT위시.png';
-import aichillin from '@/assets/lineup/아이칠린.png';
-import zico from '@/assets/lineup/지코.jpg';
-import sunmi from '@/assets/lineup/선미.png';
-import leeyoungji from '@/assets/lineup/이영지.png';
+import kwoneunbi from '@/assets/lineup/권은비.webp';
+import nctWish from '@/assets/lineup/NCT위시.webp';
+import aichillin from '@/assets/lineup/아이칠린.webp';
+import zico from '@/assets/lineup/지코.webp';
+import sunmi from '@/assets/lineup/선미.webp';
+import leeyoungji from '@/assets/lineup/이영지.webp';
+import ambio from '@/assets/lineup/AMbiO.webp';
 
 export const MOCK_LINEUP: DayLineup[] = [
   {
@@ -19,8 +20,9 @@ export const MOCK_LINEUP: DayLineup[] = [
   {
     day: 21,
     artists: [
-      { src: kwoneunbi, alt: '권은비' },
+      { src: ambio, alt: 'AMbiO' },
       { src: nctWish, alt: 'NCT WISH' },
+      { src: kwoneunbi, alt: '권은비' },
     ],
     schedules: [
       { name: 'KNU 가요제\n및 시상식', startTime: '18:30', endTime: '19:30' },
@@ -39,8 +41,8 @@ export const MOCK_LINEUP: DayLineup[] = [
   {
     day: 22,
     artists: [
-      { src: aichillin, alt: '아이칠린' },
       { src: zico, alt: '지코' },
+      { src: aichillin, alt: '아이칠린' },
       { src: sunmi, alt: '선미' },
       { src: leeyoungji, alt: '이영지' },
     ],

@@ -1,10 +1,10 @@
 import SectionBlock from '@/components/home/SectionBlock';
 import VideoCard from '@/components/congratVideo/VideoCard';
 import { CONGRAT_VIDEOS } from '@/constants/congratVideo';
-import heroBg from '@/assets/congratVideo/hero-bg.png';
+import heroBg from '@/assets/home/hero-bg.webp';
 import heroDecoration from '@/assets/congratVideo/hero-decoration.svg';
-import about80thImg from '@/assets/congratVideo/about-80th.png';
-import anniversaryFundImg from '@/assets/congratVideo/anniversary-fund.png';
+import about80thImg from '@/assets/congratVideo/about-80th.webp';
+import anniversaryFundImg from '@/assets/congratVideo/anniversary-fund.webp';
 
 export default function CongratVideoPage() {
   return (

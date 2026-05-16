@@ -38,7 +38,7 @@ export default function ContentCard({
     <>
       <div aria-hidden className="absolute inset-0">
         {imageSrc ? (
-          <img src={imageSrc} alt="" className="size-full object-cover" />
+          <img src={imageSrc} alt="" loading="lazy" className="size-full object-cover" />
         ) : (
           <div className="size-full bg-border" />
         )}
@@ -62,6 +62,7 @@ export default function ContentCard({
           <img
             src={illustrationSrc}
             alt=""
+            loading="lazy"
             className={`absolute inset-0 size-full object-contain object-bottom ${illustrationClassName ?? ''}`}
           />
         )}
