@@ -10,8 +10,8 @@ import prize1 from '@/assets/stampTour/prize_1.svg';
 import prize2 from '@/assets/stampTour/prize_2.svg';
 import prize3 from '@/assets/stampTour/prize_3.svg';
 import { useNavigate } from 'react-router-dom';
-import OutlineButton from './OutlineButton';
-import ProcessCard from './ProcessCard';
+import OutlineButton from '@/components/common/OutlineButton';
+import ProcessCard from '@/components/common/ProcessCard';
 
 const steps = [
   {
