@@ -1,4 +1,6 @@
 import TabNavigation from '@/components/common/TabNavigation';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
+import InstatingErrorFallback from '@/components/instating/InstatingErrorFallback';
 import { Outlet } from 'react-router-dom';
 
 const TABS = [
@@ -11,7 +13,9 @@ const InstatingPage = () => {
   return (
     <>
       <TabNavigation tabs={TABS} layoutId="instating-tab" />
-      <Outlet />
+      <ErrorBoundary fallback={<InstatingErrorFallback />}>
+        <Outlet />
+      </ErrorBoundary>
     </>
   );
 };

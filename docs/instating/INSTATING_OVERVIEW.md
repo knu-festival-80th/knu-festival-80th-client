@@ -174,6 +174,43 @@ getApplicantsCount();
 
 공통 에러 모달은 `AlertModal` 컴포넌트로 통일했다. title과 description을 props로 주입받아 `createPortal`로 렌더링된다.
 
+### ErrorBoundary 적용
+
+`InstatingPage`에서 `<Outlet />`을 `ErrorBoundary`로 감싼다. `TabNavigation`은 경계 바깥에 두어 렌더링 에러가 발생해도 탭은 유지된다.
+
+```
+InstatingPage
+├── TabNavigation          ← 에러와 무관하게 유지
+└── ErrorBoundary
+    └── Outlet             ← 렌더링 에러 발생 시 InstatingErrorFallback 표시
+```
+
+`ErrorBoundary`는 예상치 못한 JS 런타임 에러(null 접근, 타입 에러 등)를 최후 방어선으로 잡는다. API 에러는 각 컴포넌트에서 별도 처리한다.
+
+### 섹션 레벨 Fallback (MatchingStatusFallback)
+
+`CountDownSection`과 `ApplicantsNumberSection`은 `useMatchingStatus` API가 실패(`isError`)하면 각자 `MatchingStatusFallback`을 렌더한다. `InstatingContent`(정적 콘텐츠)는 API와 무관하므로 영향 없이 렌더된다.
+
+**isLoading 처리를 별도로 두지 않은 이유**: `staleTime: 10s` 설정으로 재방문 시 캐시에서 즉시 반환되고, 첫 로드 시만 짧게(수백 ms) 보인다. 이 시간 동안 기본값(`00:00:00:00`, `0명`)이 표시되는 게 스켈레톤이나 별도 로딩 UI보다 자연스럽다고 판단했다.
+
+**섹션 레벨을 선택한 이유**: API 실패 시에도 `InstatingContent`(스텝 카드, 신청 버튼)는 의미 있는 정보를 제공한다. 페이지 전체를 대체하면 실질적으로 유효한 콘텐츠까지 가려지므로 섹션 단위로 처리한다.
+
+**Apply/Result 뷰에서 별도 처리가 불필요한 이유**: `isRegistrationOpen`과 `isResultOpen` 기본값이 `true`라서 API 실패 시 폼이 활성화된 상태로 렌더된다. 잘못된 시간에 제출해도 서버에서 거부(403, 결과 미공개)하므로 클라이언트 추가 처리가 불필요하다.
+
+## 이미지 최적화
+
+모든 이미지 에셋을 WebP로 변환했다. SVG는 내부에 base64 래스터 이미지가 임베드된 구조라 sharp(librsvg 내장)로 WebP 변환이 가능하다.
+
+| 대상                   | 변환 전 | 변환 후 | 감소율 |
+| ---------------------- | ------- | ------- | ------ |
+| step_bg × 4 (PNG)      | ~1.9MB  | ~18KB   | ~99%   |
+| step_illust × 4 (SVG)  | ~13.2MB | ~117KB  | ~99%   |
+| Hobanwoo × 3 (SVG/PNG) | ~5.2MB  | ~78KB   | ~98%   |
+
+SVG 일러스트는 `width: 800px`(2x 모바일), Hobanwoo는 `width: 400px`(2x 렌더 사이즈)로 래스터라이즈했다.
+
+아이콘 SVG(`closeIcon`, `copyIcon`, `forwardArrowIcon`)는 lucide-react 컴포넌트로 교체했다. `forwardArrowIcon`은 `OutlineButton`의 기존 `showArrow` prop으로 대체했다.
+
 ## 파일 구조
 
 ```
@@ -184,16 +221,19 @@ src/
 │   ├── useCountdown.ts          ← useTimeLeft, useCountdown, getTimeLeft
 │   └── useInstatingScratchCanvas.ts
 ├── pages/
-│   ├── InstatingPage.tsx
+│   ├── InstatingPage.tsx        ← ErrorBoundary로 Outlet 감쌈
 │   └── console/
 │       ├── MatchingOverviewPage.tsx
 │       └── MatchingParticipantsPage.tsx
 ├── components/common/            ← 공통 컴포넌트 (docs/COMMON_COMPONENTS.md 참고)
+│   ├── ErrorBoundary.tsx         ← 렌더링 에러 캐치, fallback prop 지원
 │   ├── TabNavigation.tsx         ← 탭 목록을 props로 받는 공통 탭 네비게이션
 │   ├── OutlineButton.tsx         ← variant 기반 테두리 버튼 (dark/default/red/glass)
 │   └── ProcessCard.tsx           ← 배경+일러스트 스텝 카드
 └── components/instating/
     ├── AlertModal.tsx            ← 공통 에러 모달
+    ├── InstatingErrorFallback.tsx ← ErrorBoundary fallback (탭 하단 영역 전체)
+    ├── MatchingStatusFallback.tsx ← useMatchingStatus isError 시 섹션 fallback
     ├── TabNavigation.tsx         ← 공통 TabNavigation에 인스타팅 탭을 주입하는 래퍼
     ├── intro/
     │   ├── ApplicantsNumberSection.tsx
