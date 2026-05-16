@@ -139,7 +139,7 @@ const getMarkerLabel = (tavern: Tavern) => String(tavern.boothId);
 
 const getSelectedLabel = (tavern: Tavern) => tavern.name;
 
-const getTypeColor = (tavern: Tavern) => (tavern.type === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
+const getTypeColor = (tavern: Tavern) => tavern.color;
 
 const getMarkerStyle = (selected: boolean, tavern: Tavern): CSSProperties => {
   const color = getTypeColor(tavern);

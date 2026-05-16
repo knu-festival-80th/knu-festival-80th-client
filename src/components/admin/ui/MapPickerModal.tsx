@@ -16,6 +16,7 @@ interface MapPickerModalProps {
   initialY: number | null;
   boothId?: number;
   boothType?: BoothType;
+  boothColor?: string;
   onConfirm: (x: number, y: number) => void;
   onClose: () => void;
 }
@@ -38,6 +39,7 @@ function MapPickerModalInner({
   initialY,
   boothId,
   boothType = 'TAVERN',
+  boothColor,
   onConfirm,
   onClose,
 }: MapPickerModalProps) {
@@ -280,10 +282,10 @@ function MapPickerModalInner({
     );
   };
 
-  const pinColor = boothType === 'BOOTH' ? '#15ccb1' : '#ff3d3d';
+  const pinColor = boothColor ?? (boothType === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
 
   const getMarkerColor = (marker: BoothMapItem) =>
-    marker.type === 'BOOTH' ? '#15ccb1' : '#ff3d3d';
+    marker.color ?? (marker.type === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
 
   const zoomOnPin = (factor: number) => {
     if (pin) {
