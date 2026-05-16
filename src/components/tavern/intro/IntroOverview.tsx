@@ -6,7 +6,6 @@ import reservationIconImage from '@/assets/images/reservation-icon.png';
 import tavernGuideMapImage from '@/assets/images/tavern-guide-map.png';
 import tavernGuideReservationImage from '@/assets/images/tavern-guide-reservation.png';
 import { INTRO_HERO_BACKGROUND_IMAGE } from '@/components/common/GradientBanner';
-import ContentCard from '@/components/home/ContentCard';
 import SectionBlock from '@/components/home/SectionBlock';
 import SectionHeading from '@/components/tavern/shared/SectionHeading';
 import type { TopTab } from '@/components/tavern/types';
@@ -17,6 +16,8 @@ type IntroOverviewProps = {
 };
 
 const MAP_PREVIEW_OBJECT_POSITION = '20% 70%';
+const GUIDE_CARD_BACKGROUND_OVERLAY =
+  'linear-gradient(132.09deg, #ffffff 34.45%, rgba(255, 255, 255, 0) 100%)';
 
 export default function IntroOverview({ onTabChange }: IntroOverviewProps) {
   return (
@@ -59,6 +60,7 @@ export default function IntroOverview({ onTabChange }: IntroOverviewProps) {
               description="메뉴와 대기 시간을 확인할 수 있어요."
               imageSrc={tavernGuideMapImage}
               illustrationSrc={mapIconImage}
+              illustrationClassName="p-2 bottom-[30px] left-1/2 h-[256px] w-[335px] -translate-x-1/2"
             />
             <IntroGuideCard
               category="Reservation"
@@ -66,6 +68,7 @@ export default function IntroOverview({ onTabChange }: IntroOverviewProps) {
               description={`총 3곳까지 미리 예약해\n줄을 서지 않고 기다릴 수 있어요.`}
               imageSrc={tavernGuideReservationImage}
               illustrationSrc={reservationIconImage}
+              illustrationClassName="p-2 bottom-[15px] left-1/2 h-[286px] w-[256px] -translate-x-1/2"
             />
           </div>
         </SectionBlock>
@@ -97,6 +100,7 @@ type IntroGuideCardProps = {
   description: string;
   imageSrc: string;
   illustrationSrc: string;
+  illustrationClassName: string;
 };
 
 function IntroGuideCard({
@@ -105,21 +109,42 @@ function IntroGuideCard({
   description,
   imageSrc,
   illustrationSrc,
+  illustrationClassName,
 }: IntroGuideCardProps) {
   return (
-    <ContentCard
-      category={category}
-      title={title}
-      description={description}
-      imageSrc={imageSrc}
-      illustrationSrc={illustrationSrc}
-      className="h-[430px] rounded-[6px] p-6"
-      contentClassName="relative z-10 flex w-full flex-col items-start gap-2.5"
-      categoryClassName="text-[16px] font-medium leading-none tracking-[-0.32px] text-[#333333]"
-      titleClassName="text-[18px] font-bold leading-none text-[#1a1a1a]"
-      descriptionClassName="whitespace-pre-line text-[16px] font-normal leading-[1.4] tracking-[-0.32px] text-[#808080]"
-      showAction={false}
-    />
+    <article className="relative flex h-[430px] w-full flex-col items-start overflow-hidden rounded-[6px] bg-black/[0.02]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[6px]">
+        <img src={imageSrc} alt="" className="size-full rounded-[6px] object-cover" />
+        <div
+          className="absolute inset-0 rounded-[6px]"
+          style={{ backgroundImage: GUIDE_CARD_BACKGROUND_OVERLAY }}
+        />
+      </div>
+
+      <div className="relative z-10 flex h-[104px] w-full shrink-0 flex-col items-start p-6">
+        <div className="flex w-full flex-col items-start gap-2.5">
+          <div className="flex w-full flex-col items-start gap-2.5">
+            <p className="w-full break-words font-wanted-sans text-[16px] font-medium leading-none tracking-[-0.32px] text-[#333333]">
+              {category}
+            </p>
+            <h3 className="w-full break-words font-wanted-sans text-[18px] font-bold leading-none text-[#1a1a1a]">
+              {title}
+            </h3>
+          </div>
+          <p className="w-full whitespace-pre-line break-words font-wanted-sans text-[16px] font-normal leading-[1.4] tracking-[-0.32px] text-[#808080]">
+            {description}
+          </p>
+        </div>
+      </div>
+
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 top-[104px]">
+        <img
+          src={illustrationSrc}
+          alt=""
+          className={`absolute max-w-none object-contain ${illustrationClassName}`}
+        />
+      </div>
+    </article>
   );
 }
 
