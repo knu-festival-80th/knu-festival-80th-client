@@ -1,4 +1,4 @@
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import InstatingResultModal, { type MatchResult } from '../result/InstatingResultModal';
 import AlertModal from '@/components/instating/AlertModal';
 import { useState } from 'react';
@@ -16,13 +16,8 @@ const InstatingResultView = () => {
   const {
     register,
     handleSubmit,
-    control,
-    formState: { errors, isSubmitting },
+    formState: { isValid, isSubmitting, errors },
   } = useForm<FormValues>({ mode: 'onChange' });
-
-  const instagramId = useWatch({ control, name: 'instagramId' });
-  const phone = useWatch({ control, name: 'phone' });
-  const isValid = !!instagramId && !!phone && !errors.instagramId && !errors.phone;
 
   const [result, setResult] = useState<MatchResult | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -113,9 +108,14 @@ const InstatingResultView = () => {
               id="instagramId"
               type="text"
               placeholder="인스타 아이디를 입력해주세요"
-              {...register('instagramId', { required: true })}
+              {...register('instagramId', { required: '인스타 ID를 입력해주세요.' })}
               className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
             />
+            {errors.instagramId && (
+              <p className="font-wanted-sans text-body2 text-sub-red">
+                {errors.instagramId.message}
+              </p>
+            )}
           </div>
 
           {/* Phone */}
@@ -131,11 +131,17 @@ const InstatingResultView = () => {
               type="tel"
               placeholder="번호를 입력해주세요 ('-' 없이 번호만)"
               {...register('phone', {
-                required: true,
-                pattern: /^01[0-9]{8,9}$/,
+                required: '연락처를 입력해주세요.',
+                pattern: {
+                  value: /^01[0-9]{8,9}$/,
+                  message: '올바른 연락처를 입력해주세요.',
+                },
               })}
               className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
             />
+            {errors.phone && (
+              <p className="font-wanted-sans text-body2 text-sub-red">{errors.phone.message}</p>
+            )}
           </div>
         </fieldset>
 

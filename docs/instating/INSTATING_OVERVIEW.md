@@ -78,6 +78,8 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 `resultOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `useCountdown`으로 결과 공개까지 남은 시간을 표시한다. API 성공 응답 이후에도 `resultOpen: false`이면 "아직 결과 공개 전입니다." 인라인 메시지를 표시한다.
 
+제출 버튼 활성 여부는 `formState.isValid`를 사용한다. `useWatch`로 필드 값을 직접 구독하면 키 입력마다 전체 컴포넌트가 리렌더되므로, 유효성이 실제로 변할 때만 리렌더를 유발하는 `formState.isValid`로 대체했다. 필드별 유효성 검사 실패 메시지는 `formState.errors`로 표시한다.
+
 에러 처리:
 
 ```
