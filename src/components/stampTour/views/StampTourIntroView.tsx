@@ -1,7 +1,7 @@
 import { GradientBanner } from '@/components/common/GradientBanner';
 import StampTourContext from '@/components/stampTour/StampTourContext';
 
-const StampTourPage = () => {
+const StampTourIntroView = () => {
   return (
     <div>
       <GradientBanner title={'축제의\n스탬프 투어'} />
@@ -10,4 +10,4 @@ const StampTourPage = () => {
   );
 };
 
-export default StampTourPage;
+export default StampTourIntroView;

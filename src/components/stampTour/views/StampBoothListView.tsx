@@ -107,7 +107,7 @@ const BOOTHS: Booth[] = [
   },
 ];
 
-const StampBoothListPage = () => {
+const StampBoothListView = () => {
   const [openBoothId, setOpenBoothId] = useState<number | null>(BOOTHS[0]?.id ?? null);
 
   const handleDetailClick = (id: number) => {
@@ -143,4 +143,4 @@ const StampBoothListPage = () => {
   );
 };
 
-export default StampBoothListPage;
+export default StampBoothListView;
