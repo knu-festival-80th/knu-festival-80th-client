@@ -7,7 +7,6 @@ export interface GoodsModalProps {
   goods: GoodsItem;
   onClose: () => void;
 }
-// TODO: 굿즈 상세정보 보기 인스타로 리다이렉트
 export const GoodsModal = ({ goods, onClose }: GoodsModalProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);

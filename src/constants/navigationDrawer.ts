@@ -5,9 +5,9 @@ export const NAV_ITEMS: NavItem[] = [
     id: 'grand-moment',
     label: 'THE GRAND MOMENT 80주년',
     children: [
-      { label: '80주년 롤링페이퍼', to: '/rolling-paper' },
-      { label: '축전 영상', to: '/congrat-video' },
       { label: '경북대학교 80주년', to: '/congrat-video' },
+      { label: '80주년 롤링페이퍼', to: '/rolling-paper' },
+      { label: '공연 정보', to: '/timetable' },
     ],
   },
   {
@@ -25,7 +25,8 @@ export const NAV_ITEMS: NavItem[] = [
     label: '두근두근 인스타팅',
     children: [
       { label: '소개', to: '/instating' },
-      { label: '예약 조회', to: '/instating/result' },
+      { label: '인스타팅 신청하기', to: '/instating/apply' },
+      { label: '결과 조회', to: '/instating/result' },
     ],
   },
   {
