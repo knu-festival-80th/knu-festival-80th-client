@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import day20PlaceholderImg from '@/assets/timetable/day20-placeholder.png';
+import day20PlaceholderImg from '@/assets/timetable/day20-placeholder.webp';
 
 export default function Day20Placeholder() {
   const navigate = useNavigate();
