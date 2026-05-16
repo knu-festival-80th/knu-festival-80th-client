@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import rollingHeroBg from '@/assets/rollingPaper/rolling-hero-bg.png';
 import rollingIntroIllust from '@/assets/rollingPaper/Group 425.svg';
+import { INTRO_HERO_BACKGROUND_IMAGE } from '@/components/common/GradientBanner';
 import RollingPaperPageTransition from './RollingPaperPageTransition';
 import RollingPaperTabs from './RollingPaperTabs';
 import { rollingPaperItemMotion } from './rollingPaperMotion';
@@ -13,23 +13,10 @@ export default function RollingPaperIntro() {
       <RollingPaperTabs active="intro" />
 
       <motion.section
-        className="relative flex min-h-[226px] items-center overflow-hidden px-5 py-10"
+        className="relative flex min-h-[270px] items-end overflow-hidden px-5 py-[42px]"
+        style={{ backgroundImage: INTRO_HERO_BACKGROUND_IMAGE }}
         {...rollingPaperItemMotion}
       >
-        <div aria-hidden className="absolute inset-0">
-          <img
-            src={rollingHeroBg}
-            alt=""
-            className="absolute inset-0 size-full object-cover object-bottom"
-          />
-          <div
-            className="absolute inset-0 mix-blend-screen"
-            style={{
-              backgroundImage: 'linear-gradient(125deg, #ffe76e 4.7%, #ff6568 82.5%)',
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-white/0 mix-blend-soft-light" />
-        </div>
         <h1 className="relative font-wanted-sans text-[40px] font-bold leading-[1.4] tracking-[-0.02em] text-ink">
           80주년
           <br />

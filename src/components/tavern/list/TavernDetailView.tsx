@@ -25,8 +25,8 @@ export default function TavernDetailView({ tavern, onRegister }: TavernDetailVie
 
   return (
     <section className="flex flex-col gap-5 px-5 py-5">
-      <article className="overflow-hidden rounded-[12px] bg-white">
-        <div className="flex flex-col gap-2.5 pb-2.5">
+      <article className="overflow-hidden bg-white">
+        <div className="flex flex-col gap-4.5 pb-2.5">
           <div className="flex flex-col gap-2.5">
             <p className="flex gap-1 text-[16px] font-medium leading-none tracking-[-0.32px] text-[#808080]">
               {metaItems.map((item, index) => (
