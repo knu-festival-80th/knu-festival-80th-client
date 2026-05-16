@@ -1,4 +1,4 @@
-import sadHobanwoo from '@/assets/instating/Hobanwoo/sadHobanwoo.svg';
+import sadHobanwoo from '@/assets/instating/Hobanwoo/sadHobanwoo.webp';
 
 const FailureCard = () => (
   <div

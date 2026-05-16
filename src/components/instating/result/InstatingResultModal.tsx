@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import closeIcon from '@/assets/instating/icon/closeIcon.svg';
+import { X } from 'lucide-react';
 import ScratchCard from './ScratchCard';
 import ResultCard from './ResultCard';
 import FailureCard from './FailureCard';
@@ -79,7 +79,7 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
             aria-label="닫기"
             className="flex size-6 items-center justify-center"
           >
-            <img src={closeIcon} alt="닫기" className="size-6" />
+            <X className="size-6" aria-hidden="true" />
           </button>
         </header>
 

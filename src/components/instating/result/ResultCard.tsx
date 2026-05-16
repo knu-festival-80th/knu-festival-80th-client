@@ -1,6 +1,5 @@
-import { CheckIcon } from 'lucide-react';
-import copyIcon from '@/assets/instating/icon/copyIcon.svg';
-import happyHobanwoo from '@/assets/instating/Hobanwoo/happyHobanwoo.svg';
+import { Check, Copy } from 'lucide-react';
+import happyHobanwoo from '@/assets/instating/Hobanwoo/happyHobanwoo.webp';
 
 interface ResultCardProps {
   instagramId: string;
@@ -47,7 +46,7 @@ const ResultCard = ({ instagramId, copied, onCopy }: ResultCardProps) => (
         @{instagramId}
       </p>
       <button type="button" onClick={onCopy} aria-label="아이디 복사" className="shrink-0">
-        {copied ? <CheckIcon /> : <img src={copyIcon} alt="복사" className="size-6" />}
+        {copied ? <Check className="size-6" /> : <Copy className="size-6 text-[#FF5C7D]" />}
       </button>
     </div>
 
