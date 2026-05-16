@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { ApiClientError, matchingApi } from '@/apis';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
-import { useCountdown } from '@/hooks/instating/useCountdown';
 import type { SubmittedData } from '../result/InstatingSuccessModal';
 import InstatingSuccessModal from '../result/InstatingSuccessModal';
 import AlertModal from '@/components/instating/AlertModal';
+import CountdownText from '@/components/instating/CountdownText';
 
 type FormValues = {
   gender: 'male' | 'female';
@@ -24,7 +24,6 @@ const InstatingApplyView = () => {
   const registrationOpenAt = status?.registrationOpenAt
     ? new Date(status.registrationOpenAt)
     : null;
-  const countdownText = useCountdown(registrationOpenAt);
 
   const {
     register,
@@ -228,11 +227,13 @@ const InstatingApplyView = () => {
                 : 'bg-[#CCCCCC]'
           }`}
         >
-          {!isRegistrationOpen
-            ? `남은시간 ${countdownText}`
-            : isSubmitting
-              ? '신청 중...'
-              : '인스타팅 신청하기'}
+          {!isRegistrationOpen ? (
+            <CountdownText deadline={registrationOpenAt} />
+          ) : isSubmitting ? (
+            '신청 중...'
+          ) : (
+            '인스타팅 신청하기'
+          )}
         </button>
 
         {/* Notice */}

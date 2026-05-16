@@ -46,8 +46,11 @@
 tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를 증가시켜 리렌더를 유발하고, `getTimeLeft(deadline)`으로 매 렌더마다 남은 시간을 계산한다. 이 방식은 stale state 없이 항상 최신 값을 보장한다.
 
 - `useTimeLeft(deadline)` — tick 담당, `TimeLeft | null` 반환
-- `useCountdown(deadline)` — `useTimeLeft` 결과를 `"DD:HH:MM:SS"` 문자열로 포맷, 버튼 라벨 등 인라인 텍스트에 사용
+- `useCountdown(deadline)` — `useTimeLeft` 결과를 `"DD:HH:MM:SS"` 문자열로 포맷
 - `CountDownTimer` — `useTimeLeft` 결과로 큰 숫자 UI 조립, 인트로 섹션에 사용
+- `CountdownText` — `useCountdown`을 래핑한 인라인 텍스트용 컴포넌트 (`남은시간 DD:HH:MM:SS`), 신청·결과 조회 폼 버튼에 사용
+
+`useCountdown`을 폼 컴포넌트에서 직접 호출하면 폼 전체가 1초마다 리렌더된다. `CountdownText`로 분리해 타이머 tick이 해당 컴포넌트에만 국한되도록 했다.
 
 **신청자 현황 (`ApplicantsNumberSection`)**
 
@@ -246,6 +249,7 @@ src/
 │   └── ProcessCard.tsx           ← 배경+일러스트 스텝 카드
 └── components/instating/
     ├── AlertModal.tsx            ← 공통 에러 모달
+    ├── CountdownText.tsx         ← 폼 버튼 카운트다운 텍스트 (리렌더 격리)
     ├── InstatingErrorFallback.tsx ← ErrorBoundary fallback (탭 하단 영역 전체)
     ├── MatchingStatusFallback.tsx ← useMatchingStatus isError 시 섹션 fallback
     ├── TabNavigation.tsx         ← 공통 TabNavigation에 인스타팅 탭을 주입하는 래퍼

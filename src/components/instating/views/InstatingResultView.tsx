@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiClientError, matchingApi } from '@/apis';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
-import { useCountdown } from '@/hooks/instating/useCountdown';
+import CountdownText from '@/components/instating/CountdownText';
 
 type FormValues = {
   instagramId: string;
@@ -31,7 +31,6 @@ const InstatingResultView = () => {
   const { data: status } = useMatchingStatus();
   const isResultOpen = status?.resultOpen ?? true;
   const resultOpenAt = status?.resultOpenAt ? new Date(status.resultOpenAt) : null;
-  const countdownText = useCountdown(resultOpenAt);
   const navigate = useNavigate();
 
   const onSubmit = async ({ instagramId, phone }: FormValues) => {
@@ -154,11 +153,13 @@ const InstatingResultView = () => {
             !isResultOpen ? 'bg-black' : isValid && !isSubmitting ? 'bg-sub-red' : 'bg-[#CCCCCC]'
           }`}
         >
-          {!isResultOpen
-            ? `남은시간 ${countdownText}`
-            : isSubmitting
-              ? '조회 중...'
-              : '결과 조회하기'}
+          {!isResultOpen ? (
+            <CountdownText deadline={resultOpenAt} />
+          ) : isSubmitting ? (
+            '조회 중...'
+          ) : (
+            '결과 조회하기'
+          )}
         </button>
       </form>
     </>
