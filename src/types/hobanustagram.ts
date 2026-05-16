@@ -4,10 +4,10 @@ export type TabStep = 1 | 2;
 export type CameraState = 'idle' | 'shooting' | 'review';
 export type TwoShotStep = 'preview' | 'shooting' | 'select-photos' | 'select-frame' | 'compositing';
 export type OverlayStyle = {
-  left: string;
+  left?: string;
+  right?: string;
   width: string;
   top?: string;
   bottom?: string;
   transform?: string;
-  mirrorTransform?: string;
 };
