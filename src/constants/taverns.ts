@@ -22,11 +22,15 @@ export type Tavern = {
   xRatio: number;
   yRatio: number;
   type: BoothType;
+  color: string;
 };
 
 const normalizeRatio = (ratio: number | null | undefined) => ratio ?? 0.5;
 
+const DEFAULT_COLORS: Record<BoothType, string> = { BOOTH: '#15ccb1', TAVERN: '#ff3d3d' };
+
 export function boothToTavern(booth: BoothListItem): Tavern {
+  const type = booth.type ?? 'TAVERN';
   return {
     id: String(booth.boothId),
     boothId: booth.boothId,
@@ -39,11 +43,13 @@ export function boothToTavern(booth: BoothListItem): Tavern {
     menuBoardImageUrl: booth.menuBoardImageUrl,
     xRatio: normalizeRatio(booth.xRatio),
     yRatio: normalizeRatio(booth.yRatio),
-    type: booth.type ?? 'TAVERN',
+    type,
+    color: booth.color ?? DEFAULT_COLORS[type],
   };
 }
 
 export function mapBoothToTavern(booth: BoothMapItem): Tavern {
+  const type = booth.type ?? 'TAVERN';
   return {
     id: String(booth.boothId),
     boothId: booth.boothId,
@@ -56,7 +62,8 @@ export function mapBoothToTavern(booth: BoothMapItem): Tavern {
     menuBoardImageUrl: null,
     xRatio: normalizeRatio(booth.xRatio),
     yRatio: normalizeRatio(booth.yRatio),
-    type: booth.type ?? 'TAVERN',
+    type,
+    color: booth.color ?? DEFAULT_COLORS[type],
   };
 }
 
