@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+  type PointerEvent,
+} from 'react';
 import { FiCircle, FiMinus, FiPlus } from 'react-icons/fi';
 
 import tavernMapImage from '@/assets/images/map.svg';
@@ -176,10 +183,10 @@ export default function CampusMap({
   const pointerMapRef = useRef(new Map<number, MapPoint>());
   const lastDragPointRef = useRef<MapPoint | null>(null);
   const pinchStateRef = useRef<PinchState | null>(null);
+  const skipMarkerClickRef = useRef(false);
   const scaleRef = useRef(MAP_DEFAULT_SCALE);
   const panRef = useRef(getScaledInitialMapPan(MAP_BASE_VIEWPORT_SIZE));
-
-  const initialFocusDone = useRef(false);
+  const selectedTavernRef = useRef<Tavern | null>(selectedTavern);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -189,11 +196,10 @@ export default function CampusMap({
       const nextSize = viewport.getBoundingClientRect().width;
       if (nextSize <= 0) return;
 
-      if (focusSelected && selectedTavern && !initialFocusDone.current) {
-        initialFocusDone.current = true;
+      if (focusSelected && selectedTavernRef.current) {
         const focusScale = clampScale(MAP_FOCUS_SCALE);
         const focusPan = clampMapPan(
-          getFocusedMapPan(selectedTavern, focusScale, nextSize),
+          getFocusedMapPan(selectedTavernRef.current, focusScale, nextSize),
           focusScale,
           nextSize,
         );
@@ -219,7 +225,29 @@ export default function CampusMap({
     resizeObserver.observe(viewport);
 
     return () => resizeObserver.disconnect();
-  }, [focusSelected, selectedTavern]);
+  }, [focusSelected]);
+
+  useEffect(() => {
+    selectedTavernRef.current = selectedTavern;
+
+    if (!focusSelected || !selectedTavern || viewportSize <= 0) return;
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      const focusScale = clampScale(MAP_FOCUS_SCALE);
+      const focusPan = clampMapPan(
+        getFocusedMapPan(selectedTavern, focusScale, viewportSize),
+        focusScale,
+        viewportSize,
+      );
+
+      scaleRef.current = focusScale;
+      panRef.current = focusPan;
+      setMapScale(focusScale);
+      setMapPan(focusPan);
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [focusSelected, selectedTavern, viewportSize]);
 
   const applyMapViewport = (nextScale: number, nextPan: MapPoint) => {
     const clampedScale = clampScale(nextScale);
@@ -338,6 +366,33 @@ export default function CampusMap({
     applyMapViewport(nextScale, nextPan);
   };
 
+  const resetPointerGesture = () => {
+    pointerMapRef.current.clear();
+    lastDragPointRef.current = null;
+    pinchStateRef.current = null;
+    setIsGestureActive(false);
+  };
+
+  const handleMarkerPointerDown = (event: PointerEvent<HTMLButtonElement>, tavern: Tavern) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+    event.stopPropagation();
+    skipMarkerClickRef.current = true;
+    resetPointerGesture();
+    handleSelectTavern(tavern);
+  };
+
+  const handleMarkerClick = (event: MouseEvent<HTMLButtonElement>, tavern: Tavern) => {
+    event.stopPropagation();
+
+    if (skipMarkerClickRef.current) {
+      skipMarkerClickRef.current = false;
+      return;
+    }
+
+    handleSelectTavern(tavern);
+  };
+
   return (
     <div className="flex w-full flex-col gap-5">
       <div
@@ -379,8 +434,10 @@ export default function CampusMap({
                   selected ? 'z-30' : 'z-10'
                 } ${interactive ? '' : 'pointer-events-none'}`}
                 style={getMapMarkerStyle(tavern)}
-                onPointerDown={(event) => event.stopPropagation()}
-                onClick={() => handleSelectTavern(tavern)}
+                onPointerDown={(event) => handleMarkerPointerDown(event, tavern)}
+                onPointerUp={(event) => event.stopPropagation()}
+                onPointerCancel={(event) => event.stopPropagation()}
+                onClick={(event) => handleMarkerClick(event, tavern)}
               >
                 {selected && (
                   <span

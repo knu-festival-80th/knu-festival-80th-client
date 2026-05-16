@@ -86,10 +86,22 @@ export default function TavernMapExperience() {
     staleTime: 30_000,
   });
 
-  const selectedMapTavern = useMemo(
-    () => (selectedBoothQuery.data ? boothToTavern(selectedBoothQuery.data) : selectedTavern),
-    [selectedBoothQuery.data, selectedTavern],
-  );
+  const selectedMapTavern = useMemo(() => {
+    if (!selectedTavern) return null;
+    if (!selectedBoothQuery.data) return selectedTavern;
+
+    const detailTavern = boothToTavern(selectedBoothQuery.data);
+
+    return {
+      ...detailTavern,
+      id: selectedTavern.id,
+      boothId: selectedTavern.boothId,
+      xRatio: selectedTavern.xRatio,
+      yRatio: selectedTavern.yRatio,
+      type: selectedTavern.type,
+      color: selectedTavern.color,
+    };
+  }, [selectedBoothQuery.data, selectedTavern]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
