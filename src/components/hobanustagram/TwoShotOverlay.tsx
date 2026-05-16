@@ -41,6 +41,18 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
 
   const { videoRef, isReady, error, facingMode, startCamera, stopCamera, flipCamera } = useCamera();
 
+  const [viewportW, setViewportW] = useState(window.innerWidth);
+  const [viewportH, setViewportH] = useState(window.innerHeight);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportW(window.innerWidth);
+      setViewportH(window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     if (step === 'shooting') {
       void startCamera();
@@ -57,8 +69,8 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
   const handleShutter = () => {
     if (!videoRef.current || !isReady || slotAspect === null) return;
 
-    const containerW = Math.min(window.innerWidth, 600);
-    const containerH = window.innerHeight;
+    const containerW = Math.min(viewportW, 600);
+    const containerH = viewportH;
     const videoAreaH = containerH - 96;
 
     const zoneW = Math.min(containerW, videoAreaH * slotAspect);
@@ -154,7 +166,9 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
           </div>
 
           <div className="shrink-0 px-5 pt-3 pb-[calc(2rem+env(safe-area-inset-bottom))]">
-            <p className="mb-3 font-wanted-sans text-sm text-gray text-center">촬영 후 선택 가능</p>
+            <p className="mb-3 font-wanted-sans text-sm text-gray text-center">
+              모바일 세로 촬영 기준으로 제작되었어요.
+            </p>
             <button
               type="button"
               onClick={() => setStep('shooting')}
@@ -171,8 +185,8 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
   if (step === 'shooting') {
     const shotNumber = Math.min(capturedPhotos.length + 1, 4);
     const bottomBarH = 96;
-    const containerW = Math.min(window.innerWidth, 600);
-    const videoAreaH = window.innerHeight - bottomBarH;
+    const containerW = Math.min(viewportW, 600);
+    const videoAreaH = viewportH - bottomBarH;
     const zoneW = slotAspect ? Math.min(containerW, videoAreaH * slotAspect) : 0;
     const zoneH = slotAspect ? Math.min(videoAreaH, containerW / slotAspect) : 0;
     const zoneLeft = (containerW - zoneW) / 2;
@@ -262,7 +276,7 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
     return (
       <div className="fixed inset-0 z-[39] flex justify-center bg-[#eceef3]">
         <div className="relative flex h-full w-full max-w-[600px] flex-col bg-white">
-          <div className="shrink-0 h-[100px]" />
+          <div className="shrink-0" style={{ height: 'min(100px, 12vh)' }} />
           <div className="shrink-0 px-5 pt-7 pb-5 text-center">
             <p className="font-wanted-sans text-xl font-bold tracking-[-0.4px] text-[#1a1a1a]">
               원하는 사진을 선택해주세요
@@ -305,7 +319,7 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
                   type="button"
                   onClick={() => handleToggleSelection(index)}
                   className="relative flex-1 overflow-hidden rounded-lg"
-                  style={{ aspectRatio: '3 / 4' }}
+                  style={{ aspectRatio: '3 / 4', maxHeight: 'min(140px, 20vh)' }}
                 >
                   <img
                     src={photo}
@@ -346,7 +360,7 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
     return (
       <div className="fixed inset-0 z-[39] flex justify-center bg-[#eceef3]">
         <div className="relative flex h-full w-full max-w-[600px] flex-col bg-white">
-          <div className="shrink-0 h-[100px]" />
+          <div className="shrink-0" style={{ height: 'min(100px, 12vh)' }} />
           <div className="shrink-0 px-5 pt-7 pb-5 text-center">
             <p className="font-wanted-sans text-xl font-bold tracking-[-0.4px] text-[#1a1a1a]">
               원하는 프레임을 선택해주세요
