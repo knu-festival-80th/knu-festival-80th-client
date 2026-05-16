@@ -42,9 +42,11 @@ import { rollingPaperItemMotion } from './rollingPaperMotion';
 const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
 const PENDING_POSTIT_REFETCH_INTERVAL_MS = 5000;
 const PENDING_POSTIT_LOCAL_VISIBLE_MS = 60000;
+const CONFLICT_PLACEHOLDER_LOCAL_VISIBLE_MS = 60000;
 const POSTIT_POSITION_CONFLICT_CODE = 'CP008';
 const POSTIT_POSITION_CONFLICT_MESSAGE =
   '이미 다른 사용자가 같은 위치에 메시지를 붙였어요. 다른 위치에 다시 시도해주세요.';
+const POSTIT_POSITION_CONFLICT_PLACEHOLDER_MESSAGE = '이미 사용 중인 위치예요.';
 
 type RollingPaperBoardProps = {
   categoryId?: string;
@@ -65,6 +67,20 @@ function isNoteInChannel(note: PlacedRollingPaperNote, categoryId: string, chann
   }
 
   return note.categoryId === categoryId && note.channelId === channelId;
+}
+
+function isExpiredLocalNote(note: PlacedRollingPaperNote, now = Date.now()) {
+  return Boolean(note.pendingVisibleUntil && note.pendingVisibleUntil <= now);
+}
+
+function isSameConflictPlaceholder(note: PlacedRollingPaperNote, nextNote: PlacedRollingPaperNote) {
+  return (
+    note.isConflictPlaceholder &&
+    note.boardId === nextNote.boardId &&
+    note.boardVariant === nextNote.boardVariant &&
+    Math.abs(note.x - nextNote.x) < 0.01 &&
+    Math.abs(note.y - nextNote.y) < 0.01
+  );
 }
 
 export default function RollingPaperBoard({ categoryId, channelId }: RollingPaperBoardProps) {
@@ -164,9 +180,27 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
     },
   });
   const approvedPostitIds = new Set(apiPlacedNotes.map((note) => note.postitId));
-  const visiblePendingNotes = pendingPlacedNotes.filter(
-    (note) => note.boardId === boardId && !approvedPostitIds.has(note.postitId),
-  );
+  const visiblePendingNotes = pendingPlacedNotes.filter((note) => {
+    if (note.boardId !== boardId || approvedPostitIds.has(note.postitId)) {
+      return false;
+    }
+
+    if (isExpiredLocalNote(note)) {
+      return false;
+    }
+
+    const apiNotesForBoard = getPlacedNotesForBoard(apiPlacedNotes, note.boardVariant);
+    const isAlreadyVisibleFromApi = !isRollingPaperPlacementAvailable(
+      { x: note.x, y: note.y },
+      note.colorId,
+      apiNotesForBoard,
+      note.boardVariant,
+      undefined,
+      ROLLING_PAPER_CLIENT_COLLISION_SCALE,
+    );
+
+    return !isAlreadyVisibleFromApi;
+  });
   const placedNotes =
     mockNotes.length > 0 ? mockNotes : [...apiPlacedNotes, ...visiblePendingNotes];
 
@@ -239,6 +273,34 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       });
     } catch (error) {
       if (error instanceof ApiClientError && error.code === POSTIT_POSITION_CONFLICT_CODE) {
+        const conflictPlaceholder: PlacedRollingPaperNote = {
+          ...note,
+          id: `conflict-${boardId}-${Date.now()}`,
+          boardId,
+          boardVariant: boardIndex,
+          categoryId: category.id,
+          channelId: channel.id,
+          message: POSTIT_POSITION_CONFLICT_PLACEHOLDER_MESSAGE,
+          isPending: true,
+          isLocalOnly: true,
+          isConflictPlaceholder: true,
+          pendingVisibleUntil: Date.now() + CONFLICT_PLACEHOLDER_LOCAL_VISIBLE_MS,
+        };
+
+        setPendingPlacedNotes((prevNotes) => [
+          ...prevNotes.filter(
+            (prevNote) =>
+              !isExpiredLocalNote(prevNote) &&
+              !isSameConflictPlaceholder(prevNote, conflictPlaceholder),
+          ),
+          conflictPlaceholder,
+        ]);
+        window.setTimeout(() => {
+          setPendingPlacedNotes((prevNotes) =>
+            prevNotes.filter((prevNote) => prevNote.id !== conflictPlaceholder.id),
+          );
+        }, CONFLICT_PLACEHOLDER_LOCAL_VISIBLE_MS);
+
         setPlacementErrorMessage(POSTIT_POSITION_CONFLICT_MESSAGE);
         await queryClient.refetchQueries({ queryKey: ['rollingPaper', 'postits', boardId] });
         await queryClient.invalidateQueries({ queryKey: ['rollingPaper', 'boards', questionId] });
