@@ -9,6 +9,7 @@ import BoothManageGuard from '@/components/guards/BoothManageGuard';
 import ConsoleGuard from '@/components/guards/ConsoleGuard';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import PostHogPageView from '@/utils/PostHogPageView';
+import PageLoader from '@/components/common/PageLoader';
 
 const BoothManageLoginPage = lazy(() => import('@/pages/boothManage/BoothManageLoginPage'));
 const BoothProfilePage = lazy(() => import('@/pages/boothManage/BoothProfilePage'));
@@ -45,7 +46,7 @@ export default function App() {
     <>
       <GoogleAnalytics />
       <PostHogPageView />
-      <Suspense>
+      <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
