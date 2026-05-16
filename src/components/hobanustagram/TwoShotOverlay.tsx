@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { SwitchCamera, X } from 'lucide-react';
+import { SwitchCamera, Timer, TimerOff, X } from 'lucide-react';
 
 import { useCamera } from '@/hooks/useCamera';
 import { compositeTwoShot } from '@/lib/compositeTwoShot';
@@ -38,6 +38,9 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [slotAspect, setSlotAspect] = useState<number | null>(null);
   const [showFlash, setShowFlash] = useState(false);
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { videoRef, isReady, error, facingMode, startCamera, stopCamera, flipCamera } = useCamera();
 
@@ -66,7 +69,13 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  const handleShutter = () => {
+  useEffect(() => {
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, []);
+
+  const executeCapture = () => {
     if (!videoRef.current || !isReady || slotAspect === null) return;
 
     const containerW = Math.min(viewportW, 600);
@@ -94,11 +103,35 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
     if (!dataUrl) return;
     setShowFlash(true);
     setTimeout(() => setShowFlash(false), 300);
-    const newPhotos = [...capturedPhotos, dataUrl];
-    setCapturedPhotos(newPhotos);
-    if (newPhotos.length >= 4) {
-      setSelectedIndices([0, 1]);
-      setStep('select-photos');
+    setCapturedPhotos((prev) => {
+      const newPhotos = [...prev, dataUrl];
+      if (newPhotos.length >= 4) {
+        setSelectedIndices([0, 1]);
+        setStep('select-photos');
+      }
+      return newPhotos;
+    });
+  };
+
+  const handleShutter = () => {
+    if (!videoRef.current || !isReady || slotAspect === null || countdown !== null) return;
+
+    if (timerEnabled) {
+      setCountdown(5);
+      let remaining = 5;
+      countdownRef.current = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(countdownRef.current!);
+          countdownRef.current = null;
+          setCountdown(null);
+          executeCapture();
+        } else {
+          setCountdown(remaining);
+        }
+      }, 1000);
+    } else {
+      executeCapture();
     }
   };
 
@@ -225,6 +258,34 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
             className={`pointer-events-none absolute inset-0 bg-white transition-opacity ${showFlash ? 'opacity-80 duration-0' : 'opacity-0 duration-300'}`}
           />
 
+          {countdown !== null && (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+              <style>{`@keyframes timer-drain { from { stroke-dashoffset: 0 } to { stroke-dashoffset: -157.08 } }`}</style>
+              <div
+                className="relative flex items-center justify-center"
+                style={{ width: 160, height: 160 }}
+              >
+                <svg width="160" height="160" viewBox="0 0 100 100" className="absolute inset-0">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="25"
+                    fill="none"
+                    stroke="rgba(107,114,128,0.85)"
+                    strokeWidth="50"
+                    strokeDasharray="157.08"
+                    strokeDashoffset="0"
+                    transform="rotate(-90 50 50)"
+                    style={{ animation: 'timer-drain 5s linear forwards' }}
+                  />
+                </svg>
+                <span className="relative z-10 font-wanted-sans text-7xl font-bold text-white">
+                  {countdown}
+                </span>
+              </div>
+            </div>
+          )}
+
           {error && (
             <div className="absolute inset-0 flex items-center justify-center px-8">
               <p className="text-center font-wanted-sans text-base text-white">{error}</p>
@@ -239,25 +300,45 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
             <X className="size-6 text-white" />
           </button>
 
-          <div className="absolute bottom-0 flex h-24 w-full items-center justify-between bg-white px-6 pb-[env(safe-area-inset-bottom)]">
-            <div className="flex w-16 flex-col items-center justify-center">
-              <span className="font-wanted-sans text-2xl font-bold leading-none">
-                <span className="text-sub-red">{shotNumber}</span>
-                <span className="text-black">/4</span>
-              </span>
+          <div className="absolute bottom-0 flex h-24 w-full items-center justify-between bg-white px-4 pb-[env(safe-area-inset-bottom)]">
+            <div className="flex w-36 items-center gap-4">
+              <div className="flex flex-col items-center justify-center">
+                <span className="font-wanted-sans text-2xl font-bold leading-none">
+                  <span className="text-sub-red">{shotNumber}</span>
+                  <span className="text-black">/4</span>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTimerEnabled((v) => !v)}
+                disabled={countdown !== null}
+                className="flex flex-col items-center gap-1 disabled:opacity-40"
+              >
+                {timerEnabled ? (
+                  <Timer className="size-9 text-sub-red" />
+                ) : (
+                  <TimerOff className="size-9 text-gray" />
+                )}
+                <span
+                  className={`font-wanted-sans text-sm tracking-[-0.28px] ${timerEnabled ? 'text-sub-red' : 'text-gray'}`}
+                >
+                  5초 타이머
+                </span>
+              </button>
             </div>
 
             <button
               type="button"
               onClick={handleShutter}
-              disabled={!isReady}
+              disabled={!isReady || countdown !== null}
               className="size-16 rounded-full border-4 border-sub-red bg-white disabled:opacity-40"
             />
 
             <button
               type="button"
               onClick={flipCamera}
-              className="flex w-16 flex-col items-center gap-1"
+              disabled={countdown !== null}
+              className="flex w-36 flex-col items-center gap-1 disabled:opacity-40"
             >
               <SwitchCamera className="size-9 text-gray" />
               <span className="font-wanted-sans text-sm tracking-[-0.28px] text-gray">
