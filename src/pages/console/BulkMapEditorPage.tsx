@@ -13,12 +13,14 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 8;
 
 const round = (v: number) => Math.round(v * PRECISION) / PRECISION;
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 
 type PendingChange = { xRatio: number; yRatio: number };
 
 export default function BulkMapEditorPage() {
   const queryClient = useQueryClient();
   const outerRef = useRef<HTMLDivElement>(null);
+  const mapAreaRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [scale, setScale] = useState(1);
@@ -38,12 +40,16 @@ export default function BulkMapEditorPage() {
   const scaleRef = useRef(scale);
   const txRef = useRef(tx);
   const tyRef = useRef(ty);
+  const sizeRef = useRef(size);
 
   useEffect(() => {
     scaleRef.current = scale;
     txRef.current = tx;
     tyRef.current = ty;
   }, [scale, tx, ty]);
+  useEffect(() => {
+    sizeRef.current = size;
+  }, [size]);
 
   const markersQuery = useQuery({
     queryKey: ['admin', 'booths', 'map-editor'],
@@ -64,15 +70,27 @@ export default function BulkMapEditorPage() {
   };
 
   useLayoutEffect(() => {
-    const update = () => {
-      const node = containerRef.current;
-      if (!node) return;
-      const rect = node.getBoundingClientRect();
-      setSize({ w: rect.width, h: rect.height });
+    const area = mapAreaRef.current;
+    if (!area) return;
+    const PAD = 8;
+    const recalc = () => {
+      const rect = area.getBoundingClientRect();
+      const aw = rect.width - PAD * 2;
+      const ah = rect.height - PAD * 2;
+      if (aw <= 0 || ah <= 0) return;
+      let w = aw;
+      let h = w / ASPECT;
+      if (h > ah) {
+        h = ah;
+        w = h * ASPECT;
+      }
+      const fw = Math.floor(w);
+      const fh = Math.floor(h);
+      setSize((prev) => (prev.w === fw && prev.h === fh ? prev : { w: fw, h: fh }));
     };
-    update();
-    const ro = new ResizeObserver(update);
-    if (containerRef.current) ro.observe(containerRef.current);
+    recalc();
+    const ro = new ResizeObserver(recalc);
+    ro.observe(area);
     return () => ro.disconnect();
   }, []);
 
@@ -240,15 +258,49 @@ export default function BulkMapEditorPage() {
     });
   };
 
+  const getNudgeStep = useCallback(() => {
+    const w = sizeRef.current.w;
+    const s = scaleRef.current;
+    if (w <= 0) return 1 / PRECISION;
+    return Math.max(1 / PRECISION, Math.ceil((2 * PRECISION) / (w * s)) / PRECISION);
+  }, []);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft' && e.altKey) {
-        e.preventDefault();
-        handlePrevNext(-1);
-      } else if (e.key === 'ArrowRight' && e.altKey) {
-        e.preventDefault();
-        handlePrevNext(1);
+      if (e.altKey) {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          handlePrevNext(-1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          handlePrevNext(1);
+        }
+        return;
       }
+      if (selectedId === null) return;
+      const step = getNudgeStep();
+      let dx = 0;
+      let dy = 0;
+      if (e.key === 'ArrowLeft') dx = -step;
+      else if (e.key === 'ArrowRight') dx = step;
+      else if (e.key === 'ArrowUp') dy = -step;
+      else if (e.key === 'ArrowDown') dy = step;
+      else return;
+      e.preventDefault();
+      setChanges((prev) => {
+        const next = new Map(prev);
+        const booth = sorted.find((b) => b.boothId === selectedId);
+        if (!booth) return prev;
+        const cur = prev.get(selectedId) ?? {
+          xRatio: booth.xRatio ?? 0.5,
+          yRatio: booth.yRatio ?? 0.5,
+        };
+        next.set(selectedId, {
+          xRatio: round(clamp01(cur.xRatio + dx)),
+          yRatio: round(clamp01(cur.yRatio + dy)),
+        });
+        return next;
+      });
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
@@ -293,17 +345,14 @@ export default function BulkMapEditorPage() {
       )}
 
       {/* Map area — fills all remaining space */}
-      <div className="relative min-h-0 flex-1 bg-neutral-100">
-        <div className="absolute inset-0 flex items-center justify-center p-2">
+      <div ref={mapAreaRef} className="relative min-h-0 flex-1 bg-neutral-100">
+        <div className="absolute inset-0 flex items-center justify-center">
           <div
             ref={containerRef}
             className="relative cursor-crosshair overflow-hidden rounded-xl bg-white shadow-sm"
             style={{
-              width: '100%',
-              height: '100%',
-              maxWidth: `calc(100% * 1)`,
-              maxHeight: `calc(100% * 1)`,
-              aspectRatio: ASPECT,
+              width: size.w || '100%',
+              height: size.h || 'auto',
               touchAction: 'none',
             }}
             onPointerDown={handlePointerDown}
