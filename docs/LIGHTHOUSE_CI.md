@@ -68,12 +68,18 @@ module.exports = {
 
 ### 2026-05-17 — 스탬프 투어 페이지 최적화
 
-**최적화 전 점수 (`/stamptour`, `/stamptour/booths`)**
+**측정 결과 비교 (`local` 환경, `refactor/#112` 브랜치)**
 
-| 페이지              | Performance | Accessibility | Best Practices | SEO   |
-| ------------------- | ----------- | ------------- | -------------- | ----- |
-| `/stamptour`        | 🟡 56       | 🟡 82         | 🟡 71          | 🟢 92 |
-| `/stamptour/booths` | 🟡 56       | 🟡 80         | 🟡 75          | 🟢 92 |
+| 페이지              | 시점      | Performance | Accessibility | Best Practices | SEO         |
+| ------------------- | --------- | ----------- | ------------- | -------------- | ----------- |
+| `/stamptour`        | 최적화 전 | 🟡 56       | 🟡 82         | 🟡 71          | 🟢 92       |
+| `/stamptour`        | 최적화 후 | 🟡 56       | 🟡 82         | 🟢 93 (+22)    | 🟢 100 (+8) |
+| `/stamptour/booths` | 최적화 전 | 🟡 56       | 🟡 80         | 🟡 75          | 🟢 92       |
+| `/stamptour/booths` | 최적화 후 | 🟡 56       | 🟡 80         | 🟢 96 (+21)    | 🟢 100 (+8) |
+
+> Performance는 local 환경 특성상 네트워크 지연이 없어 이미지 크기 감소 효과가 반영되지 않는다. prod 배포 후 재측정 필요.
+>
+> Accessibility가 유지된 이유는 `BoothCard`의 `text-[#999]` 색상 대비(2.85:1)가 WCAG AA 기준(4.5:1) 미달인 채로 남아 있기 때문이다. 디자이너 확인 후 `#737373` 이상으로 수정하면 추가 개선 가능하다.
 
 **적용 내용**
 
