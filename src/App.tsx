@@ -31,8 +31,9 @@ import TavernMapPage from '@/pages/TavernMapPage';
 import TimeTablePage from '@/pages/TimeTablePage';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import PostHogPageView from '@/utils/PostHogPageView';
-import StampTourPage from './pages/stampTour/StampTourPage';
-import StampBoothListPage from './pages/stampTour/StampBoothListPage';
+import StampTourPage from './pages/StampTourPage';
+import StampTourIntroView from './components/stampTour/views/StampTourIntroView';
+import StampBoothListView from './components/stampTour/views/StampBoothListView';
 import InstatingPage from './pages/InstatingPage';
 import InstatingIntroView from './components/instating/views/InstatingIntroView';
 import InstatingApplyView from './components/instating/views/InstatingApplyView';
@@ -89,8 +90,10 @@ export default function App() {
           <Route path="/taverns/:boothId" element={<TavernDetailPage />} />
           <Route path="/timetable" element={<TimeTablePage />} />
           <Route path="/goods" element={<GoodsPage />} />
-          <Route path="/stamptour" element={<StampTourPage />} />
-          <Route path="/stamptour/booths" element={<StampBoothListPage />} />
+          <Route path="/stamptour" element={<StampTourPage />}>
+            <Route index element={<StampTourIntroView />} />
+            <Route path="booths" element={<StampBoothListView />} />
+          </Route>
           <Route path="/hobanustagram" element={<HobanustagramPage />} />
           <Route path="/instating" element={<InstatingPage />}>
             <Route index element={<InstatingIntroView />} />
