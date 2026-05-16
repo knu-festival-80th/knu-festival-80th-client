@@ -64,6 +64,37 @@ module.exports = {
 
 모바일 환경(iPhone 14 기준) 단일 측정입니다.
 
+## 최적화 이력
+
+### 2026-05-17 — 스탬프 투어 페이지 최적화
+
+**측정 결과 비교 (`local` 환경, `refactor/#112` 브랜치)**
+
+| 페이지              | 시점      | Performance | Accessibility | Best Practices | SEO         |
+| ------------------- | --------- | ----------- | ------------- | -------------- | ----------- |
+| `/stamptour`        | 최적화 전 | 🟡 56       | 🟡 82         | 🟡 71          | 🟢 92       |
+| `/stamptour`        | 최적화 후 | 🟡 56       | 🟡 82         | 🟢 93 (+22)    | 🟢 100 (+8) |
+| `/stamptour/booths` | 최적화 전 | 🟡 56       | 🟡 80         | 🟡 75          | 🟢 92       |
+| `/stamptour/booths` | 최적화 후 | 🟡 56       | 🟡 80         | 🟢 96 (+21)    | 🟢 100 (+8) |
+
+> Performance는 local 환경 특성상 네트워크 지연이 없어 이미지 크기 감소 효과가 반영되지 않는다. prod 배포 후 재측정 필요.
+>
+> Accessibility가 유지된 이유는 `BoothCard`의 `text-[#999]` 색상 대비(2.85:1)가 WCAG AA 기준(4.5:1) 미달인 채로 남아 있기 때문이다. 디자이너 확인 후 `#737373` 이상으로 수정하면 추가 개선 가능하다.
+
+**적용 내용**
+
+| 분류          | 변경 내용                                                                 | 효과                       |
+| ------------- | ------------------------------------------------------------------------- | -------------------------- |
+| Performance   | booth_map SVG(4.4MB × 7) → WebP(~15KB × 7), Figma @3x PNG 기반            | 이미지 총량 ~30MB → ~100KB |
+| Performance   | stampTour 전체 이미지 SVG/PNG → WebP 변환                                 | 약 18MB → ~566KB           |
+| Performance   | fold 아래 이미지에 `loading="lazy"` 적용 (ProcessCard, prize, booth 지도) | 초기 로드 개선             |
+| Performance   | `stampHero`에 `fetchPriority="high"` + `width`/`height` 명시              | LCP 개선, CLS 방지         |
+| Accessibility | `TabNavigation` 활성 탭에 `aria-current="page"` 추가                      | 스크린리더 탭 상태 인식    |
+| Accessibility | `BoothCard` 상세정보 버튼에 `aria-expanded`, `aria-label` 추가            | 토글 상태 및 대상 명시     |
+| Accessibility | `GradientBanner` 제목 태그 `h2` → `h1`                                    | 페이지 heading 계층 수정   |
+| Accessibility | 부스 지도 이미지 alt 텍스트 `'부스 지도'` → `'${name} 부스 위치 지도'`    | 의미있는 alt 제공          |
+| Code          | `BoothCard` arrow 이미지 → `lucide-react` `ChevronDown` 아이콘으로 교체   | 벡터 아이콘, 파일 제거     |
+
 ## 주의사항
 
 - `lighthouserc.cjs` — `package.json`에 `"type": "module"` 설정이 있어 `.js` 확장자는 ESM으로 해석됩니다. CommonJS 문법(`module.exports`)을 사용하기 위해 `.cjs` 확장자를 사용합니다.

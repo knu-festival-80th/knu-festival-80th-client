@@ -7,8 +7,8 @@ import step3Illust from '@/assets/instating/stepCard/step3_illust.svg';
 import step4Bg from '@/assets/instating/stepCard/step4_bg.png';
 import step4Illust from '@/assets/instating/stepCard/step4_illust.svg';
 import forwardArrowIcon from '@/assets/instating/icon/forwardArrowIcon.svg';
-import OutlineButton from '../OutlineButton';
-import ProcessCard from './ProcessCard';
+import OutlineButton from '@/components/common/OutlineButton';
+import ProcessCard from '@/components/common/ProcessCard';
 import { useNavigate } from 'react-router-dom';
 
 const steps = [
@@ -103,7 +103,7 @@ const InstatingContent = () => {
           </div>
           <div className="flex items-center gap-4">
             <OutlineButton label="신청하기" icon={forwardArrowIcon} onClick={goApplyPage} />
-            <OutlineButton label="결과 확인하기" dark onClick={goResultPage} />
+            <OutlineButton label="결과 확인하기" variant="dark" onClick={goResultPage} />
           </div>
         </div>
       </div>

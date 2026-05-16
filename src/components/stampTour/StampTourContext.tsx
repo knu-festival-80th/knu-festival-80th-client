@@ -1,17 +1,17 @@
-import stampHero from '@/assets/stampTour/stampHero.svg';
-import step1Bg from '@/assets/stampTour/step_1_bg.png';
-import step1Img from '@/assets/stampTour/step_1.svg';
-import step2Bg from '@/assets/stampTour/step_2_bg.png';
-import step2Img from '@/assets/stampTour/step_2.svg';
-import step3Bg from '@/assets/stampTour/step_3_bg.png';
-import step3Img from '@/assets/stampTour/step_3.svg';
-import prizeStars from '@/assets/stampTour/prize_stars.png';
-import prize1 from '@/assets/stampTour/prize_1.svg';
-import prize2 from '@/assets/stampTour/prize_2.svg';
-import prize3 from '@/assets/stampTour/prize_3.svg';
+import stampHero from '@/assets/stampTour/stampHero.webp';
+import step1Bg from '@/assets/stampTour/step_1_bg.webp';
+import step1Img from '@/assets/stampTour/step_1.webp';
+import step2Bg from '@/assets/stampTour/step_2_bg.webp';
+import step2Img from '@/assets/stampTour/step_2.webp';
+import step3Bg from '@/assets/stampTour/step_3_bg.webp';
+import step3Img from '@/assets/stampTour/step_3.webp';
+import prizeStars from '@/assets/stampTour/prize_stars.webp';
+import prize1 from '@/assets/stampTour/prize_1.webp';
+import prize2 from '@/assets/stampTour/prize_2.webp';
+import prize3 from '@/assets/stampTour/prize_3.webp';
 import { useNavigate } from 'react-router-dom';
-import OutlineButton from './OutlineButton';
-import ProcessCard from './ProcessCard';
+import OutlineButton from '@/components/common/OutlineButton';
+import ProcessCard from '@/components/common/ProcessCard';
 
 const steps = [
   {
@@ -76,7 +76,14 @@ const StampTourContext = () => {
           <OutlineButton label="부스 위치 확인하기" showArrow variant="red" onClick={goToBooths} />
         </div>
 
-        <img src={stampHero} alt="스탬프 투어 카드" className="w-[297px]" />
+        <img
+          src={stampHero}
+          alt="스탬프 투어 카드"
+          fetchPriority="high"
+          width={297}
+          height={245}
+          className="w-[297px]"
+        />
 
         {/* Step cards */}
         <ol className="flex w-full flex-col gap-[30px]">
@@ -110,6 +117,7 @@ const StampTourContext = () => {
                         src={prizeStars}
                         alt=""
                         aria-hidden
+                        loading="lazy"
                         className="pointer-events-none size-full object-bottom"
                       />
                     </div>
@@ -126,6 +134,7 @@ const StampTourContext = () => {
                 <img
                   src={imgSrc}
                   alt={name.replace('\n', ' ')}
+                  loading="lazy"
                   className="shrink-0 size-[156px] object-contain"
                 />
               </li>
