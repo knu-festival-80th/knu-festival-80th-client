@@ -1,4 +1,6 @@
-interface ProcessCardProps {
+import React from 'react';
+
+export interface ProcessCardProps {
   step: string;
   title: string;
   description: React.ReactNode;
@@ -14,14 +16,16 @@ const ProcessCard = ({ step, title, description, bgSrc, illustSrc }: ProcessCard
         className="absolute inset-0"
         style={{
           backgroundImage:
-            'linear-gradient(129.57deg, rgba(255,255,255,0.9) 34.45%, rgba(255,255,255,0) 100%)',
+            'linear-gradient(132.09deg, rgba(255,255,255,0.9) 34.45%, rgba(255,255,255,0) 100%)',
         }}
       />
     </div>
 
     <div className="relative flex flex-col gap-2.5">
-      <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#333]">{step}</p>
-      <h3 className="font-wanted-sans text-heading3 font-bold text-ink">{title}</h3>
+      <p className="font-wanted-sans text-body1 font-bold tracking-tight text-ink">{step}</p>
+      <h3 className="font-wanted-sans text-subheading font-bold tracking-tight text-ink">
+        {title}
+      </h3>
       <p className="font-wanted-sans text-body1 leading-[1.4] tracking-tight text-gray">
         {description}
       </p>
