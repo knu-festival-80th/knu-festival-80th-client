@@ -5,6 +5,7 @@ import ErrorFallback from './ErrorFallback';
 type Props = {
   children: ReactNode;
   fallback?: ReactNode;
+  fallbackClassName?: string;
 };
 
 type State = {
@@ -35,7 +36,11 @@ export default class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
       const type = isNetworkError(error) ? 'network' : 'service';
       return (
-        <ErrorFallback type={type} onRetry={type === 'network' ? this.handleRetry : undefined} />
+        <ErrorFallback
+          type={type}
+          onRetry={type === 'network' ? this.handleRetry : undefined}
+          className={this.props.fallbackClassName}
+        />
       );
     }
 

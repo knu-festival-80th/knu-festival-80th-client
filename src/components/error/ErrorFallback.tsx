@@ -5,6 +5,7 @@ import errorServiceImg from '@/assets/error/error-service.webp';
 type ErrorFallbackProps = {
   type: 'service' | 'network' | 'notFound';
   onRetry?: () => void;
+  className?: string;
 };
 
 const CONFIG = {
@@ -25,11 +26,13 @@ const CONFIG = {
   },
 };
 
-export default function ErrorFallback({ type, onRetry }: ErrorFallbackProps) {
+export default function ErrorFallback({ type, onRetry, className }: ErrorFallbackProps) {
   const { imageSrc, imageClassName, message } = CONFIG[type];
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-6.25 pb-7.5">
+    <div
+      className={`flex flex-col items-center justify-center gap-6.25 bg-background pb-7.5 ${className ?? 'min-h-[calc(100dvh-4rem)]'}`}
+    >
       <img src={imageSrc} alt="" className={`h-52.75 w-70.5 object-contain ${imageClassName}`} />
       <p className="font-wanted-sans text-body1 font-semibold text-text text-center whitespace-pre-line">
         {message}
