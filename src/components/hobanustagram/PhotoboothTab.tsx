@@ -2,8 +2,8 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Download, Film, ImagePlus, RotateCcw, Share2 } from 'lucide-react';
 
+import PageLoader from '@/components/common/PageLoader';
 import { CameraOverlay } from '@/components/hobanustagram/CameraOverlay';
-import { HobanustagramFallback } from '@/components/hobanustagram/HobanustagramFallback';
 import { LazyTwoShotOverlay } from '@/components/hobanustagram/LazyTwoShotOverlay';
 import { StepIndicator } from '@/components/hobanustagram/StepIndicator';
 import { CHARACTER_LIST } from '@/constants/hobanustagram';
@@ -122,7 +122,7 @@ export const PhotoboothTab = () => {
   return (
     <>
       {twoShotActive && (
-        <Suspense fallback={<HobanustagramFallback className="fixed inset-0 z-[100]" />}>
+        <Suspense fallback={<PageLoader className="fixed inset-0 z-[100]" />}>
           <LazyTwoShotOverlay
             onClose={() => setTwoShotActive(false)}
             onComplete={handleTwoShotComplete}
