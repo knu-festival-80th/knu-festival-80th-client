@@ -126,7 +126,7 @@ App.tsx
 
 ## 로딩 상태 처리 방식
 
-현재 앱은 `BrowserRouter` 기반이라 React Router의 `useNavigation` 훅을 사용할 수 없다.  
+현재 앱은 `BrowserRouter` 기반이라 React Router의 `useNavigation` 훅을 사용할 수 없다.
 (`useNavigation`은 `createBrowserRouter` + `RouterProvider` 기반 data router에서만 동작)
 
 따라서 페이지 이동 시 로딩은 `Suspense` fallback(`PageLoader`)으로만 처리한다.

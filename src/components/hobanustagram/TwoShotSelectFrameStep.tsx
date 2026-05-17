@@ -8,6 +8,7 @@ export interface TwoShotSelectFrameStepProps {
   capturedPhotos: string[];
   selectedIndices: number[];
   selectedFilter: 1 | 2;
+  compositeError: string | null;
   onSelectFilter: (filter: 1 | 2) => void;
   onComplete: () => void;
 }
@@ -16,6 +17,7 @@ export const TwoShotSelectFrameStep = ({
   capturedPhotos,
   selectedIndices,
   selectedFilter,
+  compositeError,
   onSelectFilter,
   onComplete,
 }: TwoShotSelectFrameStepProps) => {
@@ -77,6 +79,11 @@ export const TwoShotSelectFrameStep = ({
         </div>
 
         <div className="shrink-0 px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+          {compositeError && (
+            <p className="pb-3 text-center font-wanted-sans text-sm font-medium text-sub-red">
+              {compositeError}
+            </p>
+          )}
           <button
             type="button"
             onClick={onComplete}

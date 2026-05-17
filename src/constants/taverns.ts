@@ -23,7 +23,13 @@ export type Tavern = {
   yRatio: number;
   type: BoothType;
   color: string;
+  markerLabel?: string;
 };
+
+export const PERFORMANCE_LOCATION_DESCRIPTION = '모든 공연은 대공연장에서 진행됩니다.';
+
+export const isPerformanceLocation = (tavern: Tavern | null | undefined) =>
+  tavern?.type === 'STAGE';
 
 const normalizeRatio = (ratio: number | null | undefined) => ratio ?? 0.5;
 

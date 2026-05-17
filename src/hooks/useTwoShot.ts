@@ -6,6 +6,27 @@ import { compositeTwoShot } from '@/lib/compositeTwoShot';
 import type { TwoShotStep } from '@/types/hobanustagram';
 import { TWO_SHOT_FRAME_URLS } from '@/constants/twoShot';
 
+const COMPOSITE_ERROR_MESSAGE = '인생두컷을 제작하지 못했어요. 다시 시도해 주세요.';
+
+function waitForImageReady(src: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      if (!img.decode) {
+        resolve();
+        return;
+      }
+
+      img
+        .decode()
+        .catch(() => {})
+        .finally(resolve);
+    };
+    img.onerror = () => resolve();
+    img.src = src;
+  });
+}
+
 export const useTwoShot = (onComplete: (compositedUrl: string) => void) => {
   const [step, setStep] = useState<TwoShotStep>('preview');
   const [selectedFilter, setSelectedFilter] = useState<1 | 2>(1);
@@ -15,6 +36,7 @@ export const useTwoShot = (onComplete: (compositedUrl: string) => void) => {
   const [showFlash, setShowFlash] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [compositeError, setCompositeError] = useState<string | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { videoRef, isReady, error, facingMode, startCamera, stopCamera, flipCamera } = useCamera();
@@ -111,6 +133,7 @@ export const useTwoShot = (onComplete: (compositedUrl: string) => void) => {
   };
 
   const handleToggleSelection = (index: number) => {
+    setCompositeError(null);
     setSelectedIndices((prev) => {
       if (prev.includes(index)) return prev.filter((i) => i !== index);
       if (prev.length >= 2) return [prev[1], index];
@@ -118,24 +141,37 @@ export const useTwoShot = (onComplete: (compositedUrl: string) => void) => {
     });
   };
 
+  const handleSelectFilter = (filter: 1 | 2) => {
+    setCompositeError(null);
+    setSelectedFilter(filter);
+  };
+
   const handleComplete = async () => {
     if (selectedIndices.length !== 2) return;
+    setCompositeError(null);
     setStep('compositing');
-    const [composited] = await Promise.all([
-      compositeTwoShot(
-        [capturedPhotos[selectedIndices[0]], capturedPhotos[selectedIndices[1]]],
-        selectedFilter,
-      ),
-      new Promise<void>((resolve) => setTimeout(resolve, 4000)),
-    ]);
-    onComplete(composited);
+
+    try {
+      const firstPhoto = capturedPhotos[selectedIndices[0]];
+      const secondPhoto = capturedPhotos[selectedIndices[1]];
+
+      if (!firstPhoto || !secondPhoto) {
+        throw new Error('Selected photos are missing.');
+      }
+
+      const composited = await compositeTwoShot([firstPhoto, secondPhoto], selectedFilter);
+      await waitForImageReady(composited);
+      onComplete(composited);
+    } catch {
+      setCompositeError(COMPOSITE_ERROR_MESSAGE);
+      setStep('select-frame');
+    }
   };
 
   return {
     step,
     setStep,
     selectedFilter,
-    setSelectedFilter,
     capturedPhotos,
     selectedIndices,
     slotAspect,
@@ -143,6 +179,7 @@ export const useTwoShot = (onComplete: (compositedUrl: string) => void) => {
     timerEnabled,
     setTimerEnabled,
     countdown,
+    compositeError,
     videoRef,
     isReady,
     error,
@@ -152,6 +189,7 @@ export const useTwoShot = (onComplete: (compositedUrl: string) => void) => {
     viewportH,
     handleShutter,
     handleToggleSelection,
+    handleSelectFilter,
     handleComplete,
   };
 };

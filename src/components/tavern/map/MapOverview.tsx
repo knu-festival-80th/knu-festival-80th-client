@@ -1,9 +1,14 @@
 import TavernCard from '@/components/tavern/list/TavernCard';
 import CampusMap from '@/components/tavern/map/CampusMap';
-import type { Tavern } from '@/constants/taverns';
+import {
+  PERFORMANCE_LOCATION_DESCRIPTION,
+  isPerformanceLocation,
+  type Tavern,
+} from '@/constants/taverns';
 
 type MapOverviewProps = {
   expandedMenuId: string | null;
+  focusSelected?: boolean;
   selectedTavern: Tavern | null;
   taverns: Tavern[];
   onMenuToggle: (id: string | null) => void;
@@ -14,6 +19,7 @@ type MapOverviewProps = {
 
 export default function MapOverview({
   expandedMenuId,
+  focusSelected = false,
   selectedTavern,
   taverns,
   onMenuToggle,
@@ -33,12 +39,25 @@ export default function MapOverview({
       <div className="-mx-5 px-5">
         <CampusMap
           taverns={taverns}
+          focusSelected={focusSelected}
           selectedTavern={selectedTavern}
           onSelectTavern={onSelectTavern}
         />
       </div>
 
-      {selectedTavern && selectedTavern.type !== 'STAGE' && (
+      {selectedTavern && isPerformanceLocation(selectedTavern) ? (
+        <div className="rounded-xl border border-[#e5e5e5] bg-white px-5 py-4 shadow-sm">
+          <p className="text-[13px] font-semibold leading-none tracking-[-0.26px] text-[#1f7ae0]">
+            공연 위치
+          </p>
+          <h2 className="mt-2 text-[20px] font-bold leading-[1.35] tracking-[-0.4px] text-[#1a1a1a]">
+            {selectedTavern.name}
+          </h2>
+          <p className="mt-2 text-[14px] font-medium leading-[1.45] tracking-[-0.28px] text-[#707070]">
+            {selectedTavern.location || PERFORMANCE_LOCATION_DESCRIPTION}
+          </p>
+        </div>
+      ) : selectedTavern ? (
         <TavernCard
           expanded={expandedMenuId === selectedTavern.id}
           tavern={selectedTavern}
@@ -49,7 +68,7 @@ export default function MapOverview({
           onRegister={() => onRegister(selectedTavern)}
           onSelect={() => onOpenDetail(selectedTavern)}
         />
-      )}
+      ) : null}
     </section>
   );
 }

@@ -55,7 +55,7 @@ StampTourPage (TabNavigation + Outlet)
 
 ### StampBoothListView (`src/components/stampTour/views/StampBoothListView.tsx`)
 
-부스 위치 확인하기 탭 뷰. 부스 데이터(`BOOTHS` 상수)를 포함하며 `BoothCard`를 아코디언 형태로 렌더링한다.
+부스 위치 확인하기 탭 뷰. `BOOTHS` 상수를 `src/constants/stampTour.ts`에서 import하며 `BoothCard`를 아코디언 형태로 렌더링한다.
 
 첫 번째 부스가 기본 펼침 상태다.
 
@@ -97,12 +97,39 @@ const [openBoothId, setOpenBoothId] = useState<number | null>(BOOTHS[0]?.id ?? n
 - **BoothCard 토글 버튼**: `aria-expanded={isExpanded}`, `aria-label="{부스명} 상세정보"` 적용.
 - **부스 지도 이미지 alt**: `'{부스명} 부스 위치 지도'` 형식으로 각 부스별 의미있는 alt 텍스트 제공.
 
+## 스크롤 진입 애니메이션
+
+`framer-motion`의 `whileInView`를 사용해 각 섹션이 뷰포트에 진입할 때 `opacity: 0, y: 40` → `opacity: 1, y: 0`으로 전환된다. `once: true`라 최초 1회만 실행된다.
+
+공통 설정은 `src/constants/animation.ts`의 `fadeUpVariant`로 관리한다.
+
+```ts
+export const fadeUpVariant = {
+  initial: { opacity: 0, y: 40 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, amount: 0.2 },
+  transition: { duration: 0.5, ease: 'easeOut' as const },
+};
+```
+
+- **StampTourContext**: 헤더, 히어로 이미지, 스텝 카드, 경품 섹션 각각 독립적으로 적용
+- **StampBoothListView**: 제목과 부스 카드 각각 적용. 부스 카드는 `index * 0.08s` 딜레이로 순차 등장
+
+## 데이터 관리
+
+부스 데이터(`Booth` 타입 및 `BOOTHS` 배열)는 `src/constants/stampTour.ts`에서 관리한다. 부스 지도 이미지 import도 함께 포함된다.
+
+`steps`와 `prizes` 데이터는 description에 JSX(`<strong>`, `<br />`)가 포함되어 있어 `StampTourContext.tsx` 내에서 관리한다.
+
 ## 파일 구조
 
 ```
 src/
 ├── pages/
 │   └── StampTourPage.tsx              ← 레이아웃 (TabNavigation + Outlet)
+├── constants/
+│   ├── stampTour.ts                   ← Booth 타입, BOOTHS 데이터
+│   └── animation.ts                   ← fadeUpVariant (공통 애니메이션 설정)
 └── components/stampTour/
     ├── views/
     │   ├── StampTourIntroView.tsx      ← 소개 탭

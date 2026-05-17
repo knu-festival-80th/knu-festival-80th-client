@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ChevronDown, Plus } from 'lucide-react';
 import { ApiClientError, rollingPaperApi } from '@/apis';
@@ -42,9 +42,12 @@ import { rollingPaperItemMotion } from './rollingPaperMotion';
 const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
 const PENDING_POSTIT_REFETCH_INTERVAL_MS = 5000;
 const PENDING_POSTIT_LOCAL_VISIBLE_MS = 60000;
+const CONFLICT_PLACEHOLDER_LOCAL_VISIBLE_MS = 60000;
+const FOCUS_RESET_ANIMATION_MS = 320;
 const POSTIT_POSITION_CONFLICT_CODE = 'CP008';
 const POSTIT_POSITION_CONFLICT_MESSAGE =
   '이미 다른 사용자가 같은 위치에 메시지를 붙였어요. 다른 위치에 다시 시도해주세요.';
+const POSTIT_POSITION_CONFLICT_PLACEHOLDER_MESSAGE = '이미 사용 중인 위치예요.';
 
 type RollingPaperBoardProps = {
   categoryId?: string;
@@ -67,12 +70,27 @@ function isNoteInChannel(note: PlacedRollingPaperNote, categoryId: string, chann
   return note.categoryId === categoryId && note.channelId === channelId;
 }
 
+function isExpiredLocalNote(note: PlacedRollingPaperNote, now = Date.now()) {
+  return Boolean(note.pendingVisibleUntil && note.pendingVisibleUntil <= now);
+}
+
+function isSameConflictPlaceholder(note: PlacedRollingPaperNote, nextNote: PlacedRollingPaperNote) {
+  return (
+    note.isConflictPlaceholder &&
+    note.boardId === nextNote.boardId &&
+    note.boardVariant === nextNote.boardVariant &&
+    Math.abs(note.x - nextNote.x) < 0.01 &&
+    Math.abs(note.y - nextNote.y) < 0.01
+  );
+}
+
 export default function RollingPaperBoard({ categoryId, channelId }: RollingPaperBoardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const questionId = Number(categoryId);
   const isApiRoute = Number.isFinite(questionId);
-  const mockNotes = getInitialPlacedNotes();
+  const mockNotes = useMemo(() => getInitialPlacedNotes(), []);
+  const focusResetTimeoutRef = useRef<number | null>(null);
   const questionsQuery = useQuery({
     queryKey: ['rollingPaper', 'questions'],
     queryFn: rollingPaperApi.listQuestions,
@@ -82,10 +100,14 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
     queryFn: () => rollingPaperApi.listBoards(questionId),
     enabled: isApiRoute,
   });
-  const apiCategories = (questionsQuery.data ?? [])
-    .slice()
-    .sort((a, b) => a.orderIndex - b.orderIndex)
-    .map(toRollingPaperCategory);
+  const apiCategories = useMemo(
+    () =>
+      (questionsQuery.data ?? [])
+        .slice()
+        .sort((a, b) => a.orderIndex - b.orderIndex)
+        .map(toRollingPaperCategory),
+    [questionsQuery.data],
+  );
   const fallbackCategory = getRollingPaperCategory(categoryId);
   const placeholderCategory = {
     id: categoryId ?? fallbackCategory.id,
@@ -96,9 +118,13 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
     apiCategories.find((item) => item.id === categoryId) ??
     apiCategories[0] ??
     (isApiRoute ? placeholderCategory : fallbackCategory);
-  const apiChannels = (boardsQuery.data ?? [])
-    .map(toRollingPaperChannel)
-    .slice(0, ROLLING_PAPER_CHANNELS_PER_CATEGORY);
+  const apiChannels = useMemo(
+    () =>
+      (boardsQuery.data ?? [])
+        .map(toRollingPaperChannel)
+        .slice(0, ROLLING_PAPER_CHANNELS_PER_CATEGORY),
+    [boardsQuery.data],
+  );
   const fallbackChannels = isApiRoute ? [] : getRollingPaperChannelsByCategory(category.id);
   const categoryChannels = apiChannels.length > 0 ? apiChannels : fallbackChannels;
   const fallbackChannel = isApiRoute
@@ -149,7 +175,10 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       return hasPendingPostit && hasLoadedData ? PENDING_POSTIT_REFETCH_INTERVAL_MS : false;
     },
   });
-  const apiPlacedNotes = (postitsQuery.data ?? []).map(toPlacedRollingPaperNote);
+  const apiPlacedNotes = useMemo(
+    () => (postitsQuery.data ?? []).map(toPlacedRollingPaperNote),
+    [postitsQuery.data],
+  );
   const createPostitMutation = useMutation({
     mutationFn: (note: PlacedRollingPaperNote) =>
       rollingPaperApi.createPostit({
@@ -163,34 +192,99 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       void queryClient.invalidateQueries({ queryKey: ['rollingPaper', 'postits', boardId] });
     },
   });
-  const approvedPostitIds = new Set(apiPlacedNotes.map((note) => note.postitId));
-  const visiblePendingNotes = pendingPlacedNotes.filter(
-    (note) => note.boardId === boardId && !approvedPostitIds.has(note.postitId),
+  const approvedPostitIds = useMemo(
+    () => new Set(apiPlacedNotes.map((note) => note.postitId)),
+    [apiPlacedNotes],
   );
-  const placedNotes =
-    mockNotes.length > 0 ? mockNotes : [...apiPlacedNotes, ...visiblePendingNotes];
+  const visiblePendingNotes = useMemo(
+    () =>
+      pendingPlacedNotes.filter((note) => {
+        if (note.boardId !== boardId || approvedPostitIds.has(note.postitId)) {
+          return false;
+        }
 
-  const boardScope = { categoryId: category.id, channelId: channel.id };
-  const scopedPlacedNotes = placedNotes.filter((note) =>
-    isNoteInChannel(note, category.id, channel.id),
+        if (isExpiredLocalNote(note)) {
+          return false;
+        }
+
+        const apiNotesForBoard = getPlacedNotesForBoard(apiPlacedNotes, note.boardVariant);
+        const isAlreadyVisibleFromApi = !isRollingPaperPlacementAvailable(
+          { x: note.x, y: note.y },
+          note.colorId,
+          apiNotesForBoard,
+          note.boardVariant,
+          undefined,
+          ROLLING_PAPER_CLIENT_COLLISION_SCALE,
+        );
+
+        return !isAlreadyVisibleFromApi;
+      }),
+    [apiPlacedNotes, approvedPostitIds, boardId, pendingPlacedNotes],
   );
-  const currentBoardNotes = getPlacedNotesForBoard(placedNotes, boardIndex, boardScope);
+  const placedNotes = useMemo(
+    () => (mockNotes.length > 0 ? mockNotes : [...apiPlacedNotes, ...visiblePendingNotes]),
+    [apiPlacedNotes, mockNotes, visiblePendingNotes],
+  );
+
+  const boardScope = useMemo(
+    () => ({ categoryId: category.id, channelId: channel.id }),
+    [category.id, channel.id],
+  );
+  const scopedPlacedNotes = useMemo(
+    () => placedNotes.filter((note) => isNoteInChannel(note, category.id, channel.id)),
+    [category.id, channel.id, placedNotes],
+  );
+  const currentBoardNotes = useMemo(
+    () => getPlacedNotesForBoard(placedNotes, boardIndex, boardScope),
+    [boardIndex, boardScope, placedNotes],
+  );
   const boardCapacity = channel.capacity ?? ROLLING_PAPER_MAX_NOTES_PER_BOARD;
   const currentBoardNoteCount = Math.min(currentBoardNotes.length, boardCapacity);
   const isCurrentBoardFull = currentBoardNotes.length >= boardCapacity;
   const boardCategories = apiCategories.length > 0 ? apiCategories : [category];
   const boardNumberLabel = `BOR ${String(channelIndex + 1).padStart(2, '0')}`;
 
-  const resetBoardViewport = () => {
+  const clearFocusResetTimeout = useCallback(() => {
+    if (focusResetTimeoutRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(focusResetTimeoutRef.current);
+    focusResetTimeoutRef.current = null;
+  }, []);
+
+  useEffect(() => clearFocusResetTimeout, [clearFocusResetTimeout]);
+
+  const handleFocusedNoteChange = useCallback(
+    (noteId: string | null) => {
+      clearFocusResetTimeout();
+      setFocusedNoteId(noteId);
+    },
+    [clearFocusResetTimeout],
+  );
+
+  const resetBoardViewport = (options: { animateFocusedNote?: boolean } = {}) => {
+    const animateFocusedNote = options.animateFocusedNote ?? true;
+
     setBoardScale(ROLLING_PAPER_ZOOM.default);
     setBoardPan(INITIAL_BOARD_PAN);
-    setFocusedNoteId(null);
+
+    clearFocusResetTimeout();
+    if (!focusedNoteId || !animateFocusedNote) {
+      setFocusedNoteId(null);
+      return;
+    }
+
+    focusResetTimeoutRef.current = window.setTimeout(() => {
+      setFocusedNoteId(null);
+      focusResetTimeoutRef.current = null;
+    }, FOCUS_RESET_ANIMATION_MS);
   };
 
   const showPreviousBoard = () => {
     if (categoryChannels.length === 0) return;
 
-    resetBoardViewport();
+    resetBoardViewport({ animateFocusedNote: false });
     const previousIndex = channelIndex === 0 ? categoryChannels.length - 1 : channelIndex - 1;
     const previousChannel = categoryChannels[previousIndex];
 
@@ -200,7 +294,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   const showNextBoard = () => {
     if (categoryChannels.length === 0) return;
 
-    resetBoardViewport();
+    resetBoardViewport({ animateFocusedNote: false });
     const nextIndex = (channelIndex + 1) % categoryChannels.length;
     const nextChannel = categoryChannels[nextIndex];
 
@@ -239,6 +333,34 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       });
     } catch (error) {
       if (error instanceof ApiClientError && error.code === POSTIT_POSITION_CONFLICT_CODE) {
+        const conflictPlaceholder: PlacedRollingPaperNote = {
+          ...note,
+          id: `conflict-${boardId}-${Date.now()}`,
+          boardId,
+          boardVariant: boardIndex,
+          categoryId: category.id,
+          channelId: channel.id,
+          message: POSTIT_POSITION_CONFLICT_PLACEHOLDER_MESSAGE,
+          isPending: true,
+          isLocalOnly: true,
+          isConflictPlaceholder: true,
+          pendingVisibleUntil: Date.now() + CONFLICT_PLACEHOLDER_LOCAL_VISIBLE_MS,
+        };
+
+        setPendingPlacedNotes((prevNotes) => [
+          ...prevNotes.filter(
+            (prevNote) =>
+              !isExpiredLocalNote(prevNote) &&
+              !isSameConflictPlaceholder(prevNote, conflictPlaceholder),
+          ),
+          conflictPlaceholder,
+        ]);
+        window.setTimeout(() => {
+          setPendingPlacedNotes((prevNotes) =>
+            prevNotes.filter((prevNote) => prevNote.id !== conflictPlaceholder.id),
+          );
+        }, CONFLICT_PLACEHOLDER_LOCAL_VISIBLE_MS);
+
         setPlacementErrorMessage(POSTIT_POSITION_CONFLICT_MESSAGE);
         await queryClient.refetchQueries({ queryKey: ['rollingPaper', 'postits', boardId] });
         await queryClient.invalidateQueries({ queryKey: ['rollingPaper', 'boards', questionId] });
@@ -345,7 +467,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
             focusedNoteId={focusedNoteId}
             onPanChange={setBoardPan}
             onScaleChange={setBoardScale}
-            onFocusedNoteChange={setFocusedNoteId}
+            onFocusedNoteChange={handleFocusedNoteChange}
           />
 
           <div className="pointer-events-none absolute inset-x-0 top-[30px] z-40 flex justify-between px-4">
@@ -402,7 +524,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
           onClose={() => setIsBoardChangeDialogOpen(false)}
           onSelectChannel={(nextChannel) => {
             setIsBoardChangeDialogOpen(false);
-            resetBoardViewport();
+            resetBoardViewport({ animateFocusedNote: false });
             navigate(getRollingPaperBoardPath(category.id, nextChannel.id));
           }}
         />

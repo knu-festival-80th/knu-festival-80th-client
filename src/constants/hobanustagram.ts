@@ -1,7 +1,7 @@
 import type { FaqItem } from '@/components/common/FaqAccordion';
-import hobanuImg from '@/assets/hobanustagram/hobanu.png';
-import smileHobanuImg from '@/assets/hobanustagram/smile_hobanu.png';
-import smileHobanuInclineImg from '@/assets/hobanustagram/smile_hobanu_incline.png';
+import hobanuImg from '@/assets/hobanustagram/hobanu.webp';
+import smileHobanuImg from '@/assets/hobanustagram/smile_hobanu.webp';
+import smileHobanuInclineImg from '@/assets/hobanustagram/smile_hobanu_incline.webp';
 import type { CharacterKey, OverlayStyle } from '@/types/hobanustagram';
 
 export const CHARACTER_LIST: {
