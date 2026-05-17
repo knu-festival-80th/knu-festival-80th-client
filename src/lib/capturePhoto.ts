@@ -1,3 +1,7 @@
+const PHOTO_OUTPUT_MIME_TYPE = 'image/jpeg';
+const PHOTO_OUTPUT_QUALITY = 0.98;
+const PHOTO_BACKGROUND_COLOR = '#ffffff';
+
 export function capturePhoto(
   video: HTMLVideoElement,
   overlayImg: HTMLImageElement,
@@ -25,6 +29,9 @@ export function capturePhoto(
   canvas.width = canvasW;
   canvas.height = canvasH;
   const ctx = canvas.getContext('2d')!;
+
+  ctx.fillStyle = PHOTO_BACKGROUND_COLOR;
+  ctx.fillRect(0, 0, canvasW, canvasH);
 
   if (isFrontCamera) {
     ctx.save();
@@ -62,5 +69,5 @@ export function capturePhoto(
     ctx.drawImage(overlayImg, overlayX, overlayY, overlayW, overlayH);
   }
 
-  return canvas.toDataURL('image/png');
+  return canvas.toDataURL(PHOTO_OUTPUT_MIME_TYPE, PHOTO_OUTPUT_QUALITY);
 }

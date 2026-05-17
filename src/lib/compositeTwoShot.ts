@@ -3,6 +3,9 @@ import frame2WebpUrl from '@/assets/hobanustagram/twoframephoto_frame2.webp';
 
 const FRAME_WEBP_URLS: Record<1 | 2, string> = { 1: frame1WebpUrl, 2: frame2WebpUrl };
 const PHOTO_SLOT_BLEED_PX = 6;
+const TWO_SHOT_OUTPUT_MIME_TYPE = 'image/jpeg';
+const TWO_SHOT_OUTPUT_QUALITY = 0.98;
+const TWO_SHOT_BACKGROUND_COLOR = '#ffffff';
 
 const PHOTO_SLOT_RATIOS: Record<
   1 | 2,
@@ -81,6 +84,9 @@ export async function compositeTwoShot(photos: [string, string], filterId: 1 | 2
   const h = canvas.height;
   const slots = PHOTO_SLOT_RATIOS[filterId];
 
+  ctx.fillStyle = TWO_SHOT_BACKGROUND_COLOR;
+  ctx.fillRect(0, 0, w, h);
+
   drawCoverImage(
     ctx,
     photo1Img,
@@ -100,5 +106,5 @@ export async function compositeTwoShot(photos: [string, string], filterId: 1 | 2
 
   ctx.drawImage(frameImg, 0, 0, w, h);
 
-  return canvas.toDataURL('image/png');
+  return canvas.toDataURL(TWO_SHOT_OUTPUT_MIME_TYPE, TWO_SHOT_OUTPUT_QUALITY);
 }
