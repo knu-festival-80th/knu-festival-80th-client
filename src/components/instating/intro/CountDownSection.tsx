@@ -1,8 +1,14 @@
 import CountDownTimer from './CountDownTimer';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
+import MatchingStatusFallback from '@/components/instating/MatchingStatusFallback';
 
 const CountDownSection = () => {
-  const { data } = useMatchingStatus();
+  const { data, isError, refetch } = useMatchingStatus();
+
+  // TODO: fallback ui 체크(최종 배포 시 제거)
+  // return <MatchingStatusFallback onRetry={refetch} className="pb-16 pt-8" />;
+
+  if (isError) return <MatchingStatusFallback onRetry={refetch} className="pb-16 pt-8" />;
 
   let label: string;
   let deadline: Date;

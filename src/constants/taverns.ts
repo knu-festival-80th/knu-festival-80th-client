@@ -27,7 +27,11 @@ export type Tavern = {
 
 const normalizeRatio = (ratio: number | null | undefined) => ratio ?? 0.5;
 
-const DEFAULT_COLORS: Record<BoothType, string> = { BOOTH: '#15ccb1', TAVERN: '#ff3d3d' };
+const DEFAULT_COLORS: Record<BoothType, string> = {
+  BOOTH: '#15ccb1',
+  TAVERN: '#ff3d3d',
+  STAGE: '#8B5CF6',
+};
 
 export function boothToTavern(booth: BoothListItem): Tavern {
   const type = booth.type ?? 'TAVERN';

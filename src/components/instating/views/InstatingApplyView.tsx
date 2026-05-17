@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { ApiClientError, matchingApi } from '@/apis';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
-import { useCountdown } from '@/hooks/instating/useCountdown';
 import type { SubmittedData } from '../result/InstatingSuccessModal';
 import InstatingSuccessModal from '../result/InstatingSuccessModal';
 import AlertModal from '@/components/instating/AlertModal';
+import CountdownText from '@/components/instating/CountdownText';
 
 type FormValues = {
   gender: 'male' | 'female';
@@ -24,7 +24,6 @@ const InstatingApplyView = () => {
   const registrationOpenAt = status?.registrationOpenAt
     ? new Date(status.registrationOpenAt)
     : null;
-  const countdownText = useCountdown(registrationOpenAt);
 
   const {
     register,
@@ -133,13 +132,23 @@ const InstatingApplyView = () => {
           <div className="flex flex-col gap-[18px]">
             {/* Instagram ID */}
             <div className="flex flex-col gap-2">
-              <label className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink">
+              <label
+                htmlFor="instagramId"
+                className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink"
+              >
                 인스타 ID
               </label>
               <input
+                id="instagramId"
                 type="text"
                 placeholder="honggildong"
-                {...register('instagramId', { required: '인스타 ID를 입력해주세요.' })}
+                {...register('instagramId', {
+                  required: '인스타 ID를 입력해주세요.',
+                  pattern: {
+                    value: /^[a-zA-Z0-9_.]{1,30}$/,
+                    message: '올바른 인스타그램 ID를 입력해주세요.',
+                  },
+                })}
                 className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed"
               />
               {errors.instagramId && (
@@ -151,12 +160,16 @@ const InstatingApplyView = () => {
 
             {/* Phone */}
             <div className="flex flex-col gap-2">
-              <label className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink">
+              <label
+                htmlFor="phone"
+                className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink"
+              >
                 연락처
               </label>
               <input
+                id="phone"
                 type="tel"
-                placeholder="01012345678"
+                placeholder="번호를 입력해주세요 ('-' 없이 번호만)"
                 {...register('phone', {
                   required: '연락처를 입력해주세요.',
                   pattern: {
@@ -220,11 +233,13 @@ const InstatingApplyView = () => {
                 : 'bg-[#CCCCCC]'
           }`}
         >
-          {!isRegistrationOpen
-            ? `남은시간 ${countdownText}`
-            : isSubmitting
-              ? '신청 중...'
-              : '인스타팅 신청하기'}
+          {!isRegistrationOpen ? (
+            <CountdownText deadline={registrationOpenAt} />
+          ) : isSubmitting ? (
+            '신청 중...'
+          ) : (
+            '인스타팅 신청하기'
+          )}
         </button>
 
         {/* Notice */}
