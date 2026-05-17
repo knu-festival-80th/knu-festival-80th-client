@@ -64,7 +64,7 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 제출 성공 시 `InstatingSuccessModal`을 띄운다. 이 모달에는 입력한 정보 요약과 함께 결과 공개까지 남은 카운트다운이 표시된다.
 
-`registrationOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `useCountdown`으로 신청 시작까지 남은 시간을 표시한다.
+`registrationOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `CountdownText` 컴포넌트로 신청 시작까지 남은 시간을 표시한다. 목표 시간은 `useMatchingStatus`의 `registrationOpenAt` 필드를 사용한다.
 
 에러 처리:
 
@@ -265,10 +265,12 @@ src/
 │       ├── MatchingOverviewPage.tsx
 │       └── MatchingParticipantsPage.tsx
 ├── components/common/            ← 공통 컴포넌트 (docs/COMMON_COMPONENTS.md 참고)
-│   ├── ErrorBoundary.tsx         ← 렌더링 에러 캐치, fallback prop 지원
 │   ├── TabNavigation.tsx         ← 탭 목록을 props로 받는 공통 탭 네비게이션
 │   ├── OutlineButton.tsx         ← variant 기반 테두리 버튼 (dark/default/red/glass)
 │   └── ProcessCard.tsx           ← 배경+일러스트 스텝 카드
+├── components/error/
+│   ├── ErrorBoundary.tsx         ← 렌더링 에러 캐치, fallback prop 지원
+│   └── ErrorFallback.tsx         ← 네트워크/서비스 에러 기본 fallback UI
 └── components/instating/
     ├── AlertModal.tsx            ← 공통 에러 모달
     ├── CountdownText.tsx         ← 폼 버튼 카운트다운 텍스트 (리렌더 격리)

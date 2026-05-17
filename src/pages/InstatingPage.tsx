@@ -1,5 +1,5 @@
 import TabNavigation from '@/components/common/TabNavigation';
-import ErrorBoundary from '@/components/common/ErrorBoundary';
+import ErrorBoundary from '@/components/error/ErrorBoundary';
 import InstatingErrorFallback from '@/components/instating/InstatingErrorFallback';
 import { Outlet } from 'react-router-dom';
 
