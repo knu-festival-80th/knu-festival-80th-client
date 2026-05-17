@@ -1,3 +1,12 @@
+import prize1 from '@/assets/stampTour/prize_1.webp';
+import prize2 from '@/assets/stampTour/prize_2.webp';
+import prize3 from '@/assets/stampTour/prize_3.webp';
+import step1Bg from '@/assets/stampTour/step_1_bg.webp';
+import step1Img from '@/assets/stampTour/step_1.webp';
+import step2Bg from '@/assets/stampTour/step_2_bg.webp';
+import step2Img from '@/assets/stampTour/step_2.webp';
+import step3Bg from '@/assets/stampTour/step_3_bg.webp';
+import step3Img from '@/assets/stampTour/step_3.webp';
 import boothMap1 from '@/assets/stampTour/booth_map_1.webp';
 import boothMap2 from '@/assets/stampTour/booth_map_2.webp';
 import boothMap3 from '@/assets/stampTour/booth_map_3.webp';
@@ -5,6 +14,73 @@ import boothMap4 from '@/assets/stampTour/booth_map_4.webp';
 import boothMap5 from '@/assets/stampTour/booth_map_5.webp';
 import boothMap6 from '@/assets/stampTour/booth_map_6.webp';
 import boothMap7 from '@/assets/stampTour/booth_map_7.webp';
+
+import type { ReactNode } from 'react';
+
+export type StampTourStep = {
+  step: string;
+  title: string;
+  description: ReactNode;
+  bgSrc: string;
+  illustSrc: string;
+};
+
+export const STAMP_TOUR_STEPS: StampTourStep[] = [
+  {
+    step: 'Step 1',
+    title: '축제 구석구석 부스 방문하기',
+    description: (
+      <>
+        축제 지도에 표시된 다양한 테마 부스를
+        <br />
+        탐방해 보세요. 축제 맵(Map)을 확인하면
+        <br />더 효율적으로 이동할 수 있어요!
+      </>
+    ),
+    bgSrc: step1Bg,
+    illustSrc: step1Img,
+  },
+  {
+    step: 'Step 2',
+    title: '미션 수행하고 스탬프 받기',
+    description: (
+      <>
+        총 16개의 부스에서 준비한 간단한 미션이나
+        <br />
+        퀴즈를 완료해 주세요. 미션 성공 시,
+        <br />
+        스탬프 북에 소중한 참여 인증 도장을 찍어드립니다.
+      </>
+    ),
+    bgSrc: step2Bg,
+    illustSrc: step2Img,
+  },
+  {
+    step: 'Step 3',
+    title: '스탬프 모아 상품 응모하기',
+    description: (
+      <>
+        모든 미션을 완료해 경품 응모권으로 교환하거나,
+        <br />
+        럭키 드로우에 참여할 기회를 잡으세요.
+      </>
+    ),
+    bgSrc: step3Bg,
+    illustSrc: step3Img,
+  },
+];
+
+export type StampTourPrize = {
+  rank: string;
+  name: string;
+  imgSrc: string;
+};
+
+export const STAMP_TOUR_PRIZES: StampTourPrize[] = [
+  { rank: '1위', name: '애플워치', imgSrc: prize1 },
+  { rank: '2위', name: '신세계 상품권\n10만원', imgSrc: prize2 },
+  { rank: '3위', name: '배달의 민족\n3만원', imgSrc: prize3 },
+];
 
 export type Booth = {
   id: number;
