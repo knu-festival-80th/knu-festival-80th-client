@@ -36,8 +36,16 @@ export function useHeartParticles() {
   const particlesRef = useRef<Particle[]>([]);
   const rafRef = useRef<number>(0);
   const lastEmitRef = useRef<number>(0);
+  const isRunningRef = useRef(false);
 
   useEffect(() => {
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const startLoop = useCallback(() => {
+    if (isRunningRef.current) return;
+    isRunningRef.current = true;
+
     const animate = () => {
       const canvas = canvasRef.current;
 
@@ -55,14 +63,16 @@ export function useHeartParticles() {
         prevCanvasRef.current = canvas;
       }
 
+      particlesRef.current = particlesRef.current.filter((p) => p.life > 0);
+
       const ctx = ctxRef.current;
-      if (!ctx) {
-        rafRef.current = requestAnimationFrame(animate);
+      if (!ctx || particlesRef.current.length === 0) {
+        ctx?.clearRect(0, 0, wRef.current, hRef.current);
+        isRunningRef.current = false;
         return;
       }
 
       ctx.clearRect(0, 0, wRef.current, hRef.current);
-      particlesRef.current = particlesRef.current.filter((p) => p.life > 0);
 
       for (const p of particlesRef.current) {
         p.x += p.vx;
@@ -82,42 +92,51 @@ export function useHeartParticles() {
     };
 
     rafRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  const emit = useCallback((x: number, y: number) => {
-    const now = performance.now();
-    if (now - lastEmitRef.current < EMIT_INTERVAL) return;
-    lastEmitRef.current = now;
+  const emit = useCallback(
+    (x: number, y: number) => {
+      const now = performance.now();
+      if (now - lastEmitRef.current < EMIT_INTERVAL) return;
+      lastEmitRef.current = now;
 
-    for (let i = 0; i < 3; i++) {
-      particlesRef.current.push({
-        x,
-        y,
-        vx: (Math.random() - 0.5) * 5,
-        vy: -(Math.random() * 3 + 1.5),
-        life: 1,
-        size: Math.random() * 0.25 + 0.25,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      });
-    }
-  }, []);
+      for (let i = 0; i < 3; i++) {
+        particlesRef.current.push({
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 5,
+          vy: -(Math.random() * 3 + 1.5),
+          life: 1,
+          size: Math.random() * 0.25 + 0.25,
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        });
+      }
 
-  const burst = useCallback((x: number, y: number, count = 28) => {
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
-      const speed = Math.random() * 3 + 1.5;
-      particlesRef.current.push({
-        x: x + (Math.random() - 0.5) * 40,
-        y: y + (Math.random() - 0.5) * 40,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 2,
-        life: 1,
-        size: Math.random() * 0.35 + 0.25,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      });
-    }
-  }, []);
+      startLoop();
+    },
+    [startLoop],
+  );
+
+  const burst = useCallback(
+    (x: number, y: number, count = 28) => {
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const speed = Math.random() * 3 + 1.5;
+        particlesRef.current.push({
+          x: x + (Math.random() - 0.5) * 40,
+          y: y + (Math.random() - 0.5) * 40,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 2,
+          life: 1,
+          size: Math.random() * 0.35 + 0.25,
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        });
+      }
+
+      startLoop();
+    },
+    [startLoop],
+  );
 
   return { canvasRef, emit, burst };
 }

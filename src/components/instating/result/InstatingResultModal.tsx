@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useAnimate } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import ScratchCard from './ScratchCard';
@@ -32,6 +32,13 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
   const [hasStartedScratching, setHasStartedScratching] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cardScope, animateCard] = useAnimate();
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   const phase: Phase = !result.matched
     ? 'failure'
@@ -72,7 +79,8 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
     try {
       await navigator.clipboard.writeText(`@${result.instagramId}`);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard unavailable
     }
