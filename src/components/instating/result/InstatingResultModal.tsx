@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useAnimate } from 'framer-motion';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
@@ -6,6 +6,7 @@ import ScratchCard from './ScratchCard';
 import MatchSuccessCard from './MatchSuccessCard';
 import MatchFailureCard from './MatchFailureCard';
 import { useInstatingScratchCanvas } from '@/hooks/instating/useInstatingScratchCanvas';
+import { useHeartParticles } from '@/hooks/instating/useHeartParticles';
 import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 export type MatchResult = { matched: true; instagramId: string } | { matched: false };
@@ -27,8 +28,10 @@ interface InstatingResultModalProps {
 const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) => {
   useBodyScrollLock();
   const { canvasRef, revealed, handlers } = useInstatingScratchCanvas();
+  const { canvasRef: particleCanvasRef, emit: emitParticles } = useHeartParticles();
   const [hasStartedScratching, setHasStartedScratching] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [cardScope, animateCard] = useAnimate();
 
   const phase: Phase = !result.matched
     ? 'failure'
@@ -44,7 +47,23 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
     ...handlers,
     onPointerDown: (e: React.PointerEvent<HTMLCanvasElement>) => {
       if (!hasStartedScratching) setHasStartedScratching(true);
+      animateCard(
+        cardScope.current,
+        { rotate: [-0.8, 0.8] },
+        { repeat: Infinity, repeatType: 'mirror', duration: 0.12, ease: 'easeInOut' },
+      );
       handlers.onPointerDown(e);
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (e.buttons > 0) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        emitParticles(e.clientX - rect.left, e.clientY - rect.top);
+      }
+      handlers.onPointerMove(e);
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLCanvasElement>) => {
+      animateCard(cardScope.current, { rotate: 0 }, { duration: 0.15 });
+      handlers.onPointerUp(e);
     },
   };
 
@@ -117,9 +136,15 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
           ) : (
             <AnimatePresence mode="wait">
               {!revealed ? (
-                <motion.div key="scratch" exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+                <motion.div
+                  key="scratch"
+                  ref={cardScope}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
                   <ScratchCard
                     canvasRef={canvasRef}
+                    particleCanvasRef={particleCanvasRef}
                     handlers={wrappedHandlers}
                     hideLabel={hasStartedScratching}
                   />
@@ -127,9 +152,9 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
               ) : (
                 <motion.div
                   key="revealed"
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  initial={{ opacity: 0, scale: 0.88, y: 16 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 22 }}
                 >
                   <MatchSuccessCard
                     instagramId={result.instagramId}

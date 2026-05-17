@@ -1,4 +1,5 @@
 import { Check, Copy } from 'lucide-react';
+import { motion } from 'framer-motion';
 import happyHobanwoo from '@/assets/instating/Hobanwoo/happyHobanwoo.webp';
 
 interface MatchSuccessCardProps {
@@ -29,7 +30,13 @@ const MatchSuccessCard = ({ instagramId, copied, onCopy }: MatchSuccessCardProps
       className="absolute overflow-hidden"
       style={{ left: 63, top: 78, width: 201, height: 190 }}
     >
-      <img src={happyHobanwoo} alt="" className="h-full w-full object-contain" />
+      <motion.img
+        src={happyHobanwoo}
+        alt=""
+        className="h-full w-full object-contain"
+        animate={{ rotate: [-5, 7] }}
+        transition={{ repeat: Infinity, repeatType: 'mirror', duration: 0.45, ease: 'easeInOut' }}
+      />
     </div>
 
     <div

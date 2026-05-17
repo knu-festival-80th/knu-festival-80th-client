@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import sadHobanwoo from '@/assets/instating/Hobanwoo/sadHobanwoo.webp';
 
 const MatchFailureCard = () => (
@@ -13,7 +14,13 @@ const MatchFailureCard = () => (
       className="absolute overflow-hidden"
       style={{ left: 63, top: 73, width: 202, height: 210 }}
     >
-      <img src={sadHobanwoo} alt="" className="h-full w-full object-contain" />
+      <motion.img
+        src={sadHobanwoo}
+        alt=""
+        className="h-full w-full object-contain"
+        animate={{ rotate: [-4, 4] }}
+        transition={{ repeat: Infinity, repeatType: 'mirror', duration: 0.45, ease: 'easeInOut' }}
+      />
     </div>
 
     <p
