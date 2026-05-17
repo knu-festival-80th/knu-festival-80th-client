@@ -86,6 +86,8 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 제출 버튼 활성 여부는 `formState.isValid`를 사용한다. `useWatch`로 필드 값을 직접 구독하면 키 입력마다 전체 컴포넌트가 리렌더되므로, 유효성이 실제로 변할 때만 리렌더를 유발하는 `formState.isValid`로 대체했다. 필드별 유효성 검사 실패 메시지는 `formState.errors`로 표시한다.
 
+**페이지 진입 모션**: 두 폼 뷰 모두 헤더 → fieldset → 버튼 순서로 `fadeUpVariant`를 staggered 적용한다(0s → 0.1s → 0.15s 딜레이). 신청 폼은 하단 notice까지 0.2s 딜레이로 추가된다. 인트로 뷰 섹션들과 동일한 패턴이다.
+
 에러 처리:
 
 ```
