@@ -1,13 +1,14 @@
 import { Check, Copy } from 'lucide-react';
+import { motion } from 'framer-motion';
 import happyHobanwoo from '@/assets/instating/Hobanwoo/happyHobanwoo.webp';
 
-interface ResultCardProps {
+interface MatchSuccessCardProps {
   instagramId: string;
   copied: boolean;
   onCopy: () => void;
 }
 
-const ResultCard = ({ instagramId, copied, onCopy }: ResultCardProps) => (
+const MatchSuccessCard = ({ instagramId, copied, onCopy }: MatchSuccessCardProps) => (
   <div
     className="relative w-[325px] shrink-0 overflow-hidden rounded-[12px] bg-white"
     style={{
@@ -29,7 +30,13 @@ const ResultCard = ({ instagramId, copied, onCopy }: ResultCardProps) => (
       className="absolute overflow-hidden"
       style={{ left: 63, top: 78, width: 201, height: 190 }}
     >
-      <img src={happyHobanwoo} alt="" className="h-full w-full object-contain" />
+      <motion.img
+        src={happyHobanwoo}
+        alt=""
+        className="h-full w-full object-contain"
+        animate={{ rotate: [-5, 7] }}
+        transition={{ repeat: Infinity, repeatType: 'mirror', duration: 0.45, ease: 'easeInOut' }}
+      />
     </div>
 
     <div
@@ -64,4 +71,4 @@ const ResultCard = ({ instagramId, copied, onCopy }: ResultCardProps) => (
   </div>
 );
 
-export default ResultCard;
+export default MatchSuccessCard;

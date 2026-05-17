@@ -1,5 +1,6 @@
 interface ScratchCardProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  particleCanvasRef?: React.RefObject<HTMLCanvasElement | null>;
   handlers: {
     onPointerDown: (e: React.PointerEvent<HTMLCanvasElement>) => void;
     onPointerMove: (e: React.PointerEvent<HTMLCanvasElement>) => void;
@@ -9,7 +10,12 @@ interface ScratchCardProps {
   hideLabel?: boolean;
 }
 
-const ScratchCard = ({ canvasRef, handlers, hideLabel = false }: ScratchCardProps) => (
+const ScratchCard = ({
+  canvasRef,
+  particleCanvasRef,
+  handlers,
+  hideLabel = false,
+}: ScratchCardProps) => (
   <div className="relative shrink-0" style={{ width: 269, height: 346 }}>
     <article
       className="absolute inset-0 overflow-hidden rounded-[24px]"
@@ -54,6 +60,12 @@ const ScratchCard = ({ canvasRef, handlers, hideLabel = false }: ScratchCardProp
         className="absolute inset-0 h-full w-full touch-none select-none"
         {...handlers}
       />
+      {particleCanvasRef && (
+        <canvas
+          ref={particleCanvasRef}
+          className="pointer-events-none absolute inset-0 h-full w-full"
+        />
+      )}
     </article>
   </div>
 );

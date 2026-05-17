@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CountDownTimer from '../intro/CountDownTimer';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 export type SubmittedData = {
   gender: 'male' | 'female';
@@ -16,7 +17,8 @@ interface Props {
   onClose: () => void;
 }
 
-const InstatingSuccessModal = ({ data, onClose }: Props) => {
+const InstatingApplySuccessModal = ({ data, onClose }: Props) => {
+  useBodyScrollLock();
   const navigate = useNavigate();
   const { data: status } = useMatchingStatus();
   const revealDeadline = status?.resultOpenAt ? new Date(status.resultOpenAt) : new Date(0);
@@ -106,4 +108,4 @@ const InstatingSuccessModal = ({ data, onClose }: Props) => {
   );
 };
 
-export default InstatingSuccessModal;
+export default InstatingApplySuccessModal;

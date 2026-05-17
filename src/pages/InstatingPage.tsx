@@ -11,12 +11,12 @@ const TABS = [
 
 const InstatingPage = () => {
   return (
-    <>
+    <div className="flex flex-1 flex-col bg-white">
       <TabNavigation tabs={TABS} layoutId="instating-tab" />
       <ErrorBoundary fallback={<InstatingErrorFallback />}>
         <Outlet />
       </ErrorBoundary>
-    </>
+    </div>
   );
 };
 
