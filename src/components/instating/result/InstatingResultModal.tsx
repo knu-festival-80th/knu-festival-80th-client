@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import ScratchCard from './ScratchCard';
-import ResultCard from './ResultCard';
-import FailureCard from './FailureCard';
+import MatchSuccessCard from './MatchSuccessCard';
+import MatchFailureCard from './MatchFailureCard';
 import { useInstatingScratchCanvas } from '@/hooks/instating/useInstatingScratchCanvas';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 export type MatchResult = { matched: true; instagramId: string } | { matched: false };
 
@@ -24,6 +25,7 @@ interface InstatingResultModalProps {
 }
 
 const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) => {
+  useBodyScrollLock();
   const { canvasRef, revealed, handlers } = useInstatingScratchCanvas();
   const [hasStartedScratching, setHasStartedScratching] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -111,7 +113,7 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
 
           {/* Card */}
           {!result.matched ? (
-            <FailureCard />
+            <MatchFailureCard />
           ) : (
             <AnimatePresence mode="wait">
               {!revealed ? (
@@ -129,7 +131,7 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
                 >
-                  <ResultCard
+                  <MatchSuccessCard
                     instagramId={result.instagramId}
                     copied={copied}
                     onCopy={handleCopy}

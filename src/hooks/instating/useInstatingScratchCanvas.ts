@@ -43,14 +43,50 @@ export function useInstatingScratchCanvas({ onRevealed }: UseInstatingScratchCan
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 
-    // Blurred heart
+    // Blurred heart (parametric path + shadowBlur — cross-browser consistent)
+    const blurPx = Math.round(w * 0.07);
+    const scale = w * 0.017;
+    const cx = w / 2;
+    const cy = h / 2 - scale * 2.5;
+
+    const drawHeartPath = () => {
+      const GAP = Math.PI * 0.2;
+      const scaleY = scale * 1.2;
+      const hpx = (t: number) => cx + scale * 16 * Math.pow(Math.sin(t), 3);
+      const hpy = (t: number) =>
+        cy -
+        scaleY * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+      ctx.beginPath();
+
+      // 원래 공식으로 상단~하단 직전까지 (하트 형태 유지)
+      const steps = 100;
+      for (let i = 0; i <= steps; i++) {
+        const t = (i / steps) * (Math.PI - GAP);
+        if (i === 0) ctx.moveTo(hpx(t), hpy(t));
+        else ctx.lineTo(hpx(t), hpy(t));
+      }
+
+      // 바닥 첨점만 quadratic bezier로 둥글게
+      ctx.quadraticCurveTo(cx, hpy(Math.PI) - scaleY * 3, hpx(Math.PI + GAP), hpy(Math.PI + GAP));
+
+      // 하단 이후 ~ 상단 복귀 (원래 공식)
+      for (let i = 1; i <= steps; i++) {
+        const t = Math.PI + GAP + (i / steps) * (Math.PI - GAP);
+        ctx.lineTo(hpx(t), hpy(t));
+      }
+
+      ctx.closePath();
+    };
+
     ctx.save();
-    ctx.filter = `blur(${Math.round(w * 0.07)}px)`;
-    ctx.fillStyle = '#f9b8c6';
-    ctx.font = `${Math.round(w * 0.62)}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('♥', w / 2, h / 1.75);
+    ctx.shadowColor = '#f9b8c6';
+    ctx.shadowBlur = blurPx * 4;
+    ctx.fillStyle = 'rgba(249, 184, 198, 0.4)';
+    drawHeartPath();
+    ctx.fill();
+    ctx.fill();
+    ctx.fill();
     ctx.restore();
 
     // White sheen overlay (top-left)

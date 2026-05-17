@@ -1,6 +1,6 @@
 import sadHobanwoo from '@/assets/instating/Hobanwoo/sadHobanwoo.webp';
 
-const FailureCard = () => (
+const MatchFailureCard = () => (
   <div
     className="relative w-[325px] shrink-0 overflow-hidden rounded-[12px] bg-white"
     style={{
@@ -27,4 +27,4 @@ const FailureCard = () => (
   </div>
 );
 
-export default FailureCard;
+export default MatchFailureCard;

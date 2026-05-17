@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { ApiClientError, matchingApi } from '@/apis';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
-import type { SubmittedData } from '../result/InstatingSuccessModal';
-import InstatingSuccessModal from '../result/InstatingSuccessModal';
+import type { SubmittedData } from '../result/InstatingApplySuccessModal';
+import InstatingApplySuccessModal from '../result/InstatingApplySuccessModal';
 import AlertModal from '@/components/instating/AlertModal';
 import CountdownText from '@/components/instating/CountdownText';
 
@@ -65,7 +65,7 @@ const InstatingApplyView = () => {
   return (
     <>
       {submittedData && (
-        <InstatingSuccessModal data={submittedData} onClose={() => setSubmittedData(null)} />
+        <InstatingApplySuccessModal data={submittedData} onClose={() => setSubmittedData(null)} />
       )}
       {errorModal && (
         <AlertModal

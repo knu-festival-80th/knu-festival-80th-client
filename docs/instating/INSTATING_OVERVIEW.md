@@ -62,7 +62,7 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 인스타 ID는 `^[a-zA-Z0-9_.]{1,30}$` 패턴으로 형식을 검증한다. 연락처는 `^01[0-9]{8,9}$` 패턴으로 검증한다. 결과 조회 폼도 동일한 규칙을 적용한다.
 
-제출 성공 시 `InstatingSuccessModal`을 띄운다. 이 모달에는 입력한 정보 요약과 함께 결과 공개까지 남은 카운트다운이 표시된다.
+제출 성공 시 `InstatingApplySuccessModal`을 띄운다. 이 모달에는 입력한 정보 요약과 함께 결과 공개까지 남은 카운트다운이 표시된다.
 
 `registrationOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `CountdownText` 컴포넌트로 신청 시작까지 남은 시간을 표시한다. 목표 시간은 `useMatchingStatus`의 `registrationOpenAt` 필드를 사용한다.
 
@@ -94,7 +94,7 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 결과 모달은 `createPortal`로 `document.body`에 마운트된다. Framer Motion으로 오른쪽에서 슬라이드 인 애니메이션 처리된다.
 
-매칭 실패인 경우 `FailureCard`를 바로 표시한다. 매칭 성공인 경우 스크래치 카드를 먼저 보여주고, 긁으면 `ResultCard`로 전환된다.
+매칭 실패인 경우 `MatchFailureCard`를 바로 표시한다. 매칭 성공인 경우 스크래치 카드를 먼저 보여주고, 긁으면 `MatchSuccessCard`로 전환된다.
 
 모달 내부 단계(Phase):
 
@@ -123,6 +123,14 @@ REVEAL_THRESHOLD = 0.55; // 55% 이상 긁으면 자동 공개
 공개 여부 판정은 Canvas의 픽셀 투명도를 샘플링해 계산한다. 전체 픽셀을 순회하면 비용이 크므로 64px 간격으로 샘플링한다.
 
 DPR(Device Pixel Ratio)을 반영해 레티나 디스플레이에서도 선명하게 렌더링된다. `ResizeObserver`로 캔버스 크기 변화를 감지해 재초기화한다.
+
+**블러 하트 렌더링**
+
+오버레이 캔버스에 반투명 핑크 블러 하트를 그린다. `fillText('♥')` 대신 파라메트릭 공식(`x = 16sin³t`, `y = 13cost − 5cos2t − 2cos3t − cos4t`)으로 closed path를 직접 작성한다. 폰트 렌더링 차이 없이 브라우저·OS 무관하게 동일한 형태가 보장된다.
+
+블러는 `ctx.filter`(Safari < 18 미지원) 대신 `shadowBlur`로 통일해 크로스 브라우저 일관성을 확보했다. `shadowBlur` 단독으로는 블러 강도가 약하므로 `fill()`을 3회 반복해 보강한다.
+
+하단 첨점은 `quadraticCurveTo`로 대체해 둥글게 처리했다. `t = π ± 0.2π` 구간만 베지어로 교체하고 나머지는 원래 공식을 유지해 하트 전체 형태를 보존한다. y축은 `scaleY = scale * 1.2`를 적용해 세로를 20% 늘렸다.
 
 **결과 카드 (`ResultCard`)**
 
@@ -228,7 +236,7 @@ InstatingPage
 
 기존 `<label>`이 `htmlFor` 없이 단독 사용되어 스크린리더가 입력 필드와 레이블을 연결하지 못했다. 인스타 ID와 연락처 입력 필드에 `id`를 부여하고, 레이블에 `htmlFor`를 추가해 연결했다.
 
-### 모달 시맨틱 (`AlertModal`, `InstatingSuccessModal`, `InstatingResultModal`)
+### 모달 시맨틱 (`AlertModal`, `InstatingApplySuccessModal`, `InstatingResultModal`)
 
 세 모달 모두 `role="dialog"`, `aria-modal="true"`, `aria-labelledby`를 추가했다. `aria-labelledby`는 각 모달의 제목 요소(`h1`/`h2`) `id`를 참조한다. `InstatingSuccessModal`의 닫기 버튼(아이콘만)에도 `aria-label="닫기"`, 아이콘에 `aria-hidden="true"`를 추가했다.
 
@@ -255,12 +263,14 @@ SVG 일러스트는 `width: 800px`(2x 모바일), Hobanwoo는 `width: 400px`(2x 
 ```
 src/
 ├── apis/modules/matching.ts
-├── hooks/instating/
-│   ├── useMatchingStatus.ts
-│   ├── useCountdown.ts          ← useTimeLeft, useCountdown, getTimeLeft
-│   └── useInstatingScratchCanvas.ts
+├── hooks/
+│   ├── useBodyScrollLock.ts     ← 모달 마운트 시 body 스크롤 잠금 (언마운트 시 복원)
+│   └── instating/
+│       ├── useMatchingStatus.ts
+│       ├── useCountdown.ts          ← useTimeLeft, useCountdown, getTimeLeft
+│       └── useInstatingScratchCanvas.ts
 ├── pages/
-│   ├── InstatingPage.tsx        ← ErrorBoundary로 Outlet 감쌈
+│   ├── InstatingPage.tsx        ← ErrorBoundary로 Outlet 감쌈, bg-white 적용
 │   └── console/
 │       ├── MatchingOverviewPage.tsx
 │       └── MatchingParticipantsPage.tsx
@@ -272,7 +282,7 @@ src/
 │   ├── ErrorBoundary.tsx         ← 렌더링 에러 캐치, fallback prop 지원
 │   └── ErrorFallback.tsx         ← 네트워크/서비스 에러 기본 fallback UI
 └── components/instating/
-    ├── AlertModal.tsx            ← 공통 에러 모달
+    ├── AlertModal.tsx            ← 공통 에러 모달 (useBodyScrollLock 적용)
     ├── CountdownText.tsx         ← 폼 버튼 카운트다운 텍스트 (리렌더 격리)
     ├── InstatingErrorFallback.tsx ← ErrorBoundary fallback (탭 하단 영역 전체)
     ├── MatchingStatusFallback.tsx ← useMatchingStatus isError 시 섹션 fallback
@@ -283,10 +293,10 @@ src/
     │   ├── CountDownTimer.tsx
     │   └── InstatingContent.tsx  ← OutlineButton, ProcessCard를 공통 컴포넌트에서 import
     ├── result/
-    │   ├── FailureCard.tsx
-    │   ├── InstatingResultModal.tsx
-    │   ├── InstatingSuccessModal.tsx
-    │   ├── ResultCard.tsx
+    │   ├── InstatingApplySuccessModal.tsx ← 신청 완료 모달 (useBodyScrollLock 적용)
+    │   ├── InstatingResultModal.tsx       ← 결과 조회 모달 (useBodyScrollLock 적용)
+    │   ├── MatchFailureCard.tsx           ← 매칭 실패 카드
+    │   ├── MatchSuccessCard.tsx           ← 매칭 성공 카드 (인스타 ID + 프로필 링크)
     │   └── ScratchCard.tsx
     └── views/
         ├── InstatingApplyView.tsx

@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
+import { useBodyScrollLock } from '@/hooks/useBodyScrollLock';
 
 interface Props {
   title: string;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const AlertModal = ({ title, description, buttonLabel = '돌아가기', onClose }: Props) => {
+  useBodyScrollLock();
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-5">
       <motion.div
