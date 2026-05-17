@@ -46,8 +46,11 @@
 tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를 증가시켜 리렌더를 유발하고, `getTimeLeft(deadline)`으로 매 렌더마다 남은 시간을 계산한다. 이 방식은 stale state 없이 항상 최신 값을 보장한다.
 
 - `useTimeLeft(deadline)` — tick 담당, `TimeLeft | null` 반환
-- `useCountdown(deadline)` — `useTimeLeft` 결과를 `"DD:HH:MM:SS"` 문자열로 포맷, 버튼 라벨 등 인라인 텍스트에 사용
+- `useCountdown(deadline)` — `useTimeLeft` 결과를 `"DD:HH:MM:SS"` 문자열로 포맷
 - `CountDownTimer` — `useTimeLeft` 결과로 큰 숫자 UI 조립, 인트로 섹션에 사용
+- `CountdownText` — `useCountdown`을 래핑한 인라인 텍스트용 컴포넌트 (`남은시간 DD:HH:MM:SS`), 신청·결과 조회 폼 버튼에 사용
+
+`useCountdown`을 폼 컴포넌트에서 직접 호출하면 폼 전체가 1초마다 리렌더된다. `CountdownText`로 분리해 타이머 tick이 해당 컴포넌트에만 국한되도록 했다.
 
 **신청자 현황 (`ApplicantsNumberSection`)**
 
@@ -57,9 +60,11 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 `react-hook-form`으로 폼 상태를 관리한다. 성별, 인스타 ID, 연락처, 만 19세 이상 확인 체크박스를 입력받는다.
 
+인스타 ID는 `^[a-zA-Z0-9_.]{1,30}$` 패턴으로 형식을 검증한다. 연락처는 `^01[0-9]{8,9}$` 패턴으로 검증한다. 결과 조회 폼도 동일한 규칙을 적용한다.
+
 제출 성공 시 `InstatingSuccessModal`을 띄운다. 이 모달에는 입력한 정보 요약과 함께 결과 공개까지 남은 카운트다운이 표시된다.
 
-`registrationOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `useCountdown`으로 신청 시작까지 남은 시간을 표시한다.
+`registrationOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `CountdownText` 컴포넌트로 신청 시작까지 남은 시간을 표시한다. 목표 시간은 `useMatchingStatus`의 `registrationOpenAt` 필드를 사용한다.
 
 에러 처리:
 
@@ -74,6 +79,8 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 인스타 ID와 연락처를 입력해 인증한다. 제출 성공 시 `InstatingResultModal`을 띄운다.
 
 `resultOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `useCountdown`으로 결과 공개까지 남은 시간을 표시한다. API 성공 응답 이후에도 `resultOpen: false`이면 "아직 결과 공개 전입니다." 인라인 메시지를 표시한다.
+
+제출 버튼 활성 여부는 `formState.isValid`를 사용한다. `useWatch`로 필드 값을 직접 구독하면 키 입력마다 전체 컴포넌트가 리렌더되므로, 유효성이 실제로 변할 때만 리렌더를 유발하는 `formState.isValid`로 대체했다. 필드별 유효성 검사 실패 메시지는 `formState.errors`로 표시한다.
 
 에러 처리:
 
@@ -174,6 +181,75 @@ getApplicantsCount();
 
 공통 에러 모달은 `AlertModal` 컴포넌트로 통일했다. title과 description을 props로 주입받아 `createPortal`로 렌더링된다.
 
+### ErrorBoundary 적용
+
+`InstatingPage`에서 `<Outlet />`을 `ErrorBoundary`로 감싼다. `TabNavigation`은 경계 바깥에 두어 렌더링 에러가 발생해도 탭은 유지된다.
+
+```
+InstatingPage
+├── TabNavigation          ← 에러와 무관하게 유지
+└── ErrorBoundary
+    └── Outlet             ← 렌더링 에러 발생 시 InstatingErrorFallback 표시
+```
+
+`ErrorBoundary`는 예상치 못한 JS 런타임 에러(null 접근, 타입 에러 등)를 최후 방어선으로 잡는다. API 에러는 각 컴포넌트에서 별도 처리한다.
+
+### 섹션 레벨 Fallback (MatchingStatusFallback)
+
+`CountDownSection`과 `ApplicantsNumberSection`은 `useMatchingStatus` API가 실패(`isError`)하면 각자 `MatchingStatusFallback`을 렌더한다. `InstatingContent`(정적 콘텐츠)는 API와 무관하므로 영향 없이 렌더된다.
+
+**isLoading 처리를 별도로 두지 않은 이유**: `staleTime: 10s` 설정으로 재방문 시 캐시에서 즉시 반환되고, 첫 로드 시만 짧게(수백 ms) 보인다. 이 시간 동안 기본값(`00:00:00:00`, `0명`)이 표시되는 게 스켈레톤이나 별도 로딩 UI보다 자연스럽다고 판단했다.
+
+**섹션 레벨을 선택한 이유**: API 실패 시에도 `InstatingContent`(스텝 카드, 신청 버튼)는 의미 있는 정보를 제공한다. 페이지 전체를 대체하면 실질적으로 유효한 콘텐츠까지 가려지므로 섹션 단위로 처리한다.
+
+**Apply/Result 뷰에서 별도 처리가 불필요한 이유**: `isRegistrationOpen`과 `isResultOpen` 기본값이 `true`라서 API 실패 시 폼이 활성화된 상태로 렌더된다. 잘못된 시간에 제출해도 서버에서 거부(403, 결과 미공개)하므로 클라이언트 추가 처리가 불필요하다.
+
+## 보안 및 어뷰징 방지
+
+### 적용한 것
+
+**인스타 ID 형식 검증**: `^[a-zA-Z0-9_.]{1,30}$` 패턴으로 실제 Instagram ID 규칙에 맞지 않는 값을 사전 차단한다. 연락처는 `^01[0-9]{8,9}$`로 검증한다.
+
+### 검토 후 적용하지 않은 것
+
+**reCAPTCHA**: 봇·매크로 판별에 가장 효과적이나 서버의 토큰 검증 엔드포인트가 필요하다. 백엔드 연동 없이 프론트 단독으로는 의미가 없어 보류했다.
+
+**중복 신청 차단**: 서버가 이미 409로 처리한다. 클라이언트 중복 방지는 서버 거부 전 UX 개선에 불과하므로 추가하지 않았다.
+
+**선착순 공정성 보장**: 요청이 서버에 도달하는 순서는 네트워크와 서버 스케줄러가 결정한다. 프론트에서 개입할 수 있는 영역이 아니다.
+
+**IP rate limiting**: 서버·인프라 영역이다. 프론트에서 구현해도 우회가 trivial하다.
+
+> 매크로·어뷰징 방지의 실질적인 효과는 백엔드(rate limiting, CAPTCHA 검증, 기기 핑거프린팅)에서 나온다. 프론트는 정상 사용자의 입력 실수를 줄이는 수준으로 역할을 한정했다.
+
+## 접근성 개선
+
+### 폼 레이블 연결 (`InstatingApplyView`, `InstatingResultView`)
+
+기존 `<label>`이 `htmlFor` 없이 단독 사용되어 스크린리더가 입력 필드와 레이블을 연결하지 못했다. 인스타 ID와 연락처 입력 필드에 `id`를 부여하고, 레이블에 `htmlFor`를 추가해 연결했다.
+
+### 모달 시맨틱 (`AlertModal`, `InstatingSuccessModal`, `InstatingResultModal`)
+
+세 모달 모두 `role="dialog"`, `aria-modal="true"`, `aria-labelledby`를 추가했다. `aria-labelledby`는 각 모달의 제목 요소(`h1`/`h2`) `id`를 참조한다. `InstatingSuccessModal`의 닫기 버튼(아이콘만)에도 `aria-label="닫기"`, 아이콘에 `aria-hidden="true"`를 추가했다.
+
+### 장식 이미지 alt 처리 (`ResultCard`, `FailureCard`)
+
+카드 내 호반우 이미지는 카드 텍스트가 결과를 충분히 설명하므로 장식 이미지로 처리(`alt=""`)했다.
+
+## 이미지 최적화
+
+모든 이미지 에셋을 WebP로 변환했다. SVG는 내부에 base64 래스터 이미지가 임베드된 구조라 sharp(librsvg 내장)로 WebP 변환이 가능하다.
+
+| 대상                   | 변환 전 | 변환 후 | 감소율 |
+| ---------------------- | ------- | ------- | ------ |
+| step_bg × 4 (PNG)      | ~1.9MB  | ~18KB   | ~99%   |
+| step_illust × 4 (SVG)  | ~13.2MB | ~117KB  | ~99%   |
+| Hobanwoo × 3 (SVG/PNG) | ~5.2MB  | ~78KB   | ~98%   |
+
+SVG 일러스트는 `width: 800px`(2x 모바일), Hobanwoo는 `width: 400px`(2x 렌더 사이즈)로 래스터라이즈했다.
+
+아이콘 SVG(`closeIcon`, `copyIcon`, `forwardArrowIcon`)는 lucide-react 컴포넌트로 교체했다. `forwardArrowIcon`은 `OutlineButton`의 기존 `showArrow` prop으로 대체했다.
+
 ## 파일 구조
 
 ```
@@ -184,7 +260,7 @@ src/
 │   ├── useCountdown.ts          ← useTimeLeft, useCountdown, getTimeLeft
 │   └── useInstatingScratchCanvas.ts
 ├── pages/
-│   ├── InstatingPage.tsx
+│   ├── InstatingPage.tsx        ← ErrorBoundary로 Outlet 감쌈
 │   └── console/
 │       ├── MatchingOverviewPage.tsx
 │       └── MatchingParticipantsPage.tsx
@@ -192,8 +268,14 @@ src/
 │   ├── TabNavigation.tsx         ← 탭 목록을 props로 받는 공통 탭 네비게이션
 │   ├── OutlineButton.tsx         ← variant 기반 테두리 버튼 (dark/default/red/glass)
 │   └── ProcessCard.tsx           ← 배경+일러스트 스텝 카드
+├── components/error/
+│   ├── ErrorBoundary.tsx         ← 렌더링 에러 캐치, fallback prop 지원
+│   └── ErrorFallback.tsx         ← 네트워크/서비스 에러 기본 fallback UI
 └── components/instating/
     ├── AlertModal.tsx            ← 공통 에러 모달
+    ├── CountdownText.tsx         ← 폼 버튼 카운트다운 텍스트 (리렌더 격리)
+    ├── InstatingErrorFallback.tsx ← ErrorBoundary fallback (탭 하단 영역 전체)
+    ├── MatchingStatusFallback.tsx ← useMatchingStatus isError 시 섹션 fallback
     ├── TabNavigation.tsx         ← 공통 TabNavigation에 인스타팅 탭을 주입하는 래퍼
     ├── intro/
     │   ├── ApplicantsNumberSection.tsx

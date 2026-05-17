@@ -35,6 +35,9 @@ const InstatingSuccessModal = ({ data, onClose }: Props) => {
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-5">
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="success-modal-title"
         initial={{ opacity: 0, scale: 0.95, y: 8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
@@ -43,15 +46,19 @@ const InstatingSuccessModal = ({ data, onClose }: Props) => {
         {/* Header */}
         <div className="flex items-center justify-between px-5">
           <div className="size-8" />
-          <h2 className="font-wanted-sans text-heading3 font-semibold tracking-tight text-ink">
+          <h2
+            id="success-modal-title"
+            className="font-wanted-sans text-heading3 font-semibold tracking-tight text-ink"
+          >
             신청 완료!
           </h2>
           <button
             type="button"
             onClick={handleClose}
+            aria-label="닫기"
             className="flex size-8 items-center justify-center"
           >
-            <X className="size-5 text-ink" />
+            <X className="size-5 text-ink" aria-hidden="true" />
           </button>
         </div>
 

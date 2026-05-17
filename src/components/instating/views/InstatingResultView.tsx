@@ -1,11 +1,11 @@
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import InstatingResultModal, { type MatchResult } from '../result/InstatingResultModal';
 import AlertModal from '@/components/instating/AlertModal';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiClientError, matchingApi } from '@/apis';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
-import { useCountdown } from '@/hooks/instating/useCountdown';
+import CountdownText from '@/components/instating/CountdownText';
 
 type FormValues = {
   instagramId: string;
@@ -16,13 +16,8 @@ const InstatingResultView = () => {
   const {
     register,
     handleSubmit,
-    control,
-    formState: { errors, isSubmitting },
+    formState: { isValid, isSubmitting, errors },
   } = useForm<FormValues>({ mode: 'onChange' });
-
-  const instagramId = useWatch({ control, name: 'instagramId' });
-  const phone = useWatch({ control, name: 'phone' });
-  const isValid = !!instagramId && !!phone && !errors.instagramId && !errors.phone;
 
   const [result, setResult] = useState<MatchResult | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -31,7 +26,6 @@ const InstatingResultView = () => {
   const { data: status } = useMatchingStatus();
   const isResultOpen = status?.resultOpen ?? true;
   const resultOpenAt = status?.resultOpenAt ? new Date(status.resultOpenAt) : null;
-  const countdownText = useCountdown(resultOpenAt);
   const navigate = useNavigate();
 
   const onSubmit = async ({ instagramId, phone }: FormValues) => {
@@ -104,31 +98,56 @@ const InstatingResultView = () => {
         <fieldset disabled={!isResultOpen} className="m-0 flex flex-col gap-[18px] border-0 p-0">
           {/* Instagram ID */}
           <div className="flex flex-col gap-2">
-            <label className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink">
-              인스타 아이디
+            <label
+              htmlFor="instagramId"
+              className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink"
+            >
+              인스타 ID
             </label>
             <input
+              id="instagramId"
               type="text"
               placeholder="인스타 아이디를 입력해주세요"
-              {...register('instagramId', { required: true })}
+              {...register('instagramId', {
+                required: '인스타 ID를 입력해주세요.',
+                pattern: {
+                  value: /^[a-zA-Z0-9_.]{1,30}$/,
+                  message: '올바른 인스타그램 ID를 입력해주세요.',
+                },
+              })}
               className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
             />
+            {errors.instagramId && (
+              <p className="font-wanted-sans text-body2 text-sub-red">
+                {errors.instagramId.message}
+              </p>
+            )}
           </div>
 
           {/* Phone */}
           <div className="flex flex-col gap-2">
-            <label className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink">
+            <label
+              htmlFor="phone"
+              className="font-wanted-sans text-body1 font-semibold tracking-tight text-ink"
+            >
               연락처
             </label>
             <input
+              id="phone"
               type="tel"
               placeholder="번호를 입력해주세요 ('-' 없이 번호만)"
               {...register('phone', {
-                required: true,
-                pattern: /^01[0-9]{8,9}$/,
+                required: '연락처를 입력해주세요.',
+                pattern: {
+                  value: /^01[0-9]{8,9}$/,
+                  message: '올바른 연락처를 입력해주세요.',
+                },
               })}
               className="h-[50px] w-full rounded-md border border-border bg-surface px-4 font-wanted-sans text-body1 tracking-tight text-ink placeholder:text-text-disabled focus:border-sub-red focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
             />
+            {errors.phone && (
+              <p className="font-wanted-sans text-body2 text-sub-red">{errors.phone.message}</p>
+            )}
           </div>
         </fieldset>
 
@@ -146,11 +165,13 @@ const InstatingResultView = () => {
             !isResultOpen ? 'bg-black' : isValid && !isSubmitting ? 'bg-sub-red' : 'bg-[#CCCCCC]'
           }`}
         >
-          {!isResultOpen
-            ? `남은시간 ${countdownText}`
-            : isSubmitting
-              ? '조회 중...'
-              : '결과 조회하기'}
+          {!isResultOpen ? (
+            <CountdownText deadline={resultOpenAt} />
+          ) : isSubmitting ? (
+            '조회 중...'
+          ) : (
+            '결과 조회하기'
+          )}
         </button>
       </form>
     </>
