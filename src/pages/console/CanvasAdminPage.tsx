@@ -68,6 +68,16 @@ export default function CanvasAdminPage() {
     () => boards.find((b) => b.boardId === selectedBoardId) ?? null,
     [boards, selectedBoardId],
   );
+  const selectedBoardFrameVariant = useMemo(() => {
+    if (!selectedBoard) return 0;
+
+    const questionIndex = questions
+      .slice()
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .findIndex((question) => question.questionId === selectedBoard.questionId);
+
+    return Math.max(0, questionIndex);
+  }, [questions, selectedBoard]);
 
   const postitsQuery = useQuery({
     queryKey: ['admin', 'canvas', 'postits', selectedBoardId],
@@ -196,6 +206,7 @@ export default function CanvasAdminPage() {
           {selectedBoard ? (
             <BoardPreviewCanvas
               board={selectedBoard}
+              frameVariant={selectedBoardFrameVariant}
               postits={postits}
               loading={postitsQuery.isLoading}
               error={postitsQuery.isError ? postitsQuery.error : null}
@@ -451,6 +462,7 @@ function BoardsListCard({
 
 interface BoardPreviewCanvasProps {
   board: CanvasBoardSummaryResponse;
+  frameVariant: number;
   postits: CanvasPostitResponse[];
   loading: boolean;
   error: unknown;
@@ -459,13 +471,16 @@ interface BoardPreviewCanvasProps {
 
 function BoardPreviewCanvas({
   board,
+  frameVariant,
   postits,
   loading,
   error,
   onClickPostit,
 }: BoardPreviewCanvasProps) {
   const variant = board.boardVariant % rollingPaperBoardFrames.length;
-  const frameImage = rollingPaperBoardFrames[variant];
+  const frameImage =
+    rollingPaperBoardFrames[frameVariant % rollingPaperBoardFrames.length] ??
+    rollingPaperBoardFrames[0];
   const frameRect = getRollingPaperFrameRect(variant);
   const { width: canvasW, height: canvasH } = ROLLING_PAPER_CANVAS_DIMENSIONS;
 

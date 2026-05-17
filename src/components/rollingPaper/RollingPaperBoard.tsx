@@ -10,6 +10,7 @@ import {
   getRollingPaperChannel,
   getRollingPaperChannelIndex,
   getRollingPaperChannelsByCategory,
+  ROLLING_PAPER_CATEGORIES,
   ROLLING_PAPER_CHANNELS_PER_CATEGORY,
 } from '@/constants/rollingPaper';
 import { getRollingPaperPerformanceNotesFromSearch } from '@/mocks/rollingPaperPerformance';
@@ -141,6 +142,12 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
     categoryChannels.find((item) => item.id === channelId) ??
     categoryChannels[0] ??
     fallbackChannel;
+  const categoryFrameVariant = Math.max(
+    0,
+    (apiCategories.length > 0 ? apiCategories : ROLLING_PAPER_CATEGORIES).findIndex(
+      (item) => item.id === category.id,
+    ),
+  );
   const channelIndex = Math.max(
     0,
     categoryChannels.findIndex((item) => item.id === channel.id),
@@ -461,6 +468,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
         <motion.div className="relative mt-6" {...rollingPaperItemMotion}>
           <RollingPaperBoardCanvas
             variant={boardIndex}
+            frameVariant={categoryFrameVariant}
             scale={boardScale}
             pan={boardPan}
             placedNotes={scopedPlacedNotes}
@@ -503,6 +511,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
         <RollingPaperWriteModal
           isOpen={isWriteModalOpen}
           boardVariant={boardIndex}
+          frameVariant={categoryFrameVariant}
           placedNotes={scopedPlacedNotes}
           isSubmitting={createPostitMutation.isPending}
           placementErrorMessage={placementErrorMessage}
