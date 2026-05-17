@@ -2,6 +2,7 @@ import { useState } from 'react';
 import DateTabBar from '@/components/timetable/DateTabBar';
 import DayScheduleBlock from '@/components/timetable/DayScheduleBlock';
 import Day20Placeholder from '@/components/timetable/Day20Placeholder';
+import PerformanceLocationSection from '@/components/timetable/PerformanceLocationSection';
 import { MOCK_LINEUP } from '@/mocks/home';
 
 const DAYS = [20, 21, 22];
@@ -38,6 +39,7 @@ export default function TimeTablePage() {
           description={DAY_DESCRIPTIONS[selectedDay]}
         />
       )}
+      <PerformanceLocationSection />
     </div>
   );
 }
