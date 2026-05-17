@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import closeIcon from '@/assets/instating/icon/closeIcon.svg';
+import { X } from 'lucide-react';
 import ScratchCard from './ScratchCard';
 import ResultCard from './ResultCard';
 import FailureCard from './FailureCard';
@@ -60,6 +60,9 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
   return createPortal(
     <div className="fixed inset-y-0 left-1/2 z-50 w-full max-w-[600px] -translate-x-1/2 overflow-hidden">
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="result-modal-title"
         className="flex h-full flex-col"
         initial={{ x: '100%' }}
         animate={{ x: 0, backgroundColor: bgColor }}
@@ -70,7 +73,10 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
       >
         <header className="flex shrink-0 items-center justify-between border-b border-[#e5e5e5] bg-white px-5 py-5">
           <div className="size-6" />
-          <h1 className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black">
+          <h1
+            id="result-modal-title"
+            className="font-wanted-sans text-[18px] font-semibold leading-none tracking-[-0.36px] text-black"
+          >
             결과 조회
           </h1>
           <button
@@ -79,7 +85,7 @@ const InstatingResultModal = ({ onClose, result }: InstatingResultModalProps) =>
             aria-label="닫기"
             className="flex size-6 items-center justify-center"
           >
-            <img src={closeIcon} alt="닫기" className="size-6" />
+            <X className="size-6" aria-hidden="true" />
           </button>
         </header>
 

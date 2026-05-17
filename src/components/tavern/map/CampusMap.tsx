@@ -504,6 +504,9 @@ export default function CampusMap({
           <span className="flex h-[18px] items-center justify-center bg-[#C6F2EB] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-[#66666]">
             부스
           </span>
+          <span className="flex h-[18px] items-center justify-center bg-[#E4D4FC] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-[#66666]">
+            공연장
+          </span>
           <span className="flex h-[18px] items-center justify-center bg-[#FFDBF5] px-1 text-[7.5px] font-semibold leading-none tracking-[-0.1px] text-[#66666]">
             스탬프 투어
           </span>

@@ -1,12 +1,11 @@
-import step1Bg from '@/assets/instating/stepCard/step1_bg.png';
-import step1Illust from '@/assets/instating/stepCard/step1_illust.svg';
-import step2Bg from '@/assets/instating/stepCard/step2_bg.png';
-import step2Illust from '@/assets/instating/stepCard/step2_illust.svg';
-import step3Bg from '@/assets/instating/stepCard/step3_bg.png';
-import step3Illust from '@/assets/instating/stepCard/step3_illust.svg';
-import step4Bg from '@/assets/instating/stepCard/step4_bg.png';
-import step4Illust from '@/assets/instating/stepCard/step4_illust.svg';
-import forwardArrowIcon from '@/assets/instating/icon/forwardArrowIcon.svg';
+import step1Bg from '@/assets/instating/stepCard/step1_bg.webp';
+import step1Illust from '@/assets/instating/stepCard/step1_illust.webp';
+import step2Bg from '@/assets/instating/stepCard/step2_bg.webp';
+import step2Illust from '@/assets/instating/stepCard/step2_illust.webp';
+import step3Bg from '@/assets/instating/stepCard/step3_bg.webp';
+import step3Illust from '@/assets/instating/stepCard/step3_illust.webp';
+import step4Bg from '@/assets/instating/stepCard/step4_bg.webp';
+import step4Illust from '@/assets/instating/stepCard/step4_illust.webp';
 import OutlineButton from '@/components/common/OutlineButton';
 import ProcessCard from '@/components/common/ProcessCard';
 import { useNavigate } from 'react-router-dom';
@@ -77,7 +76,7 @@ const InstatingContent = () => {
               올해의 새로운 인연과 만나보세요!
             </p>
           </div>
-          <OutlineButton label="바로 신청하기" icon={forwardArrowIcon} onClick={goApplyPage} />
+          <OutlineButton label="바로 신청하기" showArrow onClick={goApplyPage} />
         </div>
 
         {/* Step cards */}
@@ -102,7 +101,7 @@ const InstatingContent = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <OutlineButton label="신청하기" icon={forwardArrowIcon} onClick={goApplyPage} />
+            <OutlineButton label="신청하기" showArrow onClick={goApplyPage} />
             <OutlineButton label="결과 확인하기" variant="dark" onClick={goResultPage} />
           </div>
         </div>

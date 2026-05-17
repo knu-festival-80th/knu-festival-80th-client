@@ -1,4 +1,4 @@
-import sadHobanwoo from '@/assets/instating/Hobanwoo/sadHobanwoo.svg';
+import sadHobanwoo from '@/assets/instating/Hobanwoo/sadHobanwoo.webp';
 
 const FailureCard = () => (
   <div
@@ -13,7 +13,7 @@ const FailureCard = () => (
       className="absolute overflow-hidden"
       style={{ left: 63, top: 73, width: 202, height: 210 }}
     >
-      <img src={sadHobanwoo} alt="호반우" className="h-full w-full object-contain" />
+      <img src={sadHobanwoo} alt="" className="h-full w-full object-contain" />
     </div>
 
     <p

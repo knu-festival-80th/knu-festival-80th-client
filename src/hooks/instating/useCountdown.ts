@@ -33,6 +33,6 @@ export function useTimeLeft(deadline: Date | null): TimeLeft | null {
 
 export function useCountdown(deadline: Date | null): string {
   const t = useTimeLeft(deadline);
-  if (!t) return '--:--:--:--';
+  if (!t) return '00:00:00:00';
   return `${pad(t.days)}:${pad(t.hours)}:${pad(t.minutes)}:${pad(t.seconds)}`;
 }

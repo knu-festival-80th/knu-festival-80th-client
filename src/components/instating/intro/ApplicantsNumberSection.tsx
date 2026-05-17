@@ -1,4 +1,5 @@
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
+import MatchingStatusFallback from '@/components/instating/MatchingStatusFallback';
 
 interface ApplicantCardProps {
   label: string;
@@ -21,7 +22,12 @@ const ApplicantCard = ({ label, count, countColor, bgColor }: ApplicantCardProps
 );
 
 const ApplicantsNumberSection = () => {
-  const { data } = useMatchingStatus();
+  const { data, isError, refetch } = useMatchingStatus();
+
+  // TODO: fallback ui 체크(최종 배포 시 제거)
+  // return <MatchingStatusFallback onRetry={refetch} className="py-8" />;
+
+  if (isError) return <MatchingStatusFallback onRetry={refetch} className="py-8" />;
 
   const maleCount = data?.malePendingCount ?? 0;
   const femaleCount = data?.femalePendingCount ?? 0;

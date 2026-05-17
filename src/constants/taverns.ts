@@ -26,16 +26,18 @@ export type Tavern = {
   markerLabel?: string;
 };
 
-export const PERFORMANCE_LOCATION_NAME = '대공연장';
-
 export const PERFORMANCE_LOCATION_DESCRIPTION = '모든 공연은 대공연장에서 진행됩니다.';
 
 export const isPerformanceLocation = (tavern: Tavern | null | undefined) =>
-  tavern?.name === PERFORMANCE_LOCATION_NAME;
+  tavern?.type === 'STAGE';
 
 const normalizeRatio = (ratio: number | null | undefined) => ratio ?? 0.5;
 
-const DEFAULT_COLORS: Record<BoothType, string> = { BOOTH: '#15ccb1', TAVERN: '#ff3d3d' };
+const DEFAULT_COLORS: Record<BoothType, string> = {
+  BOOTH: '#15ccb1',
+  TAVERN: '#ff3d3d',
+  STAGE: '#8B5CF6',
+};
 
 export function boothToTavern(booth: BoothListItem): Tavern {
   const type = booth.type ?? 'TAVERN';
