@@ -6,6 +6,25 @@ import { compositeTwoShot } from '@/lib/compositeTwoShot';
 import type { TwoShotStep } from '@/types/hobanustagram';
 import { TWO_SHOT_FRAME_URLS } from '@/constants/twoShot';
 
+function waitForImageReady(src: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      if (!img.decode) {
+        resolve();
+        return;
+      }
+
+      img
+        .decode()
+        .catch(() => {})
+        .finally(resolve);
+    };
+    img.onerror = () => resolve();
+    img.src = src;
+  });
+}
+
 export const useTwoShot = (onComplete: (compositedUrl: string) => void) => {
   const [step, setStep] = useState<TwoShotStep>('preview');
   const [selectedFilter, setSelectedFilter] = useState<1 | 2>(1);
@@ -121,13 +140,11 @@ export const useTwoShot = (onComplete: (compositedUrl: string) => void) => {
   const handleComplete = async () => {
     if (selectedIndices.length !== 2) return;
     setStep('compositing');
-    const [composited] = await Promise.all([
-      compositeTwoShot(
-        [capturedPhotos[selectedIndices[0]], capturedPhotos[selectedIndices[1]]],
-        selectedFilter,
-      ),
-      new Promise<void>((resolve) => setTimeout(resolve, 4000)),
-    ]);
+    const composited = await compositeTwoShot(
+      [capturedPhotos[selectedIndices[0]], capturedPhotos[selectedIndices[1]]],
+      selectedFilter,
+    );
+    await waitForImageReady(composited);
     onComplete(composited);
   };
 
