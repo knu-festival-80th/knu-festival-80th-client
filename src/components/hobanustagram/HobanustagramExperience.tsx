@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 
+import { HobanustagramFallback } from '@/components/hobanustagram/HobanustagramFallback';
 import { LazyPhotoboothTab } from '@/components/hobanustagram/LazyPhotoboothTab';
 import { HobanustagramTabBar } from '@/components/hobanustagram/HobanustagramTabBar';
 import { IntroTab } from '@/components/hobanustagram/IntroTab';
@@ -31,7 +32,7 @@ export const HobanustagramExperience = () => {
         />
       )}
       {activeTab === 'photobooth' && (
-        <Suspense fallback={<div className="min-h-screen bg-white" aria-busy="true" />}>
+        <Suspense fallback={<HobanustagramFallback className="min-h-[calc(100dvh-6.25rem)]" />}>
           <LazyPhotoboothTab />
         </Suspense>
       )}

@@ -10,6 +10,7 @@ import ConsoleGuard from '@/components/guards/ConsoleGuard';
 import GoogleAnalytics from '@/utils/GoogleAnalytics';
 import PostHogPageView from '@/utils/PostHogPageView';
 import PageLoader from '@/components/common/PageLoader';
+import { HobanustagramFallback } from '@/components/hobanustagram/HobanustagramFallback';
 
 const BoothManageLoginPage = lazy(() => import('@/pages/boothManage/BoothManageLoginPage'));
 const BoothProfilePage = lazy(() => import('@/pages/boothManage/BoothProfilePage'));
@@ -98,7 +99,16 @@ export default function App() {
               <Route index element={<StampTourIntroView />} />
               <Route path="booths" element={<StampBoothListView />} />
             </Route>
-            <Route path="/hobanustagram" element={<HobanustagramPage />} />
+            <Route
+              path="/hobanustagram"
+              element={
+                <Suspense
+                  fallback={<HobanustagramFallback className="min-h-[calc(100dvh-4rem)]" />}
+                >
+                  <HobanustagramPage />
+                </Suspense>
+              }
+            />
             <Route path="/instating" element={<InstatingPage />}>
               <Route index element={<InstatingIntroView />} />
               <Route path="apply" element={<InstatingApplyView />} />
