@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 
-import photoboothImage from '@/assets/hobanustagram/photobooth.png';
+import photoboothImage from '@/assets/hobanustagram/photobooth.webp';
 import { ContactSection } from '@/components/common/ContactSection';
 import { FaqAccordion } from '@/components/common/FaqAccordion';
 import { GradientBanner } from '@/components/common/GradientBanner';
@@ -8,9 +8,10 @@ import { hobanustagramFaqItems } from '@/constants/hobanustagram';
 
 export interface IntroTabProps {
   onNavigateToPhotobooth: () => void;
+  onPhotoboothIntent?: () => void;
 }
 
-export const IntroTab = ({ onNavigateToPhotobooth }: IntroTabProps) => {
+export const IntroTab = ({ onNavigateToPhotobooth, onPhotoboothIntent }: IntroTabProps) => {
   return (
     <>
       <GradientBanner title="호반우스타그램" />
@@ -33,7 +34,10 @@ export const IntroTab = ({ onNavigateToPhotobooth }: IntroTabProps) => {
           <button
             type="button"
             className="flex w-fit items-center gap-1.5 rounded-full border border-ink py-2.5 pl-5 pr-3.5"
+            onFocus={onPhotoboothIntent}
             onClick={onNavigateToPhotobooth}
+            onPointerEnter={onPhotoboothIntent}
+            onTouchStart={onPhotoboothIntent}
           >
             <span className="font-wanted-sans text-sm font-medium leading-none tracking-[-0.02em] text-ink">
               호반우 필터로 사진찍기

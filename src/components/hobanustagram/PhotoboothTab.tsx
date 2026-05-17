@@ -1,14 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Download, Film, ImagePlus, RotateCcw, Share2 } from 'lucide-react';
 
+import PageLoader from '@/components/common/PageLoader';
+import { CameraOverlay } from '@/components/hobanustagram/CameraOverlay';
+import { LazyTwoShotOverlay } from '@/components/hobanustagram/LazyTwoShotOverlay';
+import { StepIndicator } from '@/components/hobanustagram/StepIndicator';
+import { CHARACTER_LIST } from '@/constants/hobanustagram';
+import {
+  preloadCharacterOverlays,
+  preloadTwoShotExperience,
+  usePhotoboothPreload,
+} from '@/hooks/useHobanustagramPreload';
 import { capturePhoto } from '@/lib/capturePhoto';
 import { downloadPhoto, sharePhoto } from '@/lib/savePhoto';
-import { CHARACTER_LIST } from '@/constants/hobanustagram';
 import { useCamera } from '@/hooks/useCamera';
 import type { CameraState, CharacterKey, TabStep } from '@/types/hobanustagram';
-import { CameraOverlay } from './CameraOverlay';
-import { StepIndicator } from './StepIndicator';
-import { TwoShotOverlay } from './TwoShotOverlay';
 
 export const PhotoboothTab = () => {
   const [tabStep, setTabStep] = useState<TabStep>(1);
@@ -26,6 +33,8 @@ export const PhotoboothTab = () => {
   const selectedCharacterData =
     CHARACTER_LIST.find((c) => c.key === selectedCharacter) ?? CHARACTER_LIST[0];
 
+  usePhotoboothPreload();
+
   useEffect(() => {
     if (cameraState === 'shooting') {
       void startCamera();
@@ -33,7 +42,15 @@ export const PhotoboothTab = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraState]);
 
-  const handleOpenCamera = () => setCameraState('shooting');
+  const handleOpenCamera = () => {
+    preloadCharacterOverlays();
+    setCameraState('shooting');
+  };
+
+  const handleOpenTwoShot = () => {
+    preloadTwoShotExperience();
+    setTwoShotActive(true);
+  };
 
   const handleShutter = () => {
     if (!videoRef.current || !overlayRef.current) return;
@@ -71,9 +88,14 @@ export const PhotoboothTab = () => {
   };
 
   const handleTwoShotComplete = (compositedUrl: string) => {
-    setCapturedDataUrl(compositedUrl);
-    setTabStep(2);
-    setTwoShotActive(false);
+    flushSync(() => {
+      setCapturedDataUrl(compositedUrl);
+      setTabStep(2);
+    });
+
+    requestAnimationFrame(() => {
+      setTwoShotActive(false);
+    });
   };
 
   const handleSaveButtonClick = () => {
@@ -100,10 +122,12 @@ export const PhotoboothTab = () => {
   return (
     <>
       {twoShotActive && (
-        <TwoShotOverlay
-          onClose={() => setTwoShotActive(false)}
-          onComplete={handleTwoShotComplete}
-        />
+        <Suspense fallback={<PageLoader className="fixed inset-0 z-[100]" />}>
+          <LazyTwoShotOverlay
+            onClose={() => setTwoShotActive(false)}
+            onComplete={handleTwoShotComplete}
+          />
+        </Suspense>
       )}
 
       {cameraState !== 'idle' && (
@@ -195,7 +219,10 @@ export const PhotoboothTab = () => {
 
               <button
                 type="button"
-                onClick={() => setTwoShotActive(true)}
+                onClick={handleOpenTwoShot}
+                onFocus={preloadTwoShotExperience}
+                onPointerEnter={preloadTwoShotExperience}
+                onTouchStart={preloadTwoShotExperience}
                 className="flex h-67 w-full flex-col items-center justify-center gap-8 rounded-xl border border-dashed border-sub-red bg-[rgba(255,61,61,0.04)]"
               >
                 <div className="flex size-20 items-center justify-center rounded-full bg-linear-to-br from-[#ffa855] to-sub-red">
@@ -214,6 +241,9 @@ export const PhotoboothTab = () => {
               <button
                 type="button"
                 onClick={handleOpenCamera}
+                onFocus={preloadCharacterOverlays}
+                onPointerEnter={preloadCharacterOverlays}
+                onTouchStart={preloadCharacterOverlays}
                 className="flex h-67 w-full flex-col items-center justify-center gap-8 rounded-xl border border-dashed border-sub-red bg-[rgba(255,61,61,0.04)]"
               >
                 <div className="flex size-20 items-center justify-center rounded-full bg-linear-to-br from-[#ffa855] to-sub-red">

@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+const CAMERA_VIDEO_CONSTRAINTS: Omit<MediaTrackConstraints, 'facingMode'> = {
+  width: { ideal: 1920, max: 2560 },
+  height: { ideal: 1440, max: 1440 },
+  frameRate: { ideal: 30, max: 30 },
+};
+
+const createVideoConstraints = (mode: 'user' | 'environment'): MediaTrackConstraints => ({
+  ...CAMERA_VIDEO_CONSTRAINTS,
+  facingMode: { ideal: mode },
+});
+
 export const useCamera = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -21,11 +32,7 @@ export const useCamera = () => {
       setError(null);
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: mode,
-            width: { ideal: 3840 },
-            height: { ideal: 2160 },
-          },
+          video: createVideoConstraints(mode),
         });
         if (token !== tokenRef.current) {
           stream.getTracks().forEach((t) => t.stop());

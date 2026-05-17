@@ -15,7 +15,6 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
     step,
     setStep,
     selectedFilter,
-    setSelectedFilter,
     capturedPhotos,
     selectedIndices,
     slotAspect,
@@ -23,6 +22,7 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
     timerEnabled,
     setTimerEnabled,
     countdown,
+    compositeError,
     videoRef,
     isReady,
     error,
@@ -32,6 +32,7 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
     viewportH,
     handleShutter,
     handleToggleSelection,
+    handleSelectFilter,
     handleComplete,
   } = useTwoShot(onComplete);
 
@@ -79,7 +80,8 @@ export const TwoShotOverlay = ({ onClose, onComplete }: TwoShotOverlayProps) => 
         capturedPhotos={capturedPhotos}
         selectedIndices={selectedIndices}
         selectedFilter={selectedFilter}
-        onSelectFilter={setSelectedFilter}
+        compositeError={compositeError}
+        onSelectFilter={handleSelectFilter}
         onComplete={() => void handleComplete()}
       />
     );

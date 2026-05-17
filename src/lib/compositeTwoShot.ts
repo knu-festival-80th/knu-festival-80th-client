@@ -1,7 +1,11 @@
-import frame1PngUrl from '@/assets/hobanustagram/twoframephoto_frame1.png';
-import frame2PngUrl from '@/assets/hobanustagram/twoframephoto_frame2.png';
+import frame1WebpUrl from '@/assets/hobanustagram/twoframephoto_frame1.webp';
+import frame2WebpUrl from '@/assets/hobanustagram/twoframephoto_frame2.webp';
 
-const FRAME_PNG_URLS: Record<1 | 2, string> = { 1: frame1PngUrl, 2: frame2PngUrl };
+const FRAME_WEBP_URLS: Record<1 | 2, string> = { 1: frame1WebpUrl, 2: frame2WebpUrl };
+const PHOTO_SLOT_BLEED_PX = 6;
+const TWO_SHOT_OUTPUT_MIME_TYPE = 'image/jpeg';
+const TWO_SHOT_OUTPUT_QUALITY = 0.98;
+const TWO_SHOT_BACKGROUND_COLOR = '#ffffff';
 
 const PHOTO_SLOT_RATIOS: Record<
   1 | 2,
@@ -15,8 +19,8 @@ const PHOTO_SLOT_RATIOS: Record<
     { left: 0.095, top: 0.461, width: 0.818, height: 0.352 },
   ],
   2: [
-    { left: 0.091, top: 0.084, width: 0.816, height: 0.356 },
-    { left: 0.095, top: 0.461, width: 0.818, height: 0.352 },
+    { left: 0.0889, top: 0.09, width: 0.8222, height: 0.3469 },
+    { left: 0.0889, top: 0.4619, width: 0.8222, height: 0.3469 },
   ],
 };
 
@@ -37,8 +41,12 @@ function drawCoverImage(
   dw: number,
   dh: number,
 ) {
+  const drawX = Math.floor(dx) - PHOTO_SLOT_BLEED_PX;
+  const drawY = Math.floor(dy) - PHOTO_SLOT_BLEED_PX;
+  const drawW = Math.ceil(dx + dw) - drawX + PHOTO_SLOT_BLEED_PX;
+  const drawH = Math.ceil(dy + dh) - drawY + PHOTO_SLOT_BLEED_PX;
   const imgRatio = img.width / img.height;
-  const slotRatio = dw / dh;
+  const slotRatio = drawW / drawH;
   let sx: number, sy: number, sw: number, sh: number;
   if (imgRatio > slotRatio) {
     sh = img.height;
@@ -53,15 +61,15 @@ function drawCoverImage(
   }
   ctx.save();
   ctx.beginPath();
-  ctx.rect(dx, dy, dw, dh);
+  ctx.rect(drawX, drawY, drawW, drawH);
   ctx.clip();
-  ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+  ctx.drawImage(img, sx, sy, sw, sh, drawX, drawY, drawW, drawH);
   ctx.restore();
 }
 
 export async function compositeTwoShot(photos: [string, string], filterId: 1 | 2): Promise<string> {
   const [frameImg, photo1Img, photo2Img] = await Promise.all([
-    loadImage(FRAME_PNG_URLS[filterId]),
+    loadImage(FRAME_WEBP_URLS[filterId]),
     loadImage(photos[0]),
     loadImage(photos[1]),
   ]);
@@ -75,6 +83,9 @@ export async function compositeTwoShot(photos: [string, string], filterId: 1 | 2
   const w = canvas.width;
   const h = canvas.height;
   const slots = PHOTO_SLOT_RATIOS[filterId];
+
+  ctx.fillStyle = TWO_SHOT_BACKGROUND_COLOR;
+  ctx.fillRect(0, 0, w, h);
 
   drawCoverImage(
     ctx,
@@ -95,5 +106,5 @@ export async function compositeTwoShot(photos: [string, string], filterId: 1 | 2
 
   ctx.drawImage(frameImg, 0, 0, w, h);
 
-  return canvas.toDataURL('image/png');
+  return canvas.toDataURL(TWO_SHOT_OUTPUT_MIME_TYPE, TWO_SHOT_OUTPUT_QUALITY);
 }
