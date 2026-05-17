@@ -14,6 +14,7 @@ import TavernTabBar from '@/components/tavern/TavernTabBar';
 import type { TopTab, WaitingReservation } from '@/components/tavern/types';
 import {
   boothToTavern,
+  isPerformanceLocation,
   mapBoothToTavern,
   type Tavern,
   type TavernSortKey,
@@ -37,6 +38,11 @@ export default function TavernMapExperience() {
     () => resolveTavernTabFromUrl(location.pathname, location.search),
     [location.pathname, location.search],
   );
+  const focusTarget = useMemo(
+    () => new URLSearchParams(location.search).get('focus'),
+    [location.search],
+  );
+  const shouldFocusPerformance = activeTab === 'map' && focusTarget === 'performance';
 
   const boothsQuery = useQuery({
     queryKey: ['booths'],
@@ -57,6 +63,10 @@ export default function TavernMapExperience() {
     () => (mapBoothsQuery.data ?? []).map(mapBoothToTavern),
     [mapBoothsQuery.data],
   );
+  const focusedPerformanceTavern = useMemo(() => {
+    if (!shouldFocusPerformance) return null;
+    return mapTaverns.find(isPerformanceLocation) ?? null;
+  }, [mapTaverns, shouldFocusPerformance]);
 
   const [sortKey, setSortKey] = useState<TavernSortKey>('shortWait');
   const [selectedTavern, setSelectedTavern] = useState<Tavern | null>(null);
@@ -64,6 +74,7 @@ export default function TavernMapExperience() {
   const [registrationTarget, setRegistrationTarget] = useState<Tavern | null>(null);
   const [waitingReservation, setWaitingReservation] = useState<WaitingReservation | null>(null);
   const [showReservationLimitModal, setShowReservationLimitModal] = useState(false);
+  const selectedMapSourceTavern = selectedTavern ?? focusedPerformanceTavern;
 
   const sortedTaverns = useMemo(() => {
     const list = [...taverns];
@@ -77,31 +88,34 @@ export default function TavernMapExperience() {
   }, [taverns, sortKey]);
 
   const selectedBoothQuery = useQuery({
-    queryKey: ['booth', selectedTavern?.boothId],
+    queryKey: ['booth', selectedMapSourceTavern?.boothId],
     queryFn: () => {
-      if (!selectedTavern) throw new Error('선택된 주막이 없습니다.');
-      return boothApi.getBooth(selectedTavern.boothId);
+      if (!selectedMapSourceTavern) throw new Error('선택된 주막이 없습니다.');
+      return boothApi.getBooth(selectedMapSourceTavern.boothId);
     },
-    enabled: activeTab === 'map' && Boolean(selectedTavern),
+    enabled:
+      activeTab === 'map' &&
+      Boolean(selectedMapSourceTavern) &&
+      !isPerformanceLocation(selectedMapSourceTavern),
     staleTime: 30_000,
   });
 
   const selectedMapTavern = useMemo(() => {
-    if (!selectedTavern) return null;
-    if (!selectedBoothQuery.data) return selectedTavern;
+    if (!selectedMapSourceTavern) return null;
+    if (!selectedBoothQuery.data) return selectedMapSourceTavern;
 
     const detailTavern = boothToTavern(selectedBoothQuery.data);
 
     return {
       ...detailTavern,
-      id: selectedTavern.id,
-      boothId: selectedTavern.boothId,
-      xRatio: selectedTavern.xRatio,
-      yRatio: selectedTavern.yRatio,
-      type: selectedTavern.type,
-      color: selectedTavern.color,
+      id: selectedMapSourceTavern.id,
+      boothId: selectedMapSourceTavern.boothId,
+      xRatio: selectedMapSourceTavern.xRatio,
+      yRatio: selectedMapSourceTavern.yRatio,
+      type: selectedMapSourceTavern.type,
+      color: selectedMapSourceTavern.color,
     };
-  }, [selectedBoothQuery.data, selectedTavern]);
+  }, [selectedBoothQuery.data, selectedMapSourceTavern]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -158,6 +172,7 @@ export default function TavernMapExperience() {
       ) : (
         <MapOverview
           expandedMenuId={expandedMenuId}
+          focusSelected={focusTarget === 'performance'}
           selectedTavern={selectedMapTavern}
           taverns={mapTaverns}
           onMenuToggle={setExpandedMenuId}

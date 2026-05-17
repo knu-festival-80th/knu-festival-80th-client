@@ -8,8 +8,9 @@ import {
 } from 'react';
 import { FiCircle, FiMinus, FiPlus } from 'react-icons/fi';
 
+import hobanuMarker from '@/assets/images/hobanu-marker.png';
 import tavernMapImage from '@/assets/images/map.svg';
-import { festivalMap, type Tavern } from '@/constants/taverns';
+import { festivalMap, isPerformanceLocation, type Tavern } from '@/constants/taverns';
 
 const MAP_BASE_VIEWPORT_SIZE = 335;
 const MAP_RENDER_WIDTH = 3942.121;
@@ -139,7 +140,7 @@ const getAnchoredPan = (
   };
 };
 
-const getMarkerLabel = (tavern: Tavern) => String(tavern.boothId);
+const getMarkerLabel = (tavern: Tavern) => tavern.markerLabel ?? String(tavern.boothId);
 
 const getSelectedLabel = (tavern: Tavern) => tavern.name;
 
@@ -444,6 +445,7 @@ export default function CampusMap({
           />
           {taverns.map((tavern) => {
             const selected = selectedTavern?.id === tavern.id;
+            const performanceLocation = isPerformanceLocation(tavern);
 
             return (
               <button
@@ -451,9 +453,11 @@ export default function CampusMap({
                 type="button"
                 aria-label={`${tavern.name} 지도 위치: ${tavern.location}`}
                 aria-pressed={selected}
-                className={`absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center p-3 ${
-                  selected ? 'z-30' : 'z-10'
-                } ${interactive ? '' : 'pointer-events-none'}`}
+                className={`absolute flex items-center justify-center ${
+                  performanceLocation
+                    ? 'h-[72px] w-[56px] -translate-x-1/2 -translate-y-full p-0'
+                    : '-translate-x-1/2 -translate-y-1/2 p-3'
+                } ${selected ? 'z-30' : 'z-10'} ${interactive ? '' : 'pointer-events-none'}`}
                 style={getMapMarkerStyle(tavern)}
                 onPointerDown={(event) => handleMarkerPointerDown(event, tavern)}
                 onPointerUp={(event) => event.stopPropagation()}
@@ -462,18 +466,30 @@ export default function CampusMap({
               >
                 {selected && (
                   <span
-                    className="absolute bottom-[55px] left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-[4px] border bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] shadow-sm"
+                    className={`absolute left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-[4px] border bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] shadow-sm ${
+                      performanceLocation ? 'bottom-[76px]' : 'bottom-[55px]'
+                    }`}
                     style={getLabelStyle(tavern)}
                   >
                     {getSelectedLabel(tavern)}
                   </span>
                 )}
-                <span
-                  className="flex size-9.5 items-center justify-center rounded-[20px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px]"
-                  style={getMarkerStyle(selected, tavern)}
-                >
-                  {getMarkerLabel(tavern)}
-                </span>
+                {performanceLocation ? (
+                  <img
+                    src={hobanuMarker}
+                    alt=""
+                    className="h-[64px] w-[48px] object-contain drop-shadow-md"
+                    draggable={false}
+                    decoding="async"
+                  />
+                ) : (
+                  <span
+                    className="flex size-9.5 items-center justify-center rounded-[20px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px]"
+                    style={getMarkerStyle(selected, tavern)}
+                  >
+                    {getMarkerLabel(tavern)}
+                  </span>
+                )}
               </button>
             );
           })}
