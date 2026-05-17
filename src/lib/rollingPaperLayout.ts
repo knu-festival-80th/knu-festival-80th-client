@@ -16,6 +16,7 @@ export type PlacedRollingPaperNote = {
   boardId?: number;
   isPending?: boolean;
   isLocalOnly?: boolean;
+  isConflictPlaceholder?: boolean;
   pendingVisibleUntil?: number;
   message: string;
   colorId: RollingPaperStickerColorId;
