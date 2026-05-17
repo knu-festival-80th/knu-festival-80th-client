@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { motion } from 'framer-motion';
 import InstatingResultModal, { type MatchResult } from '../result/InstatingResultModal';
 import AlertModal from '@/components/instating/AlertModal';
 import { useState } from 'react';
@@ -7,6 +8,7 @@ import { ApiClientError, matchingApi } from '@/apis';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
 import CountdownText from '@/components/instating/CountdownText';
 import { useQueryInvalidateAtDeadline } from '@/hooks/instating/useQueryInvalidateAtDeadline';
+import { fadeUpVariant } from '@/constants/animation';
 
 type FormValues = {
   instagramId: string;
@@ -89,16 +91,21 @@ const InstatingResultView = () => {
         className="flex flex-col gap-7 bg-white px-5 py-6 min-h-[calc(100dvh-6.75rem)]"
       >
         {/* Header */}
-        <div className="flex flex-col gap-2.5">
+        <motion.div className="flex flex-col gap-2.5" {...fadeUpVariant}>
           <h1 className="font-wanted-sans text-heading2 font-bold tracking-tight text-ink">
             결과 조회
           </h1>
           <p className="font-wanted-sans text-body1 tracking-tight text-gray">
             신청 시 입력했던 정보를 입력해주세요.
           </p>
-        </div>
+        </motion.div>
 
-        <fieldset disabled={!isResultOpen} className="m-0 flex flex-col gap-[18px] border-0 p-0">
+        <motion.fieldset
+          disabled={!isResultOpen}
+          className="m-0 flex flex-col gap-[18px] border-0 p-0"
+          {...fadeUpVariant}
+          transition={{ ...fadeUpVariant.transition, delay: 0.1 }}
+        >
           {/* Instagram ID */}
           <div className="flex flex-col gap-2">
             <label
@@ -152,7 +159,7 @@ const InstatingResultView = () => {
               <p className="font-wanted-sans text-body2 text-sub-red">{errors.phone.message}</p>
             )}
           </div>
-        </fieldset>
+        </motion.fieldset>
 
         {submitError && (
           <p className="font-wanted-sans text-body2 text-sub-red" role="alert">
@@ -161,12 +168,14 @@ const InstatingResultView = () => {
         )}
 
         {/* Submit */}
-        <button
+        <motion.button
           type="submit"
           disabled={!isResultOpen || !isValid || isSubmitting}
           className={`h-[50px] w-full rounded-md font-wanted-sans text-body1 font-medium tracking-tight text-surface ${
             !isResultOpen ? 'bg-black' : isValid && !isSubmitting ? 'bg-sub-red' : 'bg-[#CCCCCC]'
           }`}
+          {...fadeUpVariant}
+          transition={{ ...fadeUpVariant.transition, delay: 0.15 }}
         >
           {!isResultOpen ? (
             <CountdownText deadline={resultOpenAt} />
@@ -175,7 +184,7 @@ const InstatingResultView = () => {
           ) : (
             '결과 조회하기'
           )}
-        </button>
+        </motion.button>
       </form>
     </>
   );
