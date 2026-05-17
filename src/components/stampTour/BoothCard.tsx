@@ -44,7 +44,14 @@ const BoothCard = ({
         }}
       >
         <div className="overflow-hidden">
-          <div className="flex flex-col gap-5 pt-5">
+          <div
+            className="flex flex-col gap-5 pt-5"
+            style={{
+              opacity: isExpanded ? 1 : 0,
+              transition: 'opacity 0.25s ease',
+              transitionDelay: isExpanded ? '0.1s' : '0s',
+            }}
+          >
             <div className="flex w-full flex-col gap-2.5">
               <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
                 진행장소: {location}
