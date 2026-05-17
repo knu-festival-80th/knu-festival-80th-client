@@ -10,8 +10,10 @@ import prize1 from '@/assets/stampTour/prize_1.webp';
 import prize2 from '@/assets/stampTour/prize_2.webp';
 import prize3 from '@/assets/stampTour/prize_3.webp';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import OutlineButton from '@/components/common/OutlineButton';
 import ProcessCard from '@/components/common/ProcessCard';
+import { fadeUpVariant } from '@/constants/animation';
 
 const steps = [
   {
@@ -60,7 +62,7 @@ const StampTourContext = () => {
     <section className="w-full bg-white">
       <div className="mx-auto flex w-full flex-col items-center gap-12 px-5 pb-[200px] pt-16">
         {/* Section header */}
-        <div className="flex w-full flex-col gap-4 pt-8">
+        <motion.div className="flex w-full flex-col gap-4 pt-8" {...fadeUpVariant}>
           <div className="flex flex-col gap-2.5">
             <p className="font-wanted-sans text-body1 font-bold tracking-tight text-ink">
               2026 Stamp Tour
@@ -74,28 +76,29 @@ const StampTourContext = () => {
             </p>
           </div>
           <OutlineButton label="부스 위치 확인하기" showArrow variant="red" onClick={goToBooths} />
-        </div>
+        </motion.div>
 
-        <img
+        <motion.img
           src={stampHero}
           alt="스탬프 투어 카드"
           fetchPriority="high"
           width={297}
           height={245}
           className="w-[297px]"
+          {...fadeUpVariant}
         />
 
         {/* Step cards */}
-        <ol className="flex w-full flex-col gap-[30px]">
+        <motion.ol className="flex w-full flex-col gap-[30px]" {...fadeUpVariant}>
           {steps.map((s) => (
             <li key={s.step}>
               <ProcessCard {...s} />
             </li>
           ))}
-        </ol>
+        </motion.ol>
 
         {/* Prizes */}
-        <div className="flex w-full flex-col gap-12">
+        <motion.div className="flex w-full flex-col gap-12" {...fadeUpVariant}>
           <div className="flex flex-col gap-2.5">
             <p className="font-wanted-sans text-body1 font-bold tracking-tight text-ink">
               Stamp Prizes
@@ -140,7 +143,7 @@ const StampTourContext = () => {
               </li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
