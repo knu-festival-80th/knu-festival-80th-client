@@ -38,7 +38,7 @@ export default function MapOverview({
         />
       </div>
 
-      {selectedTavern && (
+      {selectedTavern && selectedTavern.type !== 'STAGE' && (
         <TavernCard
           expanded={expandedMenuId === selectedTavern.id}
           tavern={selectedTavern}

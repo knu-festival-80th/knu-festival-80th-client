@@ -327,7 +327,12 @@ export default function BulkMapEditorPage() {
   const transitionStyle = animating ? 'transform 300ms cubic-bezier(0.25,0.46,0.45,0.94)' : 'none';
   const changedCount = changes.size;
 
-  const markerColor = (b: BoothMapItem) => b.color ?? (b.type === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
+  const markerColor = (b: BoothMapItem) => {
+    if (b.color) return b.color;
+    if (b.type === 'BOOTH') return '#15ccb1';
+    if (b.type === 'STAGE') return '#8B5CF6';
+    return '#ff3d3d';
+  };
 
   return (
     <div
