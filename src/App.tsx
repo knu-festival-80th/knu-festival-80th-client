@@ -48,7 +48,7 @@ export default function App() {
     <>
       <GoogleAnalytics />
       <PostHogPageView />
-      <ErrorBoundary>
+      <ErrorBoundary fallbackClassName="min-h-dvh">
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route element={<MainLayout />}>
