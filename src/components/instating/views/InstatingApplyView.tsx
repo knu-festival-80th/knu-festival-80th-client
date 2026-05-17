@@ -6,6 +6,7 @@ import type { SubmittedData } from '../result/InstatingApplySuccessModal';
 import InstatingApplySuccessModal from '../result/InstatingApplySuccessModal';
 import AlertModal from '@/components/instating/AlertModal';
 import CountdownText from '@/components/instating/CountdownText';
+import { useQueryInvalidateAtDeadline } from '@/hooks/instating/useQueryInvalidateAtDeadline';
 
 type FormValues = {
   gender: 'male' | 'female';
@@ -24,6 +25,8 @@ const InstatingApplyView = () => {
   const registrationOpenAt = status?.registrationOpenAt
     ? new Date(status.registrationOpenAt)
     : null;
+
+  useQueryInvalidateAtDeadline(registrationOpenAt, isRegistrationOpen, ['matchings', 'status']);
 
   const {
     register,

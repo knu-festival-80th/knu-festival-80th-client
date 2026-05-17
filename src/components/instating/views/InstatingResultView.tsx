@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { ApiClientError, matchingApi } from '@/apis';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
 import CountdownText from '@/components/instating/CountdownText';
+import { useQueryInvalidateAtDeadline } from '@/hooks/instating/useQueryInvalidateAtDeadline';
 
 type FormValues = {
   instagramId: string;
@@ -26,6 +27,8 @@ const InstatingResultView = () => {
   const { data: status } = useMatchingStatus();
   const isResultOpen = status?.resultOpen ?? true;
   const resultOpenAt = status?.resultOpenAt ? new Date(status.resultOpenAt) : null;
+
+  useQueryInvalidateAtDeadline(resultOpenAt, isResultOpen, ['matchings', 'status']);
   const navigate = useNavigate();
 
   const onSubmit = async ({ instagramId, phone }: FormValues) => {
