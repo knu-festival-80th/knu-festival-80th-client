@@ -160,6 +160,22 @@ export default function WaitingCard({
               호출
             </button>
           )}
+          {isCalled && timer && (
+            <div className="flex shrink-0 flex-col items-end">
+              <span className="text-[9px] leading-tight text-[var(--admin-text-faint)]">
+                10분 타이머
+              </span>
+              <span
+                className={[
+                  'tabular text-[13px] font-bold leading-tight',
+                  timer.isOverdue ? 'text-[var(--admin-danger)]' : '',
+                ].join(' ')}
+                style={timer.isOverdue ? undefined : { color: accent }}
+              >
+                {timer.text}
+              </span>
+            </div>
+          )}
           {isCalled && (
             <button
               type="button"
@@ -167,7 +183,7 @@ export default function WaitingCard({
               className="flex h-8 shrink-0 items-center gap-1 rounded-lg bg-[var(--admin-success)] px-2.5 text-[12px] font-semibold text-white active:opacity-80"
             >
               <Check size={12} />
-              입장
+              입장 완료
             </button>
           )}
 
@@ -190,17 +206,10 @@ export default function WaitingCard({
               SMS
             </span>
           )}
-          {timer && (
+          {!isCalled && timer && (
             <>
               <span>·</span>
-              <span
-                className={timer.isOverdue ? 'font-semibold' : undefined}
-                style={
-                  timer.isOverdue ? { color: 'var(--admin-accent-cancelled, #ef4444)' } : undefined
-                }
-              >
-                {timer.text}
-              </span>
+              <span>{timer.text}</span>
             </>
           )}
           {isEntered && waiting.enteredAt && (
