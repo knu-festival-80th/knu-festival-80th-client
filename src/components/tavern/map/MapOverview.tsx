@@ -3,6 +3,7 @@ import CampusMap from '@/components/tavern/map/CampusMap';
 import {
   PERFORMANCE_LOCATION_DESCRIPTION,
   isPerformanceLocation,
+  isStampLocation,
   type Tavern,
 } from '@/constants/taverns';
 
@@ -56,6 +57,20 @@ export default function MapOverview({
           <p className="mt-2 text-[14px] font-medium leading-[1.45] tracking-[-0.28px] text-[#707070]">
             {selectedTavern.location || PERFORMANCE_LOCATION_DESCRIPTION}
           </p>
+        </div>
+      ) : selectedTavern && isStampLocation(selectedTavern) ? (
+        <div className="rounded-xl border border-[#e5e5e5] bg-white px-5 py-4 shadow-sm">
+          <p className="text-[13px] font-semibold leading-none tracking-[-0.26px] text-[#D946A8]">
+            스탬프 투어
+          </p>
+          <h2 className="mt-2 text-[20px] font-bold leading-[1.35] tracking-[-0.4px] text-[#1a1a1a]">
+            {selectedTavern.name}
+          </h2>
+          {selectedTavern.location && (
+            <p className="mt-2 text-[14px] font-medium leading-[1.45] tracking-[-0.28px] text-[#707070]">
+              {selectedTavern.location}
+            </p>
+          )}
         </div>
       ) : selectedTavern ? (
         <TavernCard
