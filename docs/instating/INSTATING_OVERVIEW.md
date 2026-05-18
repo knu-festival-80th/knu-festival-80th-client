@@ -52,6 +52,16 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 `useCountdown`을 폼 컴포넌트에서 직접 호출하면 폼 전체가 1초마다 리렌더된다. `CountdownText`로 분리해 타이머 tick이 해당 컴포넌트에만 국한되도록 했다.
 
+**스텝 카드 애니메이션 (`InstatingContent`)**
+
+`ProcessCard` 목록은 `motion.ol` stagger 컨테이너 + `motion.li` 개별 애니메이션으로 구성된다. 카드 전체를 한 덩어리로 올리는 대신 0.12초 간격으로 순차 등장한다.
+
+```
+staggerChildren: 0.12   → 카드 간 등장 간격
+y: 20 / duration: 0.35  → 이동 거리와 속도 (fadeUpVariant의 y: 40 / 0.5보다 빠르고 가볍게)
+viewport.amount: 0.1    → 뷰포트에 조금만 걸려도 즉시 트리거
+```
+
 **신청자 현황 (`ApplicantsNumberSection`)**
 
 `useMatchingStatus`에서 `malePendingCount`, `femalePendingCount`를 읽어 표시한다. 30초 폴링으로 갱신한다. 정밀한 실시간성이 필요하지 않아 SSE를 도입하지 않았다.
