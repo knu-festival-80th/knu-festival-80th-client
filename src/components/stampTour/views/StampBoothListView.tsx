@@ -1,11 +1,33 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import { boothApi } from '@/apis';
 import { fadeUpVariant } from '@/constants/animation';
 import { BOOTHS } from '@/constants/stampTour';
 import BoothCard from '@/components/stampTour/BoothCard';
 
+const normalizeStampName = (name: string) => name.replace(/\s+/g, '').trim();
+
 const StampBoothListView = () => {
   const [openBoothId, setOpenBoothId] = useState<number | null>(BOOTHS[0]?.id ?? null);
+  const stampMapQuery = useQuery({
+    queryKey: ['booths', 'map', 'stampTour'],
+    queryFn: boothApi.listMapBooths,
+    staleTime: 30_000,
+  });
+
+  const getMapDetailPath = (mapName: string) => {
+    const stampMarker = (stampMapQuery.data ?? []).find(
+      (booth) =>
+        booth.type === 'STAMP' && normalizeStampName(booth.name) === normalizeStampName(mapName),
+    );
+
+    if (stampMarker) {
+      return `/map?tab=map&focus=stamp&boothId=${stampMarker.boothId}`;
+    }
+
+    return `/map?tab=map&focus=stamp&stampName=${encodeURIComponent(mapName)}`;
+  };
 
   const handleDetailClick = (id: number) => {
     setOpenBoothId((prev) => (prev === id ? null : id));
@@ -37,6 +59,7 @@ const StampBoothListView = () => {
             >
               <BoothCard
                 {...booth}
+                mapDetailPath={getMapDetailPath(booth.mapName)}
                 isExpanded={openBoothId === booth.id}
                 onDetailClick={() => handleDetailClick(booth.id)}
               />

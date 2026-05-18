@@ -22,7 +22,7 @@ export default function PerformanceLocationSection() {
         <img
           src={performancePreview}
           alt="대공연장 지도 미리보기"
-          className="size-full object-cover"
+          className="h-full w-full object-cover object-[5%_40%]"
           loading="lazy"
           decoding="async"
         />

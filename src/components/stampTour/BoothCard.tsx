@@ -1,4 +1,5 @@
 import { ChevronDown } from 'lucide-react';
+import ViewAllButton from '@/components/home/ViewAllButton';
 import ZoneBadge from './ZoneBadge';
 
 type BoothCardProps = {
@@ -10,6 +11,7 @@ type BoothCardProps = {
   target: string;
   imageSrc: string;
   imageAlt?: string;
+  mapDetailPath?: string;
   isExpanded?: boolean;
   onDetailClick?: () => void;
 };
@@ -23,6 +25,7 @@ const BoothCard = ({
   target,
   imageSrc,
   imageAlt,
+  mapDetailPath,
   isExpanded = false,
   onDetailClick,
 }: BoothCardProps) => {
@@ -63,6 +66,9 @@ const BoothCard = ({
                 참여대상: {target}
               </p>
             </div>
+            {mapDetailPath && (
+              <ViewAllButton to={mapDetailPath} label="자세히 보러가기" className="self-start" />
+            )}
             <div className="aspect-[335/269] w-full overflow-hidden rounded-[8px]">
               <img
                 src={imageSrc}

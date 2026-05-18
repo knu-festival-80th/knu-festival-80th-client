@@ -7,6 +7,13 @@ import { festivalMap } from '@/constants/taverns';
 
 import MapPickerModal from './MapPickerModal';
 
+const getDefaultBoothTypeColor = (boothType?: BoothType) => {
+  if (boothType === 'BOOTH') return '#15ccb1';
+  if (boothType === 'STAGE') return '#8B5CF6';
+  if (boothType === 'STAMP') return '#FFDBF5';
+  return '#ff3d3d';
+};
+
 type MapLocationPickerProps = {
   xRatio: number | null;
   yRatio: number | null;
@@ -26,7 +33,7 @@ export default function MapLocationPicker({
 }: MapLocationPickerProps) {
   const [open, setOpen] = useState(false);
   const hasPin = xRatio !== null && yRatio !== null;
-  const pinColor = boothColor ?? (boothType === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
+  const pinColor = boothColor ?? getDefaultBoothTypeColor(boothType);
 
   return (
     <div className="flex items-start gap-3">

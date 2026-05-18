@@ -26,6 +26,7 @@ import type {
 export default function RollingPaperWriteModal({
   isOpen,
   boardVariant,
+  frameVariant,
   placedNotes,
   isSubmitting = false,
   placementErrorMessage,
@@ -140,6 +141,7 @@ export default function RollingPaperWriteModal({
         ) : (
           <RollingPaperWritePlaceStep
             boardVariant={boardVariant}
+            frameVariant={frameVariant}
             colorId={colorId}
             message={trimmedMessage}
             occupiedNotes={occupiedNotes}

@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useCallback,
   useRef,
   useState,
   type CSSProperties,
@@ -8,9 +9,15 @@ import {
 } from 'react';
 import { FiCircle, FiMinus, FiPlus } from 'react-icons/fi';
 
-import hobanuMarker from '@/assets/images/hobanu-marker.png';
+import hobanuStampMarker from '@/assets/images/hobanu.png';
+import tavernMapLowDetailImage from '@/assets/images/map-low-detail.png';
 import tavernMapImage from '@/assets/images/map.svg';
-import { festivalMap, isPerformanceLocation, type Tavern } from '@/constants/taverns';
+import {
+  festivalMap,
+  isPerformanceLocation,
+  isStampLocation,
+  type Tavern,
+} from '@/constants/taverns';
 
 const MAP_BASE_VIEWPORT_SIZE = 335;
 const MAP_RENDER_WIDTH = 3942.121;
@@ -22,8 +29,18 @@ const MAP_MIN_SCALE = 0.1;
 const MAP_DEFAULT_SCALE = 0.6;
 const MAP_MAX_SCALE = 1;
 const MAP_FOCUS_SCALE = 1;
+const MAP_LOW_DETAIL_ENTER_SCALE = 0.35;
+const MAP_LOW_DETAIL_EXIT_SCALE = 0.5;
 const MAP_ZOOM_STEP = 0.15;
 const INITIAL_MAP_PAN = { x: 500, y: 350 };
+const DEFAULT_MARKER_SIZE = { width: 30, height: 30 };
+const PERFORMANCE_MARKER_SIZE = { width: 66, height: 80 };
+const STAMP_MARKER_SIZE = { width: 60, height: 74 };
+const STAMP_MARKER_OFFSET = { x: 0, y: 15 };
+const DEFAULT_LABEL_BOTTOM = 48;
+const IMAGE_MARKER_LABEL_BOTTOM = 76;
+const STAMP_MARKER_LABEL_BOTTOM = 70;
+const STAMP_MARKER_LABEL_TEXT_COLOR = '#da6aba';
 
 const clampRatio = (ratio: number) => Math.min(Math.max(ratio, 0), 1);
 
@@ -34,12 +51,27 @@ const getMapPoint = (tavern: Tavern) => {
   return { x, y };
 };
 
+const getMarkerPositionOffset = (tavern: Tavern) =>
+  isStampLocation(tavern) ? STAMP_MARKER_OFFSET : { x: 0, y: 0 };
+
+const getImageMarkerSize = (tavern: Tavern) => {
+  if (isPerformanceLocation(tavern)) return PERFORMANCE_MARKER_SIZE;
+  if (isStampLocation(tavern)) return STAMP_MARKER_SIZE;
+  return null;
+};
+
 const getMapMarkerStyle = (tavern: Tavern): CSSProperties => {
   const { x, y } = getMapPoint(tavern);
+  const offset = getMarkerPositionOffset(tavern);
+  const imageMarkerSize = getImageMarkerSize(tavern);
+  const markerSizeStyle = imageMarkerSize
+    ? { width: imageMarkerSize.width, height: imageMarkerSize.height }
+    : {};
 
   return {
-    left: `${(x / MAP_BASE_VIEWPORT_SIZE) * 100}%`,
-    top: `${(y / MAP_BASE_VIEWPORT_SIZE) * 100}%`,
+    left: `${((x + offset.x) / MAP_BASE_VIEWPORT_SIZE) * 100}%`,
+    top: `${((y + offset.y) / MAP_BASE_VIEWPORT_SIZE) * 100}%`,
+    ...markerSizeStyle,
   };
 };
 
@@ -65,6 +97,9 @@ type PinchState = {
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const clampScale = (scale: number) => clamp(scale, MAP_MIN_SCALE, MAP_MAX_SCALE);
+
+const shouldUseLowDetailMap = (scale: number, currentLowDetail: boolean) =>
+  currentLowDetail ? scale <= MAP_LOW_DETAIL_EXIT_SCALE : scale <= MAP_LOW_DETAIL_ENTER_SCALE;
 
 const getViewportRatio = (viewportSize: number) => viewportSize / MAP_BASE_VIEWPORT_SIZE;
 
@@ -155,8 +190,20 @@ const getMarkerStyle = (selected: boolean, tavern: Tavern): CSSProperties => {
 
 const getLabelStyle = (tavern: Tavern): CSSProperties => {
   const color = getTypeColor(tavern);
-  return { borderColor: color, color };
+  return {
+    borderColor: color,
+    color: isStampLocation(tavern) ? STAMP_MARKER_LABEL_TEXT_COLOR : color,
+  };
 };
+
+const getSelectedMarkerLabelStyle = (tavern: Tavern): CSSProperties => ({
+  ...getLabelStyle(tavern),
+  bottom: isStampLocation(tavern)
+    ? STAMP_MARKER_LABEL_BOTTOM
+    : isPerformanceLocation(tavern)
+      ? IMAGE_MARKER_LABEL_BOTTOM
+      : DEFAULT_LABEL_BOTTOM,
+});
 
 type CampusMapProps = {
   interactive?: boolean;
@@ -175,6 +222,8 @@ export default function CampusMap({
 }: CampusMapProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const mapLayerRef = useRef<HTMLDivElement>(null);
+  const lowDetailImageRef = useRef<HTMLImageElement>(null);
+  const highDetailImageRef = useRef<HTMLImageElement>(null);
   const [viewportSize, setViewportSize] = useState(MAP_BASE_VIEWPORT_SIZE);
   const [mapScale, setMapScale] = useState(MAP_DEFAULT_SCALE);
   const [mapPan, setMapPan] = useState(getScaledInitialMapPan(MAP_BASE_VIEWPORT_SIZE));
@@ -185,7 +234,19 @@ export default function CampusMap({
   const skipMarkerClickRef = useRef(false);
   const scaleRef = useRef(MAP_DEFAULT_SCALE);
   const panRef = useRef(getScaledInitialMapPan(MAP_BASE_VIEWPORT_SIZE));
+  const lowDetailMapRef = useRef(false);
   const selectedTavernRef = useRef<Tavern | null>(selectedTavern);
+
+  const syncMapDetailMode = useCallback((scale: number) => {
+    const nextLowDetail = shouldUseLowDetailMap(scale, lowDetailMapRef.current);
+    if (nextLowDetail === lowDetailMapRef.current) return;
+
+    lowDetailMapRef.current = nextLowDetail;
+    lowDetailImageRef.current?.classList.toggle('hidden', !nextLowDetail);
+    lowDetailImageRef.current?.classList.toggle('block', nextLowDetail);
+    highDetailImageRef.current?.classList.toggle('hidden', nextLowDetail);
+    highDetailImageRef.current?.classList.toggle('block', !nextLowDetail);
+  }, []);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -205,6 +266,7 @@ export default function CampusMap({
         setViewportSize(nextSize);
         scaleRef.current = focusScale;
         panRef.current = focusPan;
+        syncMapDetailMode(focusScale);
         setMapScale(focusScale);
         setMapPan(focusPan);
         return;
@@ -214,6 +276,7 @@ export default function CampusMap({
       setViewportSize(nextSize);
       scaleRef.current = MAP_DEFAULT_SCALE;
       panRef.current = nextPan;
+      syncMapDetailMode(MAP_DEFAULT_SCALE);
       setMapScale(MAP_DEFAULT_SCALE);
       setMapPan(nextPan);
     };
@@ -224,7 +287,7 @@ export default function CampusMap({
     resizeObserver.observe(viewport);
 
     return () => resizeObserver.disconnect();
-  }, [focusSelected]);
+  }, [focusSelected, syncMapDetailMode]);
 
   useEffect(() => {
     selectedTavernRef.current = selectedTavern;
@@ -241,12 +304,13 @@ export default function CampusMap({
 
       scaleRef.current = focusScale;
       panRef.current = focusPan;
+      syncMapDetailMode(focusScale);
       setMapScale(focusScale);
       setMapPan(focusPan);
     });
 
     return () => window.cancelAnimationFrame(animationFrame);
-  }, [focusSelected, selectedTavern, viewportSize]);
+  }, [focusSelected, selectedTavern, viewportSize, syncMapDetailMode]);
 
   const commitMapViewport = () => {
     setMapScale(scaleRef.current);
@@ -263,6 +327,7 @@ export default function CampusMap({
 
     scaleRef.current = clampedScale;
     panRef.current = clampedPan;
+    syncMapDetailMode(clampedScale);
     if (mapLayerRef.current) {
       mapLayerRef.current.style.transform = getMapTransform(clampedScale, clampedPan);
     }
@@ -436,9 +501,19 @@ export default function CampusMap({
           }}
         >
           <img
+            ref={lowDetailImageRef}
+            src={tavernMapLowDetailImage}
+            alt="대동제 주막 지도"
+            className="pointer-events-none absolute hidden h-auto max-w-none select-none"
+            style={mapImageStyle}
+            decoding="async"
+            draggable={false}
+          />
+          <img
+            ref={highDetailImageRef}
             src={tavernMapImage}
             alt="대동제 주막 지도"
-            className="pointer-events-none absolute h-auto max-w-none select-none"
+            className="pointer-events-none absolute block h-auto max-w-none select-none"
             style={mapImageStyle}
             decoding="async"
             draggable={false}
@@ -446,6 +521,8 @@ export default function CampusMap({
           {taverns.map((tavern) => {
             const selected = selectedTavern?.id === tavern.id;
             const performanceLocation = isPerformanceLocation(tavern);
+            const stampLocation = isStampLocation(tavern);
+            const customImageMarker = performanceLocation || stampLocation;
 
             return (
               <button
@@ -454,7 +531,7 @@ export default function CampusMap({
                 aria-label={`${tavern.name} 지도 위치: ${tavern.location}`}
                 aria-pressed={selected}
                 className={`absolute flex items-center justify-center ${
-                  performanceLocation
+                  customImageMarker
                     ? 'h-[72px] w-[56px] -translate-x-1/2 -translate-y-full p-0'
                     : '-translate-x-1/2 -translate-y-1/2 p-3'
                 } ${selected ? 'z-30' : 'z-10'} ${interactive ? '' : 'pointer-events-none'}`}
@@ -466,26 +543,36 @@ export default function CampusMap({
               >
                 {selected && (
                   <span
-                    className={`absolute left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-[4px] border bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] shadow-sm ${
-                      performanceLocation ? 'bottom-[76px]' : 'bottom-[55px]'
-                    }`}
-                    style={getLabelStyle(tavern)}
+                    className="absolute left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-[4px] border bg-white px-2.5 py-1.5 text-[14px] font-semibold leading-none tracking-[-0.28px] shadow-sm"
+                    style={getSelectedMarkerLabelStyle(tavern)}
                   >
                     {getSelectedLabel(tavern)}
                   </span>
                 )}
                 {performanceLocation ? (
                   <img
-                    src={hobanuMarker}
+                    src={hobanuStampMarker}
                     alt=""
-                    className="h-[64px] w-[48px] object-contain drop-shadow-md"
+                    className="h-full w-full object-contain drop-shadow-md"
+                    draggable={false}
+                    decoding="async"
+                  />
+                ) : stampLocation ? (
+                  <img
+                    src={hobanuStampMarker}
+                    alt=""
+                    className="h-full w-full object-contain drop-shadow-md"
                     draggable={false}
                     decoding="async"
                   />
                 ) : (
                   <span
-                    className="flex size-9.5 items-center justify-center rounded-[20px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px]"
-                    style={getMarkerStyle(selected, tavern)}
+                    className="flex items-center justify-center rounded-[20px] border-2 text-[14px] font-bold leading-none tracking-[-0.28px]"
+                    style={{
+                      ...getMarkerStyle(selected, tavern),
+                      width: DEFAULT_MARKER_SIZE.width,
+                      height: DEFAULT_MARKER_SIZE.height,
+                    }}
                   >
                     {getMarkerLabel(tavern)}
                   </span>
