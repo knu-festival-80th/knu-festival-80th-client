@@ -2,12 +2,19 @@ import goodsbox from '@/assets/goods/goodsbox.webp';
 import { GradientBanner } from '@/components/common/GradientBanner';
 import { SectionTitle } from '@/components/common/SectionTitle';
 import { GoodsModal } from '@/components/goods/GoodsModal';
+import { GOODS_DETAIL_GUIDE_URL, GOODS_PURCHASE_GUIDE_URL } from '@/constants/goods';
 import { ALL_GOODS, POPULAR_GOODS } from '@/mocks/goods';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import { useGoodsModal } from '@/hooks/useGoodsModal';
 import { ArrowRight } from 'lucide-react';
 
 export default function GoodsPage() {
   const { selectedGoods, openModal, closeModal } = useGoodsModal();
+  const {
+    scrollRef: popularGoodsScrollRef,
+    isDragging: isPopularGoodsDragging,
+    dragHandlers: popularGoodsDragHandlers,
+  } = useHorizontalDragScroll<HTMLDivElement>();
 
   const scrollToPopularGoods = () => {
     document.getElementById('popular-goods')?.scrollIntoView({ behavior: 'smooth' });
@@ -37,7 +44,13 @@ export default function GoodsPage() {
           <p className="font-wanted-sans text-xl font-bold leading-none tracking-[-0.02em] text-ink">
             현재 인기있는 굿즈
           </p>
-          <div className="-mx-5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div
+            ref={popularGoodsScrollRef}
+            {...popularGoodsDragHandlers}
+            className={`-mx-5 overflow-x-auto select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+              isPopularGoodsDragging ? 'cursor-grabbing' : 'cursor-grab'
+            }`}
+          >
             <div className="flex gap-5 px-5 pb-2">
               {POPULAR_GOODS.map((item) => (
                 <button
@@ -50,6 +63,7 @@ export default function GoodsPage() {
                     <img
                       src={item.images[0]}
                       alt={item.name}
+                      draggable={false}
                       loading="lazy"
                       decoding="async"
                       className="h-full w-full object-contain p-2"
@@ -85,6 +99,7 @@ export default function GoodsPage() {
                   <img
                     src={item.images[0]}
                     alt={item.name}
+                    draggable={false}
                     loading="lazy"
                     decoding="async"
                     className="h-full w-full object-contain p-2"
@@ -111,7 +126,7 @@ export default function GoodsPage() {
           />
           <div className="flex flex-col gap-3">
             <a
-              href="https://www.instagram.com/p/DXv43Z9kzgo/?img_index=1"
+              href={GOODS_PURCHASE_GUIDE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex w-fit items-center gap-1.5 rounded-full border border-[#ff3d3d] py-2.5 pl-5 pr-3.5"
@@ -122,7 +137,7 @@ export default function GoodsPage() {
               <ArrowRight className="size-6 text-[#ff3d3d]" />
             </a>
             <a
-              href="https://www.instagram.com/p/DXv5AK6EyOI/?img_index=1"
+              href={GOODS_DETAIL_GUIDE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex w-fit items-center gap-1.5 rounded-full border border-[#ff3d3d] py-2.5 pl-5 pr-3.5"

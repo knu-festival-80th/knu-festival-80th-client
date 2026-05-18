@@ -17,6 +17,9 @@ const sentryPlugin =
 
 export default defineConfig({
   base: './',
+  server: {
+    host: true,
+  },
   plugins: [
     tailwindcss(),
     react(),

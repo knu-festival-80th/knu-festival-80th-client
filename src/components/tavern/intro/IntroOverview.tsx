@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { FiArrowRight, FiChevronDown } from 'react-icons/fi';
 
 import mapIconImage from '@/assets/images/map-icon.png';
@@ -178,21 +180,54 @@ function MapPreviewIllustration() {
 }
 
 function FaqSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const toggle = (index: number) => {
+    setOpenIndex((prev) => (prev === index ? null : index));
+  };
+
   return (
     <section className="flex flex-col gap-12 px-5 py-8">
       <SectionHeading eyebrow="FAQ" title="자주 묻는 질문" variant="small" />
       <div className="flex flex-col gap-2.5">
-        {tavernFaqs.map((faq, index) => (
-          <details key={faq.question} className="bg-[#f9f9f9] p-5" open={index === 0}>
-            <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[16px] font-bold leading-none tracking-[-0.32px]">
-              {faq.question}
-              <FiChevronDown size={20} />
-            </summary>
-            <p className="mt-3 text-[16px] font-medium leading-[1.5] text-[#4d4d4d]">
-              {faq.answer}
-            </p>
-          </details>
-        ))}
+        {tavernFaqs.map((faq, index) => {
+          const isOpen = openIndex === index;
+
+          return (
+            <div key={faq.question} className="bg-[#f9f9f9] p-5">
+              <button
+                type="button"
+                className="flex w-full cursor-pointer items-start justify-between gap-4 text-left text-[16px] font-bold leading-none tracking-[-0.32px]"
+                aria-expanded={isOpen}
+                onClick={() => toggle(index)}
+              >
+                {faq.question}
+                <motion.div
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="shrink-0"
+                >
+                  <FiChevronDown size={20} />
+                </motion.div>
+              </button>
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: 'auto' }}
+                    exit={{ height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <p className="mt-3 text-[16px] font-medium leading-[1.5] text-[#4d4d4d]">
+                      {faq.answer}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

@@ -1,6 +1,8 @@
 import CountDownTimer from './CountDownTimer';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
 import MatchingStatusFallback from '@/components/instating/MatchingStatusFallback';
+import { fadeUpVariant } from '@/constants/animation';
+import { motion } from 'framer-motion';
 
 const CountDownSection = () => {
   const { data, isError, refetch } = useMatchingStatus();
@@ -31,7 +33,7 @@ const CountDownSection = () => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6 bg-white px-5 pb-16 pt-8">
+    <motion.div className="flex w-full flex-col gap-6 bg-white px-5 pb-16 pt-8" {...fadeUpVariant}>
       <div className="flex flex-col gap-1.5">
         <p className="font-wanted-sans text-[16px] font-bold leading-[1.4] tracking-[-0.32px] text-ink">
           Count Down
@@ -42,7 +44,7 @@ const CountDownSection = () => {
       </div>
 
       <CountDownTimer deadline={deadline} />
-    </div>
+    </motion.div>
   );
 };
 

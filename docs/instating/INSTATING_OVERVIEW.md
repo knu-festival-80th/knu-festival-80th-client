@@ -62,9 +62,11 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 인스타 ID는 `^[a-zA-Z0-9_.]{1,30}$` 패턴으로 형식을 검증한다. 연락처는 `^01[0-9]{8,9}$` 패턴으로 검증한다. 결과 조회 폼도 동일한 규칙을 적용한다.
 
-제출 성공 시 `InstatingSuccessModal`을 띄운다. 이 모달에는 입력한 정보 요약과 함께 결과 공개까지 남은 카운트다운이 표시된다.
+제출 성공 시 `InstatingApplySuccessModal`을 띄운다. 이 모달에는 입력한 정보 요약과 함께 결과 공개까지 남은 카운트다운이 표시된다.
 
 `registrationOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `CountdownText` 컴포넌트로 신청 시작까지 남은 시간을 표시한다. 목표 시간은 `useMatchingStatus`의 `registrationOpenAt` 필드를 사용한다.
+
+`useQueryInvalidateAtDeadline(registrationOpenAt, isRegistrationOpen, queryKey)`을 호출해 deadline 도달 시점에 즉시 `matchings/status` 캐시를 무효화한다. 30초 폴링만 의존하면 deadline 이후 최대 30초간 버튼이 타이머 상태로 남는 문제를 방지한다.
 
 에러 처리:
 
@@ -80,7 +82,11 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 `resultOpen: false`이면 `fieldset disabled`로 모든 입력 필드를 비활성화하고, 버튼에 `useCountdown`으로 결과 공개까지 남은 시간을 표시한다. API 성공 응답 이후에도 `resultOpen: false`이면 "아직 결과 공개 전입니다." 인라인 메시지를 표시한다.
 
+신청 폼과 동일하게 `useQueryInvalidateAtDeadline(resultOpenAt, isResultOpen, queryKey)`을 사용해 deadline 도달 즉시 캐시를 무효화한다.
+
 제출 버튼 활성 여부는 `formState.isValid`를 사용한다. `useWatch`로 필드 값을 직접 구독하면 키 입력마다 전체 컴포넌트가 리렌더되므로, 유효성이 실제로 변할 때만 리렌더를 유발하는 `formState.isValid`로 대체했다. 필드별 유효성 검사 실패 메시지는 `formState.errors`로 표시한다.
+
+**페이지 진입 모션**: 두 폼 뷰 모두 헤더 → fieldset → 버튼 순서로 `fadeUpVariant`를 staggered 적용한다(0s → 0.1s → 0.15s 딜레이). 신청 폼은 하단 notice까지 0.2s 딜레이로 추가된다. 인트로 뷰 섹션들과 동일한 패턴이다.
 
 에러 처리:
 
@@ -94,7 +100,7 @@ tick 로직은 `useTimeLeft` 훅 하나로 관리한다. 1초마다 카운터를
 
 결과 모달은 `createPortal`로 `document.body`에 마운트된다. Framer Motion으로 오른쪽에서 슬라이드 인 애니메이션 처리된다.
 
-매칭 실패인 경우 `FailureCard`를 바로 표시한다. 매칭 성공인 경우 스크래치 카드를 먼저 보여주고, 긁으면 `ResultCard`로 전환된다.
+매칭 실패인 경우 `MatchFailureCard`를 바로 표시한다. 매칭 성공인 경우 스크래치 카드를 먼저 보여주고, 긁으면 `MatchSuccessCard`로 전환된다.
 
 모달 내부 단계(Phase):
 
@@ -124,7 +130,48 @@ REVEAL_THRESHOLD = 0.55; // 55% 이상 긁으면 자동 공개
 
 DPR(Device Pixel Ratio)을 반영해 레티나 디스플레이에서도 선명하게 렌더링된다. `ResizeObserver`로 캔버스 크기 변화를 감지해 재초기화한다.
 
-**결과 카드 (`ResultCard`)**
+**블러 하트 렌더링**
+
+오버레이 캔버스에 반투명 핑크 블러 하트를 그린다. `fillText('♥')` 대신 파라메트릭 공식(`x = 16sin³t`, `y = 13cost − 5cos2t − 2cos3t − cos4t`)으로 closed path를 직접 작성한다. 폰트 렌더링 차이 없이 브라우저·OS 무관하게 동일한 형태가 보장된다.
+
+블러는 `ctx.filter`(Safari < 18 미지원) 대신 `shadowBlur`로 통일해 크로스 브라우저 일관성을 확보했다. `shadowBlur` 단독으로는 블러 강도가 약하므로 `fill()`을 3회 반복해 보강한다.
+
+하단 첨점은 `quadraticCurveTo`로 대체해 둥글게 처리했다. `t = π ± 0.2π` 구간만 베지어로 교체하고 나머지는 원래 공식을 유지해 하트 전체 형태를 보존한다. y축은 `scaleY = scale * 1.2`를 적용해 세로를 20% 늘렸다.
+
+**스크래치 UX 인터랙션**
+
+긁는 동안 카드가 살짝 흔들리는 wobble 애니메이션을 Framer Motion `useAnimate`로 구현했다.
+
+- `onPointerDown`: `rotate: [-0.8, 0.8]` 무한 반복 wobble 시작 (duration 0.12s)
+- `onPointerUp`: wobble 중지, `rotate: 0`으로 복귀
+
+긁는 동안 커서 위치에서 하트 파티클이 튀어오른다. `useHeartParticles` 훅이 별도 캔버스에 파티클을 렌더링한다. `onPointerMove`에서 40ms 스로틀로 `emit(x, y)`를 호출해 프레임당 최대 3개의 하트를 생성한다. 파티클 캔버스는 `ScratchCard` 내부의 overlay canvas 위에 `pointer-events-none`으로 배치된다.
+
+RAF 루프는 파티클이 있을 때만 실행된다(`isRunningRef`로 상태 추적). `emit`·`burst` 호출 시 루프를 시작하고, 모든 파티클의 life가 0이 되면 루프를 멈춘다.
+
+|                           | 기존                                           | 개선 후                                       |
+| ------------------------- | ---------------------------------------------- | --------------------------------------------- |
+| RAF 실행 시점             | 훅 마운트 시 즉시 시작, 언마운트까지 상시 실행 | `emit` 호출 시 시작, 파티클 소진 시 자동 중단 |
+| 유휴 상태(긁기 전·후) CPU | 매 프레임 `filter` + `clearRect` 실행          | RAF 자체가 멈춰 있어 비용 없음                |
+| 파티클 없을 때 캔버스     | 매 프레임 `clearRect` 호출                     | 루프 종료 직전 1회만 `clearRect` 후 정지      |
+
+클립보드 복사 버튼의 `setTimeout` ID를 `useRef`로 보관해 모달 unmount 시 `clearTimeout`으로 정리한다.
+
+|              | 기존                                                                                         | 개선 후                                               |
+| ------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| unmount 시   | 타이머가 남아 unmount된 컴포넌트에 `setState` 호출                                           | cleanup effect에서 `clearTimeout`으로 타이머 취소     |
+| 연속 복사 시 | 이전 타이머와 새 타이머가 동시에 존재해 `copied` 상태가 예기치 않게 `false`로 전환될 수 있음 | 새 타이머 등록 전 이전 타이머를 취소해 상태 충돌 방지 |
+
+스크래치 임계값 도달(공개) 시 `MatchSuccessCard`가 `opacity: 0 → 1`, `scale: 0.88 → 1`, `y: 16 → 0` 스프링 애니메이션으로 등장한다.
+
+**결과 카드 캐릭터 모션 (`MatchSuccessCard`, `MatchFailureCard`)**
+
+두 카드 모두 호반우 이미지에 Framer Motion 루프 애니메이션을 적용해 생동감을 준다.
+
+- `MatchSuccessCard`: `rotate: [-5, 7]` 무한 반복 (duration 0.45s, mirror) — 좌우 앙탈 느낌
+- `MatchFailureCard`: `rotate: [-4, 4]` 무한 반복 (duration 0.45s, mirror) — 좌우 흔들림
+
+**결과 카드 (`MatchSuccessCard`)**
 
 매칭 상대의 인스타그램 ID 표시, 클립보드 복사, 인스타그램 프로필 딥링크(`https://www.instagram.com/:id`)를 제공한다.
 
@@ -228,11 +275,11 @@ InstatingPage
 
 기존 `<label>`이 `htmlFor` 없이 단독 사용되어 스크린리더가 입력 필드와 레이블을 연결하지 못했다. 인스타 ID와 연락처 입력 필드에 `id`를 부여하고, 레이블에 `htmlFor`를 추가해 연결했다.
 
-### 모달 시맨틱 (`AlertModal`, `InstatingSuccessModal`, `InstatingResultModal`)
+### 모달 시맨틱 (`AlertModal`, `InstatingApplySuccessModal`, `InstatingResultModal`)
 
-세 모달 모두 `role="dialog"`, `aria-modal="true"`, `aria-labelledby`를 추가했다. `aria-labelledby`는 각 모달의 제목 요소(`h1`/`h2`) `id`를 참조한다. `InstatingSuccessModal`의 닫기 버튼(아이콘만)에도 `aria-label="닫기"`, 아이콘에 `aria-hidden="true"`를 추가했다.
+세 모달 모두 `role="dialog"`, `aria-modal="true"`, `aria-labelledby`를 추가했다. `aria-labelledby`는 각 모달의 제목 요소(`h1`/`h2`) `id`를 참조한다. `InstatingApplySuccessModal`의 닫기 버튼(아이콘만)에도 `aria-label="닫기"`, 아이콘에 `aria-hidden="true"`를 추가했다.
 
-### 장식 이미지 alt 처리 (`ResultCard`, `FailureCard`)
+### 장식 이미지 alt 처리 (`MatchSuccessCard`, `MatchFailureCard`)
 
 카드 내 호반우 이미지는 카드 텍스트가 결과를 충분히 설명하므로 장식 이미지로 처리(`alt=""`)했다.
 
@@ -255,12 +302,16 @@ SVG 일러스트는 `width: 800px`(2x 모바일), Hobanwoo는 `width: 400px`(2x 
 ```
 src/
 ├── apis/modules/matching.ts
-├── hooks/instating/
-│   ├── useMatchingStatus.ts
-│   ├── useCountdown.ts          ← useTimeLeft, useCountdown, getTimeLeft
-│   └── useInstatingScratchCanvas.ts
+├── hooks/
+│   ├── useBodyScrollLock.ts     ← 모달 마운트 시 body 스크롤 잠금 (언마운트 시 복원)
+│   └── instating/
+│       ├── useMatchingStatus.ts
+│       ├── useCountdown.ts                  ← useTimeLeft, useCountdown, getTimeLeft
+│       ├── useInstatingScratchCanvas.ts
+│       ├── useHeartParticles.ts             ← 스크래치 시 하트 파티클 캔버스 애니메이션
+│       └── useQueryInvalidateAtDeadline.ts  ← deadline 도달 시 즉시 queryKey 무효화
 ├── pages/
-│   ├── InstatingPage.tsx        ← ErrorBoundary로 Outlet 감쌈
+│   ├── InstatingPage.tsx        ← ErrorBoundary로 Outlet 감쌈, bg-white 적용
 │   └── console/
 │       ├── MatchingOverviewPage.tsx
 │       └── MatchingParticipantsPage.tsx
@@ -272,7 +323,7 @@ src/
 │   ├── ErrorBoundary.tsx         ← 렌더링 에러 캐치, fallback prop 지원
 │   └── ErrorFallback.tsx         ← 네트워크/서비스 에러 기본 fallback UI
 └── components/instating/
-    ├── AlertModal.tsx            ← 공통 에러 모달
+    ├── AlertModal.tsx            ← 공통 에러 모달 (useBodyScrollLock 적용)
     ├── CountdownText.tsx         ← 폼 버튼 카운트다운 텍스트 (리렌더 격리)
     ├── InstatingErrorFallback.tsx ← ErrorBoundary fallback (탭 하단 영역 전체)
     ├── MatchingStatusFallback.tsx ← useMatchingStatus isError 시 섹션 fallback
@@ -283,10 +334,10 @@ src/
     │   ├── CountDownTimer.tsx
     │   └── InstatingContent.tsx  ← OutlineButton, ProcessCard를 공통 컴포넌트에서 import
     ├── result/
-    │   ├── FailureCard.tsx
-    │   ├── InstatingResultModal.tsx
-    │   ├── InstatingSuccessModal.tsx
-    │   ├── ResultCard.tsx
+    │   ├── InstatingApplySuccessModal.tsx ← 신청 완료 모달 (useBodyScrollLock 적용)
+    │   ├── InstatingResultModal.tsx       ← 결과 조회 모달 (useBodyScrollLock 적용)
+    │   ├── MatchFailureCard.tsx           ← 매칭 실패 카드
+    │   ├── MatchSuccessCard.tsx           ← 매칭 성공 카드 (인스타 ID + 프로필 링크)
     │   └── ScratchCard.tsx
     └── views/
         ├── InstatingApplyView.tsx

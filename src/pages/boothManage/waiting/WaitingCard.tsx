@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Bell, Check, GripVertical, MessageSquare } from 'lucide-react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { WaitingItem } from '@/apis';
 import { OverflowMenu } from '@/components/admin/ui';
@@ -24,16 +24,41 @@ const STATUS_ACCENT_VAR: Record<string, string> = {
   CANCELLED: '--admin-accent-cancelled',
 };
 
-function elapsedLabel(createdAt: string, calledAt: string | null, status: string): string | null {
-  const now = Date.now();
+const CALL_TIMEOUT_MS = 10 * 60 * 1000;
+
+function useElapsedTimer(
+  createdAt: string,
+  calledAt: string | null,
+  status: string,
+): { text: string; isOverdue: boolean } | null {
+  const [now, setNow] = useState(Date.now);
+
+  useEffect(() => {
+    if (status === 'CALLED' && calledAt) {
+      const id = setInterval(() => setNow(Date.now()), 1000);
+      return () => clearInterval(id);
+    }
+    if (status === 'WAITING') {
+      const id = setInterval(() => setNow(Date.now()), 30_000);
+      return () => clearInterval(id);
+    }
+  }, [status, calledAt]);
+
   if (status === 'CALLED' && calledAt) {
-    const diff = Math.max(0, Math.floor((now - new Date(calledAt).getTime()) / 60000));
-    return `호출 ${diff}분 전`;
+    const remaining = CALL_TIMEOUT_MS - (now - new Date(calledAt).getTime());
+    if (remaining <= 0) {
+      return { text: '시간 초과', isOverdue: true };
+    }
+    const mins = Math.floor(remaining / 60_000);
+    const secs = Math.floor((remaining % 60_000) / 1000);
+    return { text: `${mins}:${secs.toString().padStart(2, '0')}`, isOverdue: false };
   }
+
   if (status === 'WAITING') {
-    const diff = Math.max(0, Math.floor((now - new Date(createdAt).getTime()) / 60000));
-    return `${diff}분 대기`;
+    const diff = Math.max(0, Math.floor((now - new Date(createdAt).getTime()) / 60_000));
+    return { text: `${diff}분 대기`, isOverdue: false };
   }
+
   return null;
 }
 
@@ -64,10 +89,7 @@ export default function WaitingCard({
   const accentVar = STATUS_ACCENT_VAR[waiting.status] ?? '--admin-text-muted';
   const accent = `var(${accentVar})`;
 
-  const elapsed = useMemo(
-    () => elapsedLabel(waiting.createdAt, waiting.calledAt, waiting.status),
-    [waiting.createdAt, waiting.calledAt, waiting.status],
-  );
+  const timer = useElapsedTimer(waiting.createdAt, waiting.calledAt, waiting.status);
 
   const isWaiting = waiting.status === 'WAITING';
   const isCalled = waiting.status === 'CALLED';
@@ -168,10 +190,17 @@ export default function WaitingCard({
               SMS
             </span>
           )}
-          {elapsed && (
+          {timer && (
             <>
               <span>·</span>
-              <span>{elapsed}</span>
+              <span
+                className={timer.isOverdue ? 'font-semibold' : undefined}
+                style={
+                  timer.isOverdue ? { color: 'var(--admin-accent-cancelled, #ef4444)' } : undefined
+                }
+              >
+                {timer.text}
+              </span>
             </>
           )}
           {isEntered && waiting.enteredAt && (
