@@ -402,8 +402,9 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   };
 
   return (
-    <RollingPaperPageTransition className="bg-white">
+    <>
       <RollingPaperTabs active="board" />
+      <RollingPaperPageTransition className="bg-white">
       <RollingPaperCategoryTabs
         activeCategory={category}
         categories={boardCategories}
@@ -552,5 +553,6 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
         />
       )}
     </RollingPaperPageTransition>
+    </>
   );
 }
