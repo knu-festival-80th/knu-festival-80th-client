@@ -66,7 +66,12 @@ export default function HomePage() {
         >
           <GlassCircleButton
             icon={<ArrowDown className="size-6 text-ink" />}
-            onClick={() => countdownRef.current?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              const el = countdownRef.current;
+              if (!el) return;
+              const y = el.getBoundingClientRect().top + window.scrollY - window.innerHeight + 630;
+              window.scrollTo({ top: y, behavior: 'smooth' });
+            }}
           />
         </motion.div>
       </section>

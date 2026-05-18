@@ -12,7 +12,7 @@ export default function TimeTableScheduleItem({ entry, day }: TimeTableScheduleI
   return (
     <div
       className={`flex items-start gap-6 px-6 py-5 ${
-        active ? 'bg-sub-red text-surface' : 'text-gray'
+        active ? 'bg-sub-red text-surface' : 'text-gray-70'
       }`}
     >
       <span className="text-body1 font-bold w-[120px] shrink-0 whitespace-nowrap">
