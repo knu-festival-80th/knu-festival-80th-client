@@ -331,6 +331,7 @@ export default function BulkMapEditorPage() {
     if (b.color) return b.color;
     if (b.type === 'BOOTH') return '#15ccb1';
     if (b.type === 'STAGE') return '#8B5CF6';
+    if (b.type === 'STAMP') return '#FFDBF5';
     return '#ff3d3d';
   };
 

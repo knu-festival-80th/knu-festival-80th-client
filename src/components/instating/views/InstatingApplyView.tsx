@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { motion } from 'framer-motion';
 import { ApiClientError, matchingApi } from '@/apis';
 import { useMatchingStatus } from '@/hooks/instating/useMatchingStatus';
-import type { SubmittedData } from '../result/InstatingSuccessModal';
-import InstatingSuccessModal from '../result/InstatingSuccessModal';
+import type { SubmittedData } from '../result/InstatingApplySuccessModal';
+import InstatingApplySuccessModal from '../result/InstatingApplySuccessModal';
 import AlertModal from '@/components/instating/AlertModal';
 import CountdownText from '@/components/instating/CountdownText';
+import { useQueryInvalidateAtDeadline } from '@/hooks/instating/useQueryInvalidateAtDeadline';
+import { fadeUpVariant } from '@/constants/animation';
 
 type FormValues = {
   gender: 'male' | 'female';
@@ -24,6 +27,8 @@ const InstatingApplyView = () => {
   const registrationOpenAt = status?.registrationOpenAt
     ? new Date(status.registrationOpenAt)
     : null;
+
+  useQueryInvalidateAtDeadline(registrationOpenAt, isRegistrationOpen, ['matchings', 'status']);
 
   const {
     register,
@@ -65,7 +70,7 @@ const InstatingApplyView = () => {
   return (
     <>
       {submittedData && (
-        <InstatingSuccessModal data={submittedData} onClose={() => setSubmittedData(null)} />
+        <InstatingApplySuccessModal data={submittedData} onClose={() => setSubmittedData(null)} />
       )}
       {errorModal && (
         <AlertModal
@@ -79,18 +84,20 @@ const InstatingApplyView = () => {
         className="flex flex-col gap-7 bg-white px-5 py-6 min-h-[calc(100dvh-6.75rem)]"
       >
         {/* Header */}
-        <div className="flex flex-col gap-2.5">
+        <motion.div className="flex flex-col gap-2.5" {...fadeUpVariant}>
           <h1 className="font-wanted-sans text-heading2 font-bold tracking-tight text-ink">
             인스타팅 신청하기
           </h1>
           <p className="font-wanted-sans text-body1 tracking-tight text-gray">
             기본 정보를 입력해주세요.
           </p>
-        </div>
+        </motion.div>
 
-        <fieldset
+        <motion.fieldset
           disabled={!isRegistrationOpen}
           className="m-0 flex flex-col gap-6 border-0 p-0 disabled:opacity-40"
+          {...fadeUpVariant}
+          transition={{ ...fadeUpVariant.transition, delay: 0.1 }}
         >
           {/* Gender */}
           <div className="flex flex-col gap-2">
@@ -213,7 +220,7 @@ const InstatingApplyView = () => {
               만 19세 이상 성인임을 확인합니다.
             </span>
           </label>
-        </fieldset>
+        </motion.fieldset>
 
         {submitError && (
           <p className="font-wanted-sans text-body2 text-sub-red" role="alert">
@@ -222,7 +229,7 @@ const InstatingApplyView = () => {
         )}
 
         {/* Submit */}
-        <button
+        <motion.button
           type="submit"
           disabled={!isRegistrationOpen || !isValid || isSubmitting}
           className={`h-[50px] w-full rounded-md font-wanted-sans text-body1 font-medium tracking-tight text-surface ${
@@ -232,6 +239,8 @@ const InstatingApplyView = () => {
                 ? 'bg-sub-red'
                 : 'bg-[#CCCCCC]'
           }`}
+          {...fadeUpVariant}
+          transition={{ ...fadeUpVariant.transition, delay: 0.15 }}
         >
           {!isRegistrationOpen ? (
             <CountdownText deadline={registrationOpenAt} />
@@ -240,17 +249,21 @@ const InstatingApplyView = () => {
           ) : (
             '인스타팅 신청하기'
           )}
-        </button>
+        </motion.button>
 
         {/* Notice */}
-        <div className="rounded-md bg-[#f9f9f9] p-4">
+        <motion.div
+          className="rounded-md bg-[#f9f9f9] p-4"
+          {...fadeUpVariant}
+          transition={{ ...fadeUpVariant.transition, delay: 0.2 }}
+        >
           <p className="font-wanted-sans text-body2 font-medium leading-[1.5] tracking-tight text-gray">
             *신청 후 취소는 불가능하오니 신중하게 결정해 주세요.
             <br />
             *본 서비스는 만 19세 이상의 성인(대학생)을 대상으로 합니다. 미성년자의 참여를 엄격히
             금지하며, 허위 정보 입력으로 발생한 문제의 책임은 본인에게 있습니다.
           </p>
-        </div>
+        </motion.div>
       </form>
     </>
   );

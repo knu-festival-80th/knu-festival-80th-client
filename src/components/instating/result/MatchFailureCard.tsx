@@ -1,6 +1,7 @@
+import { motion } from 'framer-motion';
 import sadHobanwoo from '@/assets/instating/Hobanwoo/sadHobanwoo.webp';
 
-const FailureCard = () => (
+const MatchFailureCard = () => (
   <div
     className="relative w-[325px] shrink-0 overflow-hidden rounded-[12px] bg-white"
     style={{
@@ -13,7 +14,13 @@ const FailureCard = () => (
       className="absolute overflow-hidden"
       style={{ left: 63, top: 73, width: 202, height: 210 }}
     >
-      <img src={sadHobanwoo} alt="" className="h-full w-full object-contain" />
+      <motion.img
+        src={sadHobanwoo}
+        alt=""
+        className="h-full w-full object-contain"
+        animate={{ rotate: [-4, 4] }}
+        transition={{ repeat: Infinity, repeatType: 'mirror', duration: 0.45, ease: 'easeInOut' }}
+      />
     </div>
 
     <p
@@ -27,4 +34,4 @@ const FailureCard = () => (
   </div>
 );
 
-export default FailureCard;
+export default MatchFailureCard;
