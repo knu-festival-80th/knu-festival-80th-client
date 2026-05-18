@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FiArrowRight, FiChevronDown } from 'react-icons/fi';
-import { motion } from 'framer-motion';
 
 import { fadeUpVariant } from '@/constants/animation';
 
