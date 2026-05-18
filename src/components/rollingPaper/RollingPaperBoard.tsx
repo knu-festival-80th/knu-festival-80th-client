@@ -1,10 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ChevronDown, Plus } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { ApiClientError, rollingPaperApi } from '@/apis';
-import type { CanvasPostitResponse } from '@/apis/modules/rollingPaper';
 import {
   getRollingPaperBoardPath,
   getRollingPaperCategory,
@@ -14,15 +13,12 @@ import {
   ROLLING_PAPER_CATEGORIES,
   ROLLING_PAPER_CHANNELS_PER_CATEGORY,
 } from '@/constants/rollingPaper';
-import { getRollingPaperPerformanceNotesFromSearch } from '@/mocks/rollingPaperPerformance';
 import {
   ROLLING_PAPER_MAX_NOTES_PER_BOARD,
   ROLLING_PAPER_CLIENT_COLLISION_SCALE,
-  ROLLING_PAPER_ZOOM,
   getPlacedNotesForBoard,
   isRollingPaperPlacementAvailable,
   type PlacedRollingPaperNote,
-  type RollingPaperPan,
 } from '@/lib/rollingPaperLayout';
 import {
   toCanvasColorId,
@@ -33,71 +29,43 @@ import {
 } from './rollingPaperApiAdapter';
 import RollingPaperBoardCanvas from './RollingPaperBoardCanvas';
 import RollingPaperBoardChangeDialog from './RollingPaperBoardChangeDialog';
+import RollingPaperBoardSummary from './RollingPaperBoardSummary';
 import RollingPaperCategoryChangeDialog from './RollingPaperCategoryChangeDialog';
 import RollingPaperCategoryTabs from './RollingPaperCategoryTabs';
 import RollingPaperPageTransition from './RollingPaperPageTransition';
 import RollingPaperTabs from './RollingPaperTabs';
 import RollingPaperWriteModal from './RollingPaperWriteModal';
 import RollingPaperZoomControls from './RollingPaperZoomControls';
+import {
+  CONFLICT_PLACEHOLDER_LOCAL_VISIBLE_MS,
+  PENDING_POSTIT_LOCAL_VISIBLE_MS,
+  PENDING_POSTIT_REFETCH_INTERVAL_MS,
+  POSTIT_PLACEMENT_UNAVAILABLE_MESSAGE,
+  POSTIT_POSITION_CONFLICT_CODE,
+  POSTIT_POSITION_CONFLICT_MESSAGE,
+  POSTIT_POSITION_CONFLICT_PLACEHOLDER_MESSAGE,
+} from './rollingPaperBoardConstants';
+import {
+  getInitialRollingPaperPlacedNotes,
+  isExpiredLocalRollingPaperNote,
+  isRollingPaperNoteInChannel,
+  isSameRollingPaperConflictPlaceholder,
+} from './rollingPaperBoardUtils';
 import { rollingPaperItemMotion } from './rollingPaperMotion';
-
-const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
-const PENDING_POSTIT_REFETCH_INTERVAL_MS = 5000;
-const PENDING_POSTIT_LOCAL_VISIBLE_MS = 60000;
-const CONFLICT_PLACEHOLDER_LOCAL_VISIBLE_MS = 60000;
-const PLACEMENT_SYNC_DEBOUNCE_MS = 400;
-const PLACEMENT_SYNC_STALE_MS = 3000;
-const FOCUS_RESET_ANIMATION_MS = 320;
-const POSTIT_POSITION_CONFLICT_CODE = 'CP008';
-const POSTIT_POSITION_CONFLICT_MESSAGE =
-  '이미 다른 사용자가 같은 위치에 메시지를 붙였어요. 다른 위치에 다시 시도해주세요.';
-const POSTIT_POSITION_CONFLICT_PLACEHOLDER_MESSAGE = '이미 사용 중인 위치예요.';
-const POSTIT_PLACEMENT_UNAVAILABLE_MESSAGE = '이미 붙은 포스트잇과 겹쳐요. 빈 위치로 옮겨주세요.';
+import { useRollingPaperPlacementSync } from './useRollingPaperPlacementSync';
+import { useRollingPaperViewportState } from './useRollingPaperViewportState';
 
 type RollingPaperBoardProps = {
   categoryId?: string;
   channelId?: string;
 };
 
-function getInitialPlacedNotes() {
-  if (!import.meta.env.DEV || typeof window === 'undefined') {
-    return [];
-  }
-
-  return getRollingPaperPerformanceNotesFromSearch(window.location.search);
-}
-
-function isNoteInChannel(note: PlacedRollingPaperNote, categoryId: string, channelId: string) {
-  if (!note.categoryId || !note.channelId) {
-    return true;
-  }
-
-  return note.categoryId === categoryId && note.channelId === channelId;
-}
-
-function isExpiredLocalNote(note: PlacedRollingPaperNote, now = Date.now()) {
-  return Boolean(note.pendingVisibleUntil && note.pendingVisibleUntil <= now);
-}
-
-function isSameConflictPlaceholder(note: PlacedRollingPaperNote, nextNote: PlacedRollingPaperNote) {
-  return (
-    note.isConflictPlaceholder &&
-    note.boardId === nextNote.boardId &&
-    note.boardVariant === nextNote.boardVariant &&
-    Math.abs(note.x - nextNote.x) < 0.01 &&
-    Math.abs(note.y - nextNote.y) < 0.01
-  );
-}
-
 export default function RollingPaperBoard({ categoryId, channelId }: RollingPaperBoardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const questionId = Number(categoryId);
   const isApiRoute = Number.isFinite(questionId);
-  const mockNotes = useMemo(() => getInitialPlacedNotes(), []);
-  const focusResetTimeoutRef = useRef<number | null>(null);
-  const placementSyncTimeoutRef = useRef<number | null>(null);
-  const lastPlacementSyncAtRef = useRef(0);
+  const mockNotes = useMemo(() => getInitialRollingPaperPlacedNotes(), []);
   const questionsQuery = useQuery({
     queryKey: ['rollingPaper', 'questions'],
     queryFn: rollingPaperApi.listQuestions,
@@ -164,10 +132,16 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   const [isBoardChangeDialogOpen, setIsBoardChangeDialogOpen] = useState(false);
   const [isCategoryChangeDialogOpen, setIsCategoryChangeDialogOpen] = useState(false);
   const [pendingPlacedNotes, setPendingPlacedNotes] = useState<PlacedRollingPaperNote[]>([]);
-  const [boardScale, setBoardScale] = useState<number>(ROLLING_PAPER_ZOOM.default);
-  const [boardPan, setBoardPan] = useState<RollingPaperPan>(INITIAL_BOARD_PAN);
-  const [focusedNoteId, setFocusedNoteId] = useState<string | null>(null);
   const [placementErrorMessage, setPlacementErrorMessage] = useState<string | null>(null);
+  const {
+    boardPan,
+    boardScale,
+    focusedNoteId,
+    handleFocusedNoteChange,
+    resetBoardViewport,
+    setBoardPan,
+    setBoardScale,
+  } = useRollingPaperViewportState();
   const postitsQuery = useQuery({
     queryKey: ['rollingPaper', 'postits', boardId],
     queryFn: () => rollingPaperApi.listPostits(boardId!),
@@ -216,7 +190,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
           return false;
         }
 
-        if (isExpiredLocalNote(note)) {
+        if (isExpiredLocalRollingPaperNote(note)) {
           return false;
         }
 
@@ -244,7 +218,7 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
     [category.id, channel.id],
   );
   const scopedPlacedNotes = useMemo(
-    () => placedNotes.filter((note) => isNoteInChannel(note, category.id, channel.id)),
+    () => placedNotes.filter((note) => isRollingPaperNoteInChannel(note, category.id, channel.id)),
     [category.id, channel.id, placedNotes],
   );
   const currentBoardNotes = useMemo(
@@ -254,118 +228,17 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   const boardCapacity = channel.capacity ?? ROLLING_PAPER_MAX_NOTES_PER_BOARD;
   const currentBoardNoteCount = Math.min(currentBoardNotes.length, boardCapacity);
   const isCurrentBoardFull = currentBoardNotes.length >= boardCapacity;
+  const canWritePostit = !isCurrentBoardFull && Boolean(boardId);
   const boardCategories = apiCategories.length > 0 ? apiCategories : [category];
   const boardNumberLabel = `BOR ${String(channelIndex + 1).padStart(2, '0')}`;
-
-  const clearFocusResetTimeout = useCallback(() => {
-    if (focusResetTimeoutRef.current === null) {
-      return;
-    }
-
-    window.clearTimeout(focusResetTimeoutRef.current);
-    focusResetTimeoutRef.current = null;
-  }, []);
-
-  const clearPlacementSyncTimeout = useCallback(() => {
-    if (placementSyncTimeoutRef.current === null) {
-      return;
-    }
-
-    window.clearTimeout(placementSyncTimeoutRef.current);
-    placementSyncTimeoutRef.current = null;
-  }, []);
-
-  useEffect(() => clearFocusResetTimeout, [clearFocusResetTimeout]);
-  useEffect(() => clearPlacementSyncTimeout, [clearPlacementSyncTimeout]);
-
-  const syncBoardPostits = useCallback(async () => {
-    if (!boardId || mockNotes.length > 0) {
-      return [];
-    }
-
-    const latestPostits = await queryClient.fetchQuery({
-      queryKey: ['rollingPaper', 'postits', boardId],
-      queryFn: () => rollingPaperApi.listPostits(boardId),
-      staleTime: 0,
-    });
-
-    lastPlacementSyncAtRef.current = Date.now();
-    return latestPostits;
-  }, [boardId, mockNotes.length, queryClient]);
-
-  const requestPlacementSync = useCallback(
-    (options: { immediate?: boolean } = {}) => {
-      if (!boardId || mockNotes.length > 0) return;
-
-      clearPlacementSyncTimeout();
-
-      if (options.immediate) {
-        void syncBoardPostits();
-        return;
-      }
-
-      placementSyncTimeoutRef.current = window.setTimeout(() => {
-        placementSyncTimeoutRef.current = null;
-        void syncBoardPostits();
-      }, PLACEMENT_SYNC_DEBOUNCE_MS);
-    },
-    [boardId, clearPlacementSyncTimeout, mockNotes.length, syncBoardPostits],
-  );
-
-  const getLatestBoardNotesForPlacement = useCallback(async () => {
-    if (!boardId || mockNotes.length > 0) {
-      return currentBoardNotes;
-    }
-
-    const shouldRefresh = Date.now() - lastPlacementSyncAtRef.current > PLACEMENT_SYNC_STALE_MS;
-    if (!shouldRefresh) {
-      return currentBoardNotes;
-    }
-
-    try {
-      const latestPostits: CanvasPostitResponse[] = await syncBoardPostits();
-      const latestApiNotes = latestPostits.map(toPlacedRollingPaperNote);
-      const latestPlacedNotes = [...latestApiNotes, ...visiblePendingNotes];
-
-      return getPlacedNotesForBoard(latestPlacedNotes, boardIndex, boardScope);
-    } catch {
-      return currentBoardNotes;
-    }
-  }, [
+  const { getLatestBoardNotesForPlacement, requestPlacementSync } = useRollingPaperPlacementSync({
     boardId,
+    isEnabled: mockNotes.length === 0,
     boardIndex,
     boardScope,
     currentBoardNotes,
-    mockNotes.length,
-    syncBoardPostits,
     visiblePendingNotes,
-  ]);
-
-  const handleFocusedNoteChange = useCallback(
-    (noteId: string | null) => {
-      clearFocusResetTimeout();
-      setFocusedNoteId(noteId);
-    },
-    [clearFocusResetTimeout],
-  );
-
-  const resetBoardViewport = (options: { animateFocusedNote?: boolean } = {}) => {
-    const animateFocusedNote = options.animateFocusedNote ?? true;
-
-    setBoardScale(ROLLING_PAPER_ZOOM.default);
-    setBoardPan(INITIAL_BOARD_PAN);
-
-    clearFocusResetTimeout();
-    if (!focusedNoteId || !animateFocusedNote) {
-      setFocusedNoteId(null);
-      return;
-    }
-
-    focusResetTimeoutRef.current = window.setTimeout(() => {
-      setFocusedNoteId(null);
-      focusResetTimeoutRef.current = null;
-    }, FOCUS_RESET_ANIMATION_MS);
-  };
+  });
 
   const showPreviousBoard = () => {
     if (categoryChannels.length === 0) return;
@@ -442,8 +315,8 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
         setPendingPlacedNotes((prevNotes) => [
           ...prevNotes.filter(
             (prevNote) =>
-              !isExpiredLocalNote(prevNote) &&
-              !isSameConflictPlaceholder(prevNote, conflictPlaceholder),
+              !isExpiredLocalRollingPaperNote(prevNote) &&
+              !isSameRollingPaperConflictPlaceholder(prevNote, conflictPlaceholder),
           ),
           conflictPlaceholder,
         ]);
@@ -487,157 +360,132 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   };
 
   return (
-    <RollingPaperPageTransition className="bg-white">
+    <>
       <RollingPaperTabs active="board" />
-      <RollingPaperCategoryTabs
-        activeCategory={category}
-        categories={boardCategories}
-        onGridClick={() => setIsCategoryChangeDialogOpen(true)}
-      />
+      <RollingPaperPageTransition className="bg-white">
+        <RollingPaperCategoryTabs
+          activeCategory={category}
+          categories={boardCategories}
+          onGridClick={() => setIsCategoryChangeDialogOpen(true)}
+        />
 
-      <section className="min-h-[713px] bg-white pb-16">
-        <motion.div className="border-b border-border px-5 pt-5 pb-7" {...rollingPaperItemMotion}>
-          <button
-            type="button"
-            className="flex h-[30px] items-center gap-1 rounded border border-border bg-white px-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-black"
-            onClick={() => setIsBoardChangeDialogOpen(true)}
-          >
-            <span className="font-semibold text-sub-red">{boardNumberLabel}</span>
-            <span>보드 변경하기</span>
-            <ChevronDown className="size-3.5" />
-          </button>
-
-          <div className="mt-[18px] flex items-end justify-between gap-5">
-            <div className="min-w-0">
-              {isCurrentBoardFull && (
-                <p className="mb-1.5 font-wanted-sans text-[15px] font-bold leading-none tracking-[-0.02em] text-sub-red">
-                  🎉 이 보드는 추억으로 가득 찼어요!
-                </p>
-              )}
-              <div className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
-                <span className="text-sub-red">{currentBoardNoteCount}</span>/{boardCapacity}
-              </div>
-              <p className="mt-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-gray">
-                메시지
-              </p>
-            </div>
-            <button
-              type="button"
-              className={`flex h-10 shrink-0 items-center gap-1 rounded-full px-5 font-wanted-sans text-sm font-bold leading-none tracking-[-0.02em] text-white shadow-[0_6px_14px_rgba(255,61,61,0.22)] transition ${
-                isCurrentBoardFull || !boardId ? 'hidden' : 'bg-sub-red'
-              }`}
-              disabled={isCurrentBoardFull || !boardId}
-              onClick={() => {
+        <section className="min-h-[713px] bg-white pb-16">
+          <motion.div className="border-b border-border px-5 pt-5 pb-7" {...rollingPaperItemMotion}>
+            <RollingPaperBoardSummary
+              boardNumberLabel={boardNumberLabel}
+              currentBoardNoteCount={currentBoardNoteCount}
+              boardCapacity={boardCapacity}
+              isCurrentBoardFull={isCurrentBoardFull}
+              canWrite={canWritePostit}
+              onBoardChangeClick={() => setIsBoardChangeDialogOpen(true)}
+              onWriteClick={() => {
                 setPlacementErrorMessage(null);
                 setIsWriteModalOpen(true);
               }}
-            >
-              <Plus className="size-4" />
-              <span>메시지 남기기</span>
-            </button>
-          </div>
-        </motion.div>
+            />
+          </motion.div>
 
-        {(questionsQuery.isLoading || boardsQuery.isLoading || postitsQuery.isLoading) && (
-          <p className="mt-4 px-5 font-wanted-sans text-caption text-gray">
-            롤링페이퍼 데이터를 불러오는 중이에요.
-          </p>
-        )}
+          {(questionsQuery.isLoading || boardsQuery.isLoading || postitsQuery.isLoading) && (
+            <p className="mt-4 px-5 font-wanted-sans text-caption text-gray">
+              롤링페이퍼 데이터를 불러오는 중이에요.
+            </p>
+          )}
 
-        {(questionsQuery.isError || boardsQuery.isError || postitsQuery.isError) && (
-          <p className="mt-4 px-5 font-wanted-sans text-caption text-sub-red">
-            롤링페이퍼 데이터를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
-          </p>
-        )}
+          {(questionsQuery.isError || boardsQuery.isError || postitsQuery.isError) && (
+            <p className="mt-4 px-5 font-wanted-sans text-caption text-sub-red">
+              롤링페이퍼 데이터를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
+            </p>
+          )}
 
-        <motion.div className="relative mt-6" {...rollingPaperItemMotion}>
-          <RollingPaperBoardCanvas
-            variant={boardIndex}
-            frameVariant={categoryFrameVariant}
+          <motion.div className="relative mt-6" {...rollingPaperItemMotion}>
+            <RollingPaperBoardCanvas
+              variant={boardIndex}
+              frameVariant={categoryFrameVariant}
+              scale={boardScale}
+              pan={boardPan}
+              placedNotes={scopedPlacedNotes}
+              focusedNoteId={focusedNoteId}
+              onPanChange={setBoardPan}
+              onScaleChange={setBoardScale}
+              onFocusedNoteChange={handleFocusedNoteChange}
+            />
+
+            <div className="pointer-events-none absolute inset-x-0 top-[30px] z-40 flex justify-between px-4">
+              <button
+                type="button"
+                aria-label="이전 롤링페이퍼 보드"
+                className="pointer-events-auto flex size-12 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-ink backdrop-blur-[2px]"
+                onClick={showPreviousBoard}
+              >
+                <ArrowLeft className="size-6" />
+              </button>
+              <button
+                type="button"
+                aria-label="다음 롤링페이퍼 보드"
+                className="pointer-events-auto flex size-12 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-ink backdrop-blur-[2px]"
+                onClick={showNextBoard}
+              >
+                <ArrowRight className="size-6" />
+              </button>
+            </div>
+          </motion.div>
+
+          <RollingPaperZoomControls
             scale={boardScale}
             pan={boardPan}
-            placedNotes={scopedPlacedNotes}
-            focusedNoteId={focusedNoteId}
-            onPanChange={setBoardPan}
             onScaleChange={setBoardScale}
-            onFocusedNoteChange={handleFocusedNoteChange}
+            onPanChange={setBoardPan}
+            onResetView={resetBoardViewport}
           />
+        </section>
 
-          <div className="pointer-events-none absolute inset-x-0 top-[30px] z-40 flex justify-between px-4">
-            <button
-              type="button"
-              aria-label="이전 롤링페이퍼 보드"
-              className="pointer-events-auto flex size-12 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-ink backdrop-blur-[2px]"
-              onClick={showPreviousBoard}
-            >
-              <ArrowLeft className="size-6" />
-            </button>
-            <button
-              type="button"
-              aria-label="다음 롤링페이퍼 보드"
-              className="pointer-events-auto flex size-12 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-ink backdrop-blur-[2px]"
-              onClick={showNextBoard}
-            >
-              <ArrowRight className="size-6" />
-            </button>
-          </div>
-        </motion.div>
+        {isWriteModalOpen && (
+          <RollingPaperWriteModal
+            isOpen={isWriteModalOpen}
+            boardVariant={boardIndex}
+            frameVariant={categoryFrameVariant}
+            placedNotes={scopedPlacedNotes}
+            isSubmitting={createPostitMutation.isPending}
+            isPlacementSyncing={postitsQuery.isFetching}
+            placementErrorMessage={placementErrorMessage}
+            onClose={() => {
+              setPlacementErrorMessage(null);
+              setIsWriteModalOpen(false);
+            }}
+            onPlacementErrorClear={() => setPlacementErrorMessage(null)}
+            onPlacementSyncRequest={requestPlacementSync}
+            onPlace={handlePlaceNote}
+          />
+        )}
 
-        <RollingPaperZoomControls
-          scale={boardScale}
-          pan={boardPan}
-          onScaleChange={setBoardScale}
-          onPanChange={setBoardPan}
-          onResetView={resetBoardViewport}
-        />
-      </section>
+        {isBoardChangeDialogOpen && (
+          <RollingPaperBoardChangeDialog
+            category={category}
+            currentChannel={channel}
+            channels={categoryChannels}
+            placedNotes={scopedPlacedNotes}
+            onClose={() => setIsBoardChangeDialogOpen(false)}
+            onSelectChannel={(nextChannel) => {
+              setIsBoardChangeDialogOpen(false);
+              resetBoardViewport({ animateFocusedNote: false });
+              navigate(getRollingPaperBoardPath(category.id, nextChannel.id));
+            }}
+          />
+        )}
 
-      {isWriteModalOpen && (
-        <RollingPaperWriteModal
-          isOpen={isWriteModalOpen}
-          boardVariant={boardIndex}
-          frameVariant={categoryFrameVariant}
-          placedNotes={scopedPlacedNotes}
-          isSubmitting={createPostitMutation.isPending}
-          isPlacementSyncing={postitsQuery.isFetching}
-          placementErrorMessage={placementErrorMessage}
-          onClose={() => {
-            setPlacementErrorMessage(null);
-            setIsWriteModalOpen(false);
-          }}
-          onPlacementErrorClear={() => setPlacementErrorMessage(null)}
-          onPlacementSyncRequest={requestPlacementSync}
-          onPlace={handlePlaceNote}
-        />
-      )}
-
-      {isBoardChangeDialogOpen && (
-        <RollingPaperBoardChangeDialog
-          category={category}
-          currentChannel={channel}
-          channels={categoryChannels}
-          placedNotes={scopedPlacedNotes}
-          onClose={() => setIsBoardChangeDialogOpen(false)}
-          onSelectChannel={(nextChannel) => {
-            setIsBoardChangeDialogOpen(false);
-            resetBoardViewport({ animateFocusedNote: false });
-            navigate(getRollingPaperBoardPath(category.id, nextChannel.id));
-          }}
-        />
-      )}
-
-      {isCategoryChangeDialogOpen && (
-        <RollingPaperCategoryChangeDialog
-          currentCategory={category}
-          categories={boardCategories}
-          onClose={() => setIsCategoryChangeDialogOpen(false)}
-          onSelectCategory={(nextCategory) => {
-            setIsCategoryChangeDialogOpen(false);
-            resetBoardViewport();
-            navigate(`/rolling-paper/categories/${nextCategory.id}/channels`);
-          }}
-        />
-      )}
-    </RollingPaperPageTransition>
+        {isCategoryChangeDialogOpen && (
+          <RollingPaperCategoryChangeDialog
+            currentCategory={category}
+            categories={boardCategories}
+            onClose={() => setIsCategoryChangeDialogOpen(false)}
+            onSelectCategory={(nextCategory) => {
+              setIsCategoryChangeDialogOpen(false);
+              resetBoardViewport();
+              navigate(`/rolling-paper/categories/${nextCategory.id}/channels`);
+            }}
+          />
+        )}
+      </RollingPaperPageTransition>
+    </>
   );
 }

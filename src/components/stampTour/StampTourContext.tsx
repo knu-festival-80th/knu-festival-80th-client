@@ -42,11 +42,26 @@ const StampTourContext = () => {
         />
 
         {/* Step cards */}
-        <motion.ol className="flex w-full flex-col gap-[30px]" {...fadeUpVariant}>
+        <motion.ol
+          className="flex w-full flex-col gap-[30px]"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.12 } },
+          }}
+        >
           {STAMP_TOUR_STEPS.map((s) => (
-            <li key={s.step}>
+            <motion.li
+              key={s.step}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+              }}
+            >
               <ProcessCard {...s} />
-            </li>
+            </motion.li>
           ))}
         </motion.ol>
 

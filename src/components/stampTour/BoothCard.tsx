@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import ViewAllButton from '@/components/home/ViewAllButton';
 import ZoneBadge from './ZoneBadge';
@@ -29,6 +31,16 @@ const BoothCard = ({
   isExpanded = false,
   onDetailClick,
 }: BoothCardProps) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = useState(0);
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    const ro = new ResizeObserver(([entry]) => setContentHeight(entry.contentRect.height));
+    ro.observe(contentRef.current);
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <article className="flex w-full flex-col gap-2.5 rounded-[12px] border border-border bg-white px-6 pb-2.5 pt-6">
       <div className="flex w-full flex-col items-start gap-5">
@@ -39,47 +51,31 @@ const BoothCard = ({
         </p>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateRows: isExpanded ? '1fr' : '0fr',
-          transition: 'grid-template-rows 0.3s ease',
-        }}
+      <motion.div
+        animate={{ height: isExpanded ? contentHeight : 0, opacity: isExpanded ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className="overflow-hidden"
       >
-        <div className="overflow-hidden">
-          <div
-            className="flex flex-col gap-5 pt-5"
-            style={{
-              opacity: isExpanded ? 1 : 0,
-              transition: 'opacity 0.25s ease',
-              transitionDelay: isExpanded ? '0.1s' : '0s',
-            }}
-          >
-            <div className="flex w-full flex-col gap-2.5">
-              <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
-                진행장소: {location}
-              </p>
-              <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
-                진행시간: {time}
-              </p>
-              <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
-                참여대상: {target}
-              </p>
-            </div>
-            {mapDetailPath && (
-              <ViewAllButton to={mapDetailPath} label="자세히 보러가기" className="self-start" />
-            )}
-            <div className="aspect-[335/269] w-full overflow-hidden rounded-[8px]">
-              <img
-                src={imageSrc}
-                alt={imageAlt ?? name}
-                loading="lazy"
-                className="size-full object-cover"
-              />
-            </div>
+        <div ref={contentRef} className="flex flex-col gap-5 pt-5">
+          <div className="flex w-full flex-col gap-2.5">
+            <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
+              진행장소: {location}
+            </p>
+            <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
+              진행시간: {time}
+            </p>
+            <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
+              참여대상: {target}
+            </p>
+          </div>
+          {mapDetailPath && (
+            <ViewAllButton to={mapDetailPath} label="자세히 보러가기" className="self-start" />
+          )}
+          <div className="aspect-[335/269] w-full overflow-hidden rounded-[8px]">
+            <img src={imageSrc} alt={imageAlt ?? name} className="size-full object-cover" />
           </div>
         </div>
-      </div>
+      </motion.div>
 
       <button
         type="button"
