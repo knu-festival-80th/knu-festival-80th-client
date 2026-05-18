@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ChevronDown, Plus } from 'lucide-react';
 import { ApiClientError, rollingPaperApi } from '@/apis';
+import type { CanvasPostitResponse } from '@/apis/modules/rollingPaper';
 import {
   getRollingPaperBoardPath,
   getRollingPaperCategory,
@@ -44,11 +45,14 @@ const INITIAL_BOARD_PAN: RollingPaperPan = { x: 0, y: 0 };
 const PENDING_POSTIT_REFETCH_INTERVAL_MS = 5000;
 const PENDING_POSTIT_LOCAL_VISIBLE_MS = 60000;
 const CONFLICT_PLACEHOLDER_LOCAL_VISIBLE_MS = 60000;
+const PLACEMENT_SYNC_DEBOUNCE_MS = 400;
+const PLACEMENT_SYNC_STALE_MS = 3000;
 const FOCUS_RESET_ANIMATION_MS = 320;
 const POSTIT_POSITION_CONFLICT_CODE = 'CP008';
 const POSTIT_POSITION_CONFLICT_MESSAGE =
   '이미 다른 사용자가 같은 위치에 메시지를 붙였어요. 다른 위치에 다시 시도해주세요.';
 const POSTIT_POSITION_CONFLICT_PLACEHOLDER_MESSAGE = '이미 사용 중인 위치예요.';
+const POSTIT_PLACEMENT_UNAVAILABLE_MESSAGE = '이미 붙은 포스트잇과 겹쳐요. 빈 위치로 옮겨주세요.';
 
 type RollingPaperBoardProps = {
   categoryId?: string;
@@ -92,6 +96,8 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   const isApiRoute = Number.isFinite(questionId);
   const mockNotes = useMemo(() => getInitialPlacedNotes(), []);
   const focusResetTimeoutRef = useRef<number | null>(null);
+  const placementSyncTimeoutRef = useRef<number | null>(null);
+  const lastPlacementSyncAtRef = useRef(0);
   const questionsQuery = useQuery({
     queryKey: ['rollingPaper', 'questions'],
     queryFn: rollingPaperApi.listQuestions,
@@ -260,7 +266,80 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
     focusResetTimeoutRef.current = null;
   }, []);
 
+  const clearPlacementSyncTimeout = useCallback(() => {
+    if (placementSyncTimeoutRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(placementSyncTimeoutRef.current);
+    placementSyncTimeoutRef.current = null;
+  }, []);
+
   useEffect(() => clearFocusResetTimeout, [clearFocusResetTimeout]);
+  useEffect(() => clearPlacementSyncTimeout, [clearPlacementSyncTimeout]);
+
+  const syncBoardPostits = useCallback(async () => {
+    if (!boardId || mockNotes.length > 0) {
+      return [];
+    }
+
+    const latestPostits = await queryClient.fetchQuery({
+      queryKey: ['rollingPaper', 'postits', boardId],
+      queryFn: () => rollingPaperApi.listPostits(boardId),
+      staleTime: 0,
+    });
+
+    lastPlacementSyncAtRef.current = Date.now();
+    return latestPostits;
+  }, [boardId, mockNotes.length, queryClient]);
+
+  const requestPlacementSync = useCallback(
+    (options: { immediate?: boolean } = {}) => {
+      if (!boardId || mockNotes.length > 0) return;
+
+      clearPlacementSyncTimeout();
+
+      if (options.immediate) {
+        void syncBoardPostits();
+        return;
+      }
+
+      placementSyncTimeoutRef.current = window.setTimeout(() => {
+        placementSyncTimeoutRef.current = null;
+        void syncBoardPostits();
+      }, PLACEMENT_SYNC_DEBOUNCE_MS);
+    },
+    [boardId, clearPlacementSyncTimeout, mockNotes.length, syncBoardPostits],
+  );
+
+  const getLatestBoardNotesForPlacement = useCallback(async () => {
+    if (!boardId || mockNotes.length > 0) {
+      return currentBoardNotes;
+    }
+
+    const shouldRefresh = Date.now() - lastPlacementSyncAtRef.current > PLACEMENT_SYNC_STALE_MS;
+    if (!shouldRefresh) {
+      return currentBoardNotes;
+    }
+
+    try {
+      const latestPostits: CanvasPostitResponse[] = await syncBoardPostits();
+      const latestApiNotes = latestPostits.map(toPlacedRollingPaperNote);
+      const latestPlacedNotes = [...latestApiNotes, ...visiblePendingNotes];
+
+      return getPlacedNotesForBoard(latestPlacedNotes, boardIndex, boardScope);
+    } catch {
+      return currentBoardNotes;
+    }
+  }, [
+    boardId,
+    boardIndex,
+    boardScope,
+    currentBoardNotes,
+    mockNotes.length,
+    syncBoardPostits,
+    visiblePendingNotes,
+  ]);
 
   const handleFocusedNoteChange = useCallback(
     (noteId: string | null) => {
@@ -315,16 +394,22 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
       return;
     }
 
+    const latestBoardNotes = await getLatestBoardNotesForPlacement();
+    if (latestBoardNotes.length >= boardCapacity) {
+      return;
+    }
+
     const isRequestedPlacementAvailable = isRollingPaperPlacementAvailable(
       { x: note.x, y: note.y },
       note.colorId,
-      currentBoardNotes,
+      latestBoardNotes,
       boardIndex,
       undefined,
       ROLLING_PAPER_CLIENT_COLLISION_SCALE,
     );
 
     if (!isRequestedPlacementAvailable) {
+      setPlacementErrorMessage(POSTIT_PLACEMENT_UNAVAILABLE_MESSAGE);
       return;
     }
 
@@ -514,12 +599,14 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
           frameVariant={categoryFrameVariant}
           placedNotes={scopedPlacedNotes}
           isSubmitting={createPostitMutation.isPending}
+          isPlacementSyncing={postitsQuery.isFetching}
           placementErrorMessage={placementErrorMessage}
           onClose={() => {
             setPlacementErrorMessage(null);
             setIsWriteModalOpen(false);
           }}
           onPlacementErrorClear={() => setPlacementErrorMessage(null)}
+          onPlacementSyncRequest={requestPlacementSync}
           onPlace={handlePlaceNote}
         />
       )}
