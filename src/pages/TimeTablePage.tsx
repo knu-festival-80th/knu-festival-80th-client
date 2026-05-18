@@ -4,17 +4,12 @@ import DayScheduleBlock from '@/components/timetable/DayScheduleBlock';
 import Day20Placeholder from '@/components/timetable/Day20Placeholder';
 import PerformanceLocationSection from '@/components/timetable/PerformanceLocationSection';
 import { MOCK_LINEUP } from '@/mocks/home';
+import { getNow } from '@/utils/time';
 
 const DAYS = [20, 21, 22];
 
-const DAY_DESCRIPTIONS: Record<number, string> = {
-  20: '축제의 문이 열립니다.\n모든 주막과 공연이 시작됩니다.',
-  21: '대동제의 열기가 가득한 날.\n더욱 다양한 공연이 펼쳐집니다.',
-  22: '80주년 대동제의 마지막 날.\n모두 함께 축제의 마무리를 함께해요.',
-};
-
 function getDefaultDay() {
-  const today = new Date().getDate();
+  const today = getNow().getDate();
   return DAYS.includes(today) ? today : 20;
 }
 
@@ -33,11 +28,7 @@ export default function TimeTablePage() {
       {selectedDay === 20 ? (
         <Day20Placeholder />
       ) : (
-        <DayScheduleBlock
-          key={selectedDay}
-          data={dayData}
-          description={DAY_DESCRIPTIONS[selectedDay]}
-        />
+        <DayScheduleBlock key={selectedDay} data={dayData} />
       )}
       <PerformanceLocationSection />
     </div>
