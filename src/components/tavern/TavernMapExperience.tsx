@@ -15,6 +15,7 @@ import type { TopTab, WaitingReservation } from '@/components/tavern/types';
 import {
   boothToTavern,
   isPerformanceLocation,
+  isStampLocation,
   mapBoothToTavern,
   type Tavern,
   type TavernSortKey,
@@ -30,6 +31,8 @@ const resolveTavernTabFromUrl = (pathname: string, search: string): TopTab => {
   return 'intro';
 };
 
+const normalizeMapTargetName = (name: string) => name.replace(/\s+/g, '').trim();
+
 export default function TavernMapExperience() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,7 +45,16 @@ export default function TavernMapExperience() {
     () => new URLSearchParams(location.search).get('focus'),
     [location.search],
   );
+  const focusBoothId = useMemo(() => {
+    const boothId = Number(new URLSearchParams(location.search).get('boothId'));
+    return Number.isFinite(boothId) ? boothId : null;
+  }, [location.search]);
+  const focusStampName = useMemo(
+    () => new URLSearchParams(location.search).get('stampName'),
+    [location.search],
+  );
   const shouldFocusPerformance = activeTab === 'map' && focusTarget === 'performance';
+  const shouldFocusStamp = activeTab === 'map' && focusTarget === 'stamp';
 
   const boothsQuery = useQuery({
     queryKey: ['booths'],
@@ -67,6 +79,28 @@ export default function TavernMapExperience() {
     if (!shouldFocusPerformance) return null;
     return mapTaverns.find(isPerformanceLocation) ?? null;
   }, [mapTaverns, shouldFocusPerformance]);
+  const focusedStampTavern = useMemo(() => {
+    if (!shouldFocusStamp) return null;
+
+    if (focusBoothId !== null) {
+      const stampByBoothId = mapTaverns.find(
+        (tavern) => isStampLocation(tavern) && tavern.boothId === focusBoothId,
+      );
+      if (stampByBoothId) return stampByBoothId;
+    }
+
+    if (focusStampName) {
+      const targetName = normalizeMapTargetName(focusStampName);
+      return (
+        mapTaverns.find(
+          (tavern) => isStampLocation(tavern) && normalizeMapTargetName(tavern.name) === targetName,
+        ) ?? null
+      );
+    }
+
+    return null;
+  }, [focusBoothId, focusStampName, mapTaverns, shouldFocusStamp]);
+  const focusedMapTavern = focusedPerformanceTavern ?? focusedStampTavern;
 
   const [sortKey, setSortKey] = useState<TavernSortKey>('shortWait');
   const [selectedTavern, setSelectedTavern] = useState<Tavern | null>(null);
@@ -74,7 +108,7 @@ export default function TavernMapExperience() {
   const [registrationTarget, setRegistrationTarget] = useState<Tavern | null>(null);
   const [waitingReservation, setWaitingReservation] = useState<WaitingReservation | null>(null);
   const [showReservationLimitModal, setShowReservationLimitModal] = useState(false);
-  const selectedMapSourceTavern = selectedTavern ?? focusedPerformanceTavern;
+  const selectedMapSourceTavern = selectedTavern ?? focusedMapTavern;
 
   const sortedTaverns = useMemo(() => {
     const list = [...taverns];
@@ -96,7 +130,8 @@ export default function TavernMapExperience() {
     enabled:
       activeTab === 'map' &&
       Boolean(selectedMapSourceTavern) &&
-      !isPerformanceLocation(selectedMapSourceTavern),
+      !isPerformanceLocation(selectedMapSourceTavern) &&
+      !isStampLocation(selectedMapSourceTavern),
     staleTime: 30_000,
   });
 
@@ -172,7 +207,7 @@ export default function TavernMapExperience() {
       ) : (
         <MapOverview
           expandedMenuId={expandedMenuId}
-          focusSelected={focusTarget === 'performance'}
+          focusSelected={Boolean(focusedMapTavern)}
           selectedTavern={selectedMapTavern}
           taverns={mapTaverns}
           onMenuToggle={setExpandedMenuId}
