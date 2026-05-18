@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { AlertCircle, Beer, ChevronDown } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { AlertCircle, Beer, Check, ChevronDown } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ApiClientError, authApi, boothApi } from '@/apis';
@@ -10,19 +10,11 @@ import { useAuthStore } from '@/stores/authStore';
 
 function boothLabel(booth: BoothListItem): string {
   const department = booth.department?.trim();
-  return department ? `${department} · ${booth.name}` : booth.name;
+  return department ? `${booth.name} · ${department}` : booth.name;
 }
 
 function sortBooths(booths: BoothListItem[]): BoothListItem[] {
-  return [...booths].sort((a, b) => {
-    const da = a.department?.trim() ?? '';
-    const db = b.department?.trim() ?? '';
-    if (!da && db) return 1;
-    if (da && !db) return -1;
-    const byDept = da.localeCompare(db, 'ko');
-    if (byDept !== 0) return byDept;
-    return a.name.localeCompare(b.name, 'ko');
-  });
+  return [...booths].sort((a, b) => a.name.localeCompare(b.name, 'ko'));
 }
 
 export default function BoothManageLoginPage() {
@@ -106,39 +98,20 @@ export default function BoothManageLoginPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Field label="주막 선택" htmlFor="booth-select">
-            <div className="relative">
-              <select
-                id="booth-select"
-                value={selectedBoothId}
-                onChange={(e) => setSelectedBoothId(e.target.value)}
-                disabled={boothsLoading || boothsError || loginMutation.isPending}
-                className={[
-                  'h-11 w-full appearance-none rounded-xl bg-[var(--admin-surface)] px-3.5 pr-9 text-[15px] text-[var(--admin-text)] outline-none transition-colors',
-                  'ring-1 ring-[var(--admin-border-strong)] focus:ring-2 focus:ring-[var(--admin-primary)]',
-                  isInvalid ? 'ring-[var(--admin-danger)]' : '',
-                  'disabled:opacity-60',
-                ].join(' ')}
-                autoFocus
-              >
-                <option value="" disabled>
-                  {boothsLoading
-                    ? '주막 목록 불러오는 중...'
-                    : boothsError
-                      ? '목록을 불러오지 못했어요'
-                      : '주막을 선택하세요'}
-                </option>
-                {sortedBooths.map((booth) => (
-                  <option key={booth.boothId} value={String(booth.boothId)}>
-                    {boothLabel(booth)}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={16}
-                className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[var(--admin-text-faint)]"
-                aria-hidden
-              />
-            </div>
+            <BoothSelect
+              booths={sortedBooths}
+              value={selectedBoothId}
+              onChange={setSelectedBoothId}
+              disabled={boothsLoading || boothsError || loginMutation.isPending}
+              isInvalid={isInvalid}
+              placeholder={
+                boothsLoading
+                  ? '주막 목록 불러오는 중...'
+                  : boothsError
+                    ? '목록을 불러오지 못했어요'
+                    : '주막을 선택하세요'
+              }
+            />
           </Field>
 
           <Field label="비밀번호" htmlFor="booth-password">
@@ -174,6 +147,139 @@ export default function BoothManageLoginPage() {
           </Button>
         </form>
       </div>
+    </div>
+  );
+}
+
+interface BoothSelectProps {
+  booths: BoothListItem[];
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  isInvalid?: boolean;
+  placeholder?: string;
+}
+
+function BoothSelect({
+  booths,
+  value,
+  onChange,
+  disabled,
+  isInvalid,
+  placeholder,
+}: BoothSelectProps) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const selected = booths.find((b) => String(b.boothId) === value);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (open && listRef.current && value) {
+      const active = listRef.current.querySelector('[data-active="true"]');
+      if (active) active.scrollIntoView({ block: 'nearest' });
+    }
+  }, [open, value]);
+
+  const listboxId = 'booth-select-listbox';
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        id="booth-select"
+        type="button"
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={open ? listboxId : undefined}
+        onClick={() => !disabled && setOpen((prev) => !prev)}
+        disabled={disabled}
+        className={[
+          'flex h-11 w-full items-center rounded-xl bg-[var(--admin-surface)] px-3.5 text-left text-[15px] outline-none transition-colors',
+          'ring-1 focus:ring-2 focus:ring-[var(--admin-primary)]',
+          isInvalid ? 'ring-[var(--admin-danger)]' : 'ring-[var(--admin-border-strong)]',
+          open ? 'ring-2 ring-[var(--admin-primary)]' : '',
+          'disabled:opacity-60',
+        ].join(' ')}
+      >
+        <span
+          className={
+            selected
+              ? 'flex-1 truncate text-[var(--admin-text)]'
+              : 'flex-1 truncate text-[var(--admin-text-faint)]'
+          }
+        >
+          {selected ? boothLabel(selected) : (placeholder ?? '주막을 선택하세요')}
+        </span>
+        <ChevronDown
+          size={16}
+          className={[
+            'shrink-0 text-[var(--admin-text-faint)] transition-transform',
+            open ? 'rotate-180' : '',
+          ].join(' ')}
+        />
+      </button>
+
+      {open && (
+        <div
+          id={listboxId}
+          ref={listRef}
+          role="listbox"
+          className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-64 overflow-y-auto overscroll-contain rounded-xl border border-[var(--admin-border-strong)] bg-[var(--admin-surface)] py-1 shadow-xl"
+        >
+          {booths.length === 0 ? (
+            <p className="px-3.5 py-3 text-center text-[14px] text-[var(--admin-text-faint)]">
+              등록된 주막이 없습니다
+            </p>
+          ) : (
+            booths.map((booth) => {
+              const isSelected = String(booth.boothId) === value;
+              return (
+                <button
+                  key={booth.boothId}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  data-active={isSelected}
+                  onClick={() => {
+                    onChange(String(booth.boothId));
+                    setOpen(false);
+                  }}
+                  className={[
+                    'flex w-full items-center gap-2 px-3.5 py-3 text-left text-[15px] transition-colors active:bg-[var(--admin-primary-soft)]',
+                    isSelected
+                      ? 'bg-[var(--admin-primary-soft)] font-semibold text-[var(--admin-primary)]'
+                      : 'text-[var(--admin-text)] hover:bg-[var(--admin-surface-hover)]',
+                  ].join(' ')}
+                >
+                  <span className="min-w-0 flex-1 truncate">{boothLabel(booth)}</span>
+                  {isSelected && (
+                    <Check size={16} className="shrink-0 text-[var(--admin-primary)]" />
+                  )}
+                </button>
+              );
+            })
+          )}
+        </div>
+      )}
     </div>
   );
 }
