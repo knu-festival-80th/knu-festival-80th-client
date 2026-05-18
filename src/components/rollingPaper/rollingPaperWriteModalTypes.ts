@@ -9,9 +9,11 @@ export type RollingPaperWriteModalProps = {
   frameVariant: number;
   placedNotes: PlacedRollingPaperNote[];
   isSubmitting?: boolean;
+  isPlacementSyncing?: boolean;
   placementErrorMessage?: string | null;
   onClose: () => void;
   onPlacementErrorClear?: () => void;
+  onPlacementSyncRequest?: (options?: { immediate?: boolean }) => void;
   onPlace: (note: PlacedRollingPaperNote) => void | Promise<void>;
 };
 

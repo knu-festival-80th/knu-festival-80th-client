@@ -28,6 +28,7 @@ type RollingPaperWritePlaceStepProps = {
   onPanChange: (pan: RollingPaperPan) => void;
   onPlaceDisabled: boolean;
   isSubmitting?: boolean;
+  isPlacementSyncing?: boolean;
   placementErrorMessage?: string | null;
   onPlace: () => void;
 };
@@ -75,6 +76,7 @@ export default function RollingPaperWritePlaceStep({
   onPanChange,
   onPlaceDisabled,
   isSubmitting = false,
+  isPlacementSyncing = false,
   placementErrorMessage,
   onPlace,
 }: RollingPaperWritePlaceStepProps) {
@@ -117,9 +119,11 @@ export default function RollingPaperWritePlaceStep({
         }`}
       >
         {placementErrorMessage ??
-          (isPlacementAvailable
-            ? '한 손가락으로 포스트잇 위치를 정하고, 두 손가락으로 확대/축소와 화면 이동을 할 수 있어요'
-            : '이미 붙은 포스트잇과 겹쳐요. 빈 위치로 옮겨주세요')}
+          (isPlacementSyncing
+            ? '최신 배치 상태를 확인하고 있어요.'
+            : isPlacementAvailable
+              ? '한 손가락으로 포스트잇 위치를 정하고, 두 손가락으로 확대/축소와 화면 이동을 할 수 있어요'
+              : '이미 붙은 포스트잇과 겹쳐요. 빈 위치로 옮겨주세요')}
       </p>
 
       <div className="mt-3 flex w-[287px] gap-3">

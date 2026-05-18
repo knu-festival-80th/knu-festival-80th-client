@@ -8,6 +8,7 @@ export const NAV_ITEMS: NavItem[] = [
       { label: '경북대학교 80주년', to: '/congrat-video' },
       { label: '80주년 롤링페이퍼', to: '/rolling-paper' },
       { label: '공연 정보', to: '/timetable' },
+      { label: '만든이들', to: '/credits' },
     ],
   },
   {

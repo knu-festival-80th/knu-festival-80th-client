@@ -25,8 +25,8 @@ export default function DateTabBar({
               isDisabled
                 ? 'font-normal text-text-disabled cursor-default'
                 : isSelected
-                  ? 'font-bold text-primary'
-                  : 'font-medium text-text-muted'
+                  ? 'font-bold text-sub-red'
+                  : 'font-normal text-ink'
             }`}
           >
             5.{day}
