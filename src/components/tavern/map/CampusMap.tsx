@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useCallback,
   useRef,
   useState,
   type CSSProperties,
@@ -9,6 +10,7 @@ import {
 import { FiCircle, FiMinus, FiPlus } from 'react-icons/fi';
 
 import hobanuMarker from '@/assets/images/hobanu-marker.png';
+import tavernMapLowDetailImage from '@/assets/images/map-low-detail.png';
 import tavernMapImage from '@/assets/images/map.svg';
 import { festivalMap, isPerformanceLocation, type Tavern } from '@/constants/taverns';
 
@@ -22,6 +24,8 @@ const MAP_MIN_SCALE = 0.1;
 const MAP_DEFAULT_SCALE = 0.6;
 const MAP_MAX_SCALE = 1;
 const MAP_FOCUS_SCALE = 1;
+const MAP_LOW_DETAIL_ENTER_SCALE = 0.35;
+const MAP_LOW_DETAIL_EXIT_SCALE = 0.5;
 const MAP_ZOOM_STEP = 0.15;
 const INITIAL_MAP_PAN = { x: 500, y: 350 };
 
@@ -65,6 +69,9 @@ type PinchState = {
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const clampScale = (scale: number) => clamp(scale, MAP_MIN_SCALE, MAP_MAX_SCALE);
+
+const shouldUseLowDetailMap = (scale: number, currentLowDetail: boolean) =>
+  currentLowDetail ? scale <= MAP_LOW_DETAIL_EXIT_SCALE : scale <= MAP_LOW_DETAIL_ENTER_SCALE;
 
 const getViewportRatio = (viewportSize: number) => viewportSize / MAP_BASE_VIEWPORT_SIZE;
 
@@ -175,6 +182,8 @@ export default function CampusMap({
 }: CampusMapProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const mapLayerRef = useRef<HTMLDivElement>(null);
+  const lowDetailImageRef = useRef<HTMLImageElement>(null);
+  const highDetailImageRef = useRef<HTMLImageElement>(null);
   const [viewportSize, setViewportSize] = useState(MAP_BASE_VIEWPORT_SIZE);
   const [mapScale, setMapScale] = useState(MAP_DEFAULT_SCALE);
   const [mapPan, setMapPan] = useState(getScaledInitialMapPan(MAP_BASE_VIEWPORT_SIZE));
@@ -185,7 +194,19 @@ export default function CampusMap({
   const skipMarkerClickRef = useRef(false);
   const scaleRef = useRef(MAP_DEFAULT_SCALE);
   const panRef = useRef(getScaledInitialMapPan(MAP_BASE_VIEWPORT_SIZE));
+  const lowDetailMapRef = useRef(false);
   const selectedTavernRef = useRef<Tavern | null>(selectedTavern);
+
+  const syncMapDetailMode = useCallback((scale: number) => {
+    const nextLowDetail = shouldUseLowDetailMap(scale, lowDetailMapRef.current);
+    if (nextLowDetail === lowDetailMapRef.current) return;
+
+    lowDetailMapRef.current = nextLowDetail;
+    lowDetailImageRef.current?.classList.toggle('hidden', !nextLowDetail);
+    lowDetailImageRef.current?.classList.toggle('block', nextLowDetail);
+    highDetailImageRef.current?.classList.toggle('hidden', nextLowDetail);
+    highDetailImageRef.current?.classList.toggle('block', !nextLowDetail);
+  }, []);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -205,6 +226,7 @@ export default function CampusMap({
         setViewportSize(nextSize);
         scaleRef.current = focusScale;
         panRef.current = focusPan;
+        syncMapDetailMode(focusScale);
         setMapScale(focusScale);
         setMapPan(focusPan);
         return;
@@ -214,6 +236,7 @@ export default function CampusMap({
       setViewportSize(nextSize);
       scaleRef.current = MAP_DEFAULT_SCALE;
       panRef.current = nextPan;
+      syncMapDetailMode(MAP_DEFAULT_SCALE);
       setMapScale(MAP_DEFAULT_SCALE);
       setMapPan(nextPan);
     };
@@ -224,7 +247,7 @@ export default function CampusMap({
     resizeObserver.observe(viewport);
 
     return () => resizeObserver.disconnect();
-  }, [focusSelected]);
+  }, [focusSelected, syncMapDetailMode]);
 
   useEffect(() => {
     selectedTavernRef.current = selectedTavern;
@@ -241,12 +264,13 @@ export default function CampusMap({
 
       scaleRef.current = focusScale;
       panRef.current = focusPan;
+      syncMapDetailMode(focusScale);
       setMapScale(focusScale);
       setMapPan(focusPan);
     });
 
     return () => window.cancelAnimationFrame(animationFrame);
-  }, [focusSelected, selectedTavern, viewportSize]);
+  }, [focusSelected, selectedTavern, viewportSize, syncMapDetailMode]);
 
   const commitMapViewport = () => {
     setMapScale(scaleRef.current);
@@ -263,6 +287,7 @@ export default function CampusMap({
 
     scaleRef.current = clampedScale;
     panRef.current = clampedPan;
+    syncMapDetailMode(clampedScale);
     if (mapLayerRef.current) {
       mapLayerRef.current.style.transform = getMapTransform(clampedScale, clampedPan);
     }
@@ -436,9 +461,19 @@ export default function CampusMap({
           }}
         >
           <img
+            ref={lowDetailImageRef}
+            src={tavernMapLowDetailImage}
+            alt="대동제 주막 지도"
+            className="pointer-events-none absolute hidden h-auto max-w-none select-none"
+            style={mapImageStyle}
+            decoding="async"
+            draggable={false}
+          />
+          <img
+            ref={highDetailImageRef}
             src={tavernMapImage}
             alt="대동제 주막 지도"
-            className="pointer-events-none absolute h-auto max-w-none select-none"
+            className="pointer-events-none absolute block h-auto max-w-none select-none"
             style={mapImageStyle}
             decoding="async"
             draggable={false}
