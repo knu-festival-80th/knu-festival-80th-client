@@ -1,4 +1,8 @@
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { FiArrowRight, FiChevronDown } from 'react-icons/fi';
+
+import { fadeUpVariant } from '@/constants/animation';
 
 import mapIconImage from '@/assets/images/map-icon.png';
 import mapPreviewImage from '@/assets/images/map-preview.png';
@@ -44,39 +48,44 @@ export default function IntroOverview({ onTabChange }: IntroOverviewProps) {
       </section>
 
       <section className="flex flex-col gap-12 bg-white px-5 py-16">
-        <SectionBlock
-          label="How to use"
-          title={`지도에서 주막 위치를 확인하고 \n빠르게 예약해요`}
-          animate={false}
-          className="flex flex-col gap-12"
-          headingClassName="flex flex-col gap-1.5 px-0"
-          labelClassName="text-[16px] font-bold leading-none tracking-[-0.32px] text-black"
-          titleClassName="whitespace-pre-line text-[20px] font-bold leading-[1.4] tracking-[-0.4px] text-black"
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
         >
-          <div className="flex flex-col gap-12">
-            <IntroGuideCard
-              category="Map"
-              title="원하는 주막 아이콘 터치하기"
-              description="메뉴와 대기 시간을 확인할 수 있어요."
-              imageSrc={tavernGuideMapImage}
-              illustrationSrc={mapIconImage}
-              illustrationClassName="p-2 bottom-[30px] left-1/2 h-[256px] w-[335px] -translate-x-1/2"
-            />
-            <IntroGuideCard
-              category="Reservation"
-              title="실시간 대기 현황 확인 및 예약"
-              description={`총 3곳까지 미리 예약해\n줄을 서지 않고 기다릴 수 있어요.`}
-              imageSrc={tavernGuideReservationImage}
-              illustrationSrc={reservationIconImage}
-              illustrationClassName="p-2 bottom-[15px] left-1/2 h-[286px] w-[256px] -translate-x-1/2"
-            />
-          </div>
-        </SectionBlock>
+          <SectionBlock
+            label="How to use"
+            title={`지도에서 주막 위치를 확인하고 \n빠르게 예약해요`}
+            animate={false}
+            className="flex flex-col gap-12"
+            headingClassName="flex flex-col gap-1.5 px-0"
+            labelClassName="text-[16px] font-bold leading-none tracking-[-0.32px] text-black"
+            titleClassName="whitespace-pre-line text-[20px] font-bold leading-[1.4] tracking-[-0.4px] text-black"
+          >
+            <div className="flex flex-col gap-12">
+              <IntroGuideCard
+                category="Map"
+                title="원하는 주막 아이콘 터치하기"
+                description="메뉴와 대기 시간을 확인할 수 있어요."
+                imageSrc={tavernGuideMapImage}
+                illustrationSrc={mapIconImage}
+                illustrationClassName="p-2 bottom-[30px] left-1/2 h-[256px] w-[335px] -translate-x-1/2"
+              />
+              <IntroGuideCard
+                category="Reservation"
+                title="실시간 대기 현황 확인 및 예약"
+                description={`총 3곳까지 미리 예약해\n줄을 서지 않고 기다릴 수 있어요.`}
+                imageSrc={tavernGuideReservationImage}
+                illustrationSrc={reservationIconImage}
+                illustrationClassName="p-2 bottom-[15px] left-1/2 h-[286px] w-[256px] -translate-x-1/2"
+              />
+            </div>
+          </SectionBlock>
+        </motion.div>
 
         <SectionBlock
           label="Map"
           title="지도에서 모든 주막 리스트를 확인해요."
-          animate={false}
           className="flex flex-col gap-8"
           headingClassName="flex flex-col px-0"
           labelClassName="text-[16px] font-bold leading-none tracking-[-0.32px] text-black"
@@ -178,29 +187,62 @@ function MapPreviewIllustration() {
 }
 
 function FaqSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const toggle = (index: number) => {
+    setOpenIndex((prev) => (prev === index ? null : index));
+  };
+
   return (
-    <section className="flex flex-col gap-12 px-5 py-8">
+    <motion.section className="flex flex-col gap-12 px-5 py-8" {...fadeUpVariant}>
       <SectionHeading eyebrow="FAQ" title="자주 묻는 질문" variant="small" />
       <div className="flex flex-col gap-2.5">
-        {tavernFaqs.map((faq, index) => (
-          <details key={faq.question} className="bg-[#f9f9f9] p-5" open={index === 0}>
-            <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[16px] font-bold leading-none tracking-[-0.32px]">
-              {faq.question}
-              <FiChevronDown size={20} />
-            </summary>
-            <p className="mt-3 text-[16px] font-medium leading-[1.5] text-[#4d4d4d]">
-              {faq.answer}
-            </p>
-          </details>
-        ))}
+        {tavernFaqs.map((faq, index) => {
+          const isOpen = openIndex === index;
+
+          return (
+            <div key={faq.question} className="bg-[#f9f9f9] p-5">
+              <button
+                type="button"
+                className="flex w-full cursor-pointer items-start justify-between gap-4 text-left text-[16px] font-bold leading-none tracking-[-0.32px]"
+                aria-expanded={isOpen}
+                onClick={() => toggle(index)}
+              >
+                {faq.question}
+                <motion.div
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="shrink-0"
+                >
+                  <FiChevronDown size={20} />
+                </motion.div>
+              </button>
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: 'auto' }}
+                    exit={{ height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <p className="mt-3 text-[16px] font-medium leading-[1.5] text-[#4d4d4d]">
+                      {faq.answer}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </div>
-    </section>
+    </motion.section>
   );
 }
 
 function ContactSection() {
   return (
-    <section className="flex flex-col gap-12 px-5 py-16">
+    <motion.section className="flex flex-col gap-12 px-5 py-16" {...fadeUpVariant}>
       <div className="flex flex-col gap-1.5">
         <SectionHeading eyebrow="Contact" title="문의하기" variant="small" />
         <p className="text-[16px] font-medium leading-[1.4] tracking-[-0.32px] text-[#808080]">
@@ -224,7 +266,7 @@ function ContactSection() {
           <FiArrowRight size={24} />
         </button>
       </div>
-    </section>
+    </motion.section>
   );
 }
 

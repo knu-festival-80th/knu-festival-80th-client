@@ -16,6 +16,9 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.5)
+      '@microsoft/clarity':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@posthog/react':
         specifier: ^1.8.2
         version: 1.9.0(@types/react@19.2.14)(posthog-js@1.372.1)(react@19.2.5)
@@ -962,6 +965,12 @@ packages:
     resolution:
       {
         integrity: sha512-WclJnUQJeOMY271JSuaOjCv/aA0pgvuHZS29NFNdIeI14id8eiFsjith85EGKYhljgoQhJ2SiW4PsVfFiakNNw==,
+      }
+
+  '@microsoft/clarity@1.0.2':
+    resolution:
+      {
+        integrity: sha512-9EZYROFpJxEGmQpHvUFqvD3ZJ7QQSqnibYSWmS+1xusoZfG1QQ1/Al9yVBBc11DWMbJrs1pe1hLT273it/skJg==,
       }
 
   '@opentelemetry/api-logs@0.208.0':
@@ -5987,6 +5996,8 @@ snapshots:
       - react-native-b4a
       - supports-color
       - utf-8-validate
+
+  '@microsoft/clarity@1.0.2': {}
 
   '@opentelemetry/api-logs@0.208.0':
     dependencies:

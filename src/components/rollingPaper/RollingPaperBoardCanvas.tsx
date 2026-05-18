@@ -23,6 +23,7 @@ type BoardViewport = {
 
 type RollingPaperBoardCanvasProps = {
   variant: number;
+  frameVariant: number;
   scale: number;
   pan: RollingPaperPan;
   placedNotes: PlacedRollingPaperNote[];
@@ -115,6 +116,7 @@ function getNoteScreenPosition(
 
 export default function RollingPaperBoardCanvas({
   variant,
+  frameVariant,
   scale,
   pan,
   placedNotes,
@@ -145,7 +147,8 @@ export default function RollingPaperBoardCanvas({
   const focusedNoteWidth = focusedNote ? ROLLING_PAPER_NOTE_WIDTH * renderedScale : 0;
   const frameRect = getRollingPaperFrameRect(variant);
   const frameImage =
-    rollingPaperBoardFrames[variant % rollingPaperBoardFrames.length] ?? rollingPaperBoardFrames[0];
+    rollingPaperBoardFrames[frameVariant % rollingPaperBoardFrames.length] ??
+    rollingPaperBoardFrames[0];
   const { handlePointerDown, handlePointerMove, handlePointerRelease } =
     useRollingPaperBoardGestures({
       boardRef,

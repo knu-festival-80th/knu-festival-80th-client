@@ -6,6 +6,7 @@ export type RollingPaperWriteStep = 'compose' | 'place';
 export type RollingPaperWriteModalProps = {
   isOpen: boolean;
   boardVariant: number;
+  frameVariant: number;
   placedNotes: PlacedRollingPaperNote[];
   isSubmitting?: boolean;
   placementErrorMessage?: string | null;

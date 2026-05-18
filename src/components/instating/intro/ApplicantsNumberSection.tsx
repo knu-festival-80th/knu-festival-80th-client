@@ -61,10 +61,12 @@ const ApplicantsNumberSection = () => {
       </div>
 
       <div className="rounded-md bg-[#f9f9f9] p-4">
-        <p className="font-wanted-sans text-[12px] leading-[1.4] tracking-[-0.24px] text-[#808080]">
-          성비 불균형 발생 시, 신청자가 적은 성별의 인원에 맞춰
+        <p className="font-wanted-sans text-body2 font-medium leading-[1.5] tracking-tight text-gray">
+          *인스타팅은 하루 1번, 축제 기간 총 3번 참여 가능합니다.
           <br />
-          &apos;선착순&apos;으로 대상자가 제한(컷오프)된 후 최종 매칭이 진행됩니다.
+          *성비 불균형 발생 시, 신청자가 적은 성별의 인원에 맞춰 &apos;선착순&apos;으로 대상자가
+          제한(컷오프)된 후 최종 매칭이 진행됩니다.
+          <br />
         </p>
       </div>
     </motion.div>

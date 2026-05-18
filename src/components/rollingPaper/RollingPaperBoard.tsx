@@ -10,6 +10,7 @@ import {
   getRollingPaperChannel,
   getRollingPaperChannelIndex,
   getRollingPaperChannelsByCategory,
+  ROLLING_PAPER_CATEGORIES,
   ROLLING_PAPER_CHANNELS_PER_CATEGORY,
 } from '@/constants/rollingPaper';
 import { getRollingPaperPerformanceNotesFromSearch } from '@/mocks/rollingPaperPerformance';
@@ -141,6 +142,12 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
     categoryChannels.find((item) => item.id === channelId) ??
     categoryChannels[0] ??
     fallbackChannel;
+  const categoryFrameVariant = Math.max(
+    0,
+    (apiCategories.length > 0 ? apiCategories : ROLLING_PAPER_CATEGORIES).findIndex(
+      (item) => item.id === category.id,
+    ),
+  );
   const channelIndex = Math.max(
     0,
     categoryChannels.findIndex((item) => item.id === channel.id),
@@ -395,153 +402,157 @@ export default function RollingPaperBoard({ categoryId, channelId }: RollingPape
   };
 
   return (
-    <RollingPaperPageTransition className="bg-white">
+    <>
       <RollingPaperTabs active="board" />
-      <RollingPaperCategoryTabs
-        activeCategory={category}
-        categories={boardCategories}
-        onGridClick={() => setIsCategoryChangeDialogOpen(true)}
-      />
+      <RollingPaperPageTransition className="bg-white">
+        <RollingPaperCategoryTabs
+          activeCategory={category}
+          categories={boardCategories}
+          onGridClick={() => setIsCategoryChangeDialogOpen(true)}
+        />
 
-      <section className="min-h-[713px] bg-white pb-16">
-        <motion.div className="border-b border-border px-5 pt-5 pb-7" {...rollingPaperItemMotion}>
-          <button
-            type="button"
-            className="flex h-[30px] items-center gap-1 rounded border border-border bg-white px-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-black"
-            onClick={() => setIsBoardChangeDialogOpen(true)}
-          >
-            <span className="font-semibold text-sub-red">{boardNumberLabel}</span>
-            <span>보드 변경하기</span>
-            <ChevronDown className="size-3.5" />
-          </button>
-
-          <div className="mt-[18px] flex items-end justify-between gap-5">
-            <div className="min-w-0">
-              {isCurrentBoardFull && (
-                <p className="mb-1.5 font-wanted-sans text-[15px] font-bold leading-none tracking-[-0.02em] text-sub-red">
-                  🎉 이 보드는 추억으로 가득 찼어요!
-                </p>
-              )}
-              <div className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
-                <span className="text-sub-red">{currentBoardNoteCount}</span>/{boardCapacity}
-              </div>
-              <p className="mt-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-gray">
-                메시지
-              </p>
-            </div>
+        <section className="min-h-[713px] bg-white pb-16">
+          <motion.div className="border-b border-border px-5 pt-5 pb-7" {...rollingPaperItemMotion}>
             <button
               type="button"
-              className={`flex h-10 shrink-0 items-center gap-1 rounded-full px-5 font-wanted-sans text-sm font-bold leading-none tracking-[-0.02em] text-white shadow-[0_6px_14px_rgba(255,61,61,0.22)] transition ${
-                isCurrentBoardFull || !boardId ? 'hidden' : 'bg-sub-red'
-              }`}
-              disabled={isCurrentBoardFull || !boardId}
-              onClick={() => {
-                setPlacementErrorMessage(null);
-                setIsWriteModalOpen(true);
-              }}
+              className="flex h-[30px] items-center gap-1 rounded border border-border bg-white px-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-black"
+              onClick={() => setIsBoardChangeDialogOpen(true)}
             >
-              <Plus className="size-4" />
-              <span>메시지 남기기</span>
+              <span className="font-semibold text-sub-red">{boardNumberLabel}</span>
+              <span>보드 변경하기</span>
+              <ChevronDown className="size-3.5" />
             </button>
-          </div>
-        </motion.div>
 
-        {(questionsQuery.isLoading || boardsQuery.isLoading || postitsQuery.isLoading) && (
-          <p className="mt-4 px-5 font-wanted-sans text-caption text-gray">
-            롤링페이퍼 데이터를 불러오는 중이에요.
-          </p>
-        )}
+            <div className="mt-[18px] flex items-end justify-between gap-5">
+              <div className="min-w-0">
+                {isCurrentBoardFull && (
+                  <p className="mb-1.5 font-wanted-sans text-[15px] font-bold leading-none tracking-[-0.02em] text-sub-red">
+                    🎉 이 보드는 추억으로 가득 찼어요!
+                  </p>
+                )}
+                <div className="font-wanted-sans text-[24px] font-bold leading-none tracking-[-0.02em] text-black">
+                  <span className="text-sub-red">{currentBoardNoteCount}</span>/{boardCapacity}
+                </div>
+                <p className="mt-2.5 font-wanted-sans text-caption font-medium leading-none tracking-[-0.02em] text-gray">
+                  메시지
+                </p>
+              </div>
+              <button
+                type="button"
+                className={`flex h-10 shrink-0 items-center gap-1 rounded-full px-5 font-wanted-sans text-sm font-bold leading-none tracking-[-0.02em] text-white shadow-[0_6px_14px_rgba(255,61,61,0.22)] transition ${
+                  isCurrentBoardFull || !boardId ? 'hidden' : 'bg-sub-red'
+                }`}
+                disabled={isCurrentBoardFull || !boardId}
+                onClick={() => {
+                  setPlacementErrorMessage(null);
+                  setIsWriteModalOpen(true);
+                }}
+              >
+                <Plus className="size-4" />
+                <span>메시지 남기기</span>
+              </button>
+            </div>
+          </motion.div>
 
-        {(questionsQuery.isError || boardsQuery.isError || postitsQuery.isError) && (
-          <p className="mt-4 px-5 font-wanted-sans text-caption text-sub-red">
-            롤링페이퍼 데이터를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
-          </p>
-        )}
+          {(questionsQuery.isLoading || boardsQuery.isLoading || postitsQuery.isLoading) && (
+            <p className="mt-4 px-5 font-wanted-sans text-caption text-gray">
+              롤링페이퍼 데이터를 불러오는 중이에요.
+            </p>
+          )}
 
-        <motion.div className="relative mt-6" {...rollingPaperItemMotion}>
-          <RollingPaperBoardCanvas
-            variant={boardIndex}
+          {(questionsQuery.isError || boardsQuery.isError || postitsQuery.isError) && (
+            <p className="mt-4 px-5 font-wanted-sans text-caption text-sub-red">
+              롤링페이퍼 데이터를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
+            </p>
+          )}
+
+          <motion.div className="relative mt-6" {...rollingPaperItemMotion}>
+            <RollingPaperBoardCanvas
+              variant={boardIndex}
+              frameVariant={categoryFrameVariant}
+              scale={boardScale}
+              pan={boardPan}
+              placedNotes={scopedPlacedNotes}
+              focusedNoteId={focusedNoteId}
+              onPanChange={setBoardPan}
+              onScaleChange={setBoardScale}
+              onFocusedNoteChange={handleFocusedNoteChange}
+            />
+
+            <div className="pointer-events-none absolute inset-x-0 top-[30px] z-40 flex justify-between px-4">
+              <button
+                type="button"
+                aria-label="이전 롤링페이퍼 보드"
+                className="pointer-events-auto flex size-12 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-ink backdrop-blur-[2px]"
+                onClick={showPreviousBoard}
+              >
+                <ArrowLeft className="size-6" />
+              </button>
+              <button
+                type="button"
+                aria-label="다음 롤링페이퍼 보드"
+                className="pointer-events-auto flex size-12 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-ink backdrop-blur-[2px]"
+                onClick={showNextBoard}
+              >
+                <ArrowRight className="size-6" />
+              </button>
+            </div>
+          </motion.div>
+
+          <RollingPaperZoomControls
             scale={boardScale}
             pan={boardPan}
-            placedNotes={scopedPlacedNotes}
-            focusedNoteId={focusedNoteId}
-            onPanChange={setBoardPan}
             onScaleChange={setBoardScale}
-            onFocusedNoteChange={handleFocusedNoteChange}
+            onPanChange={setBoardPan}
+            onResetView={resetBoardViewport}
           />
+        </section>
 
-          <div className="pointer-events-none absolute inset-x-0 top-[30px] z-40 flex justify-between px-4">
-            <button
-              type="button"
-              aria-label="이전 롤링페이퍼 보드"
-              className="pointer-events-auto flex size-12 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-ink backdrop-blur-[2px]"
-              onClick={showPreviousBoard}
-            >
-              <ArrowLeft className="size-6" />
-            </button>
-            <button
-              type="button"
-              aria-label="다음 롤링페이퍼 보드"
-              className="pointer-events-auto flex size-12 items-center justify-center rounded-full border border-black/10 bg-black/[0.03] text-ink backdrop-blur-[2px]"
-              onClick={showNextBoard}
-            >
-              <ArrowRight className="size-6" />
-            </button>
-          </div>
-        </motion.div>
+        {isWriteModalOpen && (
+          <RollingPaperWriteModal
+            isOpen={isWriteModalOpen}
+            boardVariant={boardIndex}
+            frameVariant={categoryFrameVariant}
+            placedNotes={scopedPlacedNotes}
+            isSubmitting={createPostitMutation.isPending}
+            placementErrorMessage={placementErrorMessage}
+            onClose={() => {
+              setPlacementErrorMessage(null);
+              setIsWriteModalOpen(false);
+            }}
+            onPlacementErrorClear={() => setPlacementErrorMessage(null)}
+            onPlace={handlePlaceNote}
+          />
+        )}
 
-        <RollingPaperZoomControls
-          scale={boardScale}
-          pan={boardPan}
-          onScaleChange={setBoardScale}
-          onPanChange={setBoardPan}
-          onResetView={resetBoardViewport}
-        />
-      </section>
+        {isBoardChangeDialogOpen && (
+          <RollingPaperBoardChangeDialog
+            category={category}
+            currentChannel={channel}
+            channels={categoryChannels}
+            placedNotes={scopedPlacedNotes}
+            onClose={() => setIsBoardChangeDialogOpen(false)}
+            onSelectChannel={(nextChannel) => {
+              setIsBoardChangeDialogOpen(false);
+              resetBoardViewport({ animateFocusedNote: false });
+              navigate(getRollingPaperBoardPath(category.id, nextChannel.id));
+            }}
+          />
+        )}
 
-      {isWriteModalOpen && (
-        <RollingPaperWriteModal
-          isOpen={isWriteModalOpen}
-          boardVariant={boardIndex}
-          placedNotes={scopedPlacedNotes}
-          isSubmitting={createPostitMutation.isPending}
-          placementErrorMessage={placementErrorMessage}
-          onClose={() => {
-            setPlacementErrorMessage(null);
-            setIsWriteModalOpen(false);
-          }}
-          onPlacementErrorClear={() => setPlacementErrorMessage(null)}
-          onPlace={handlePlaceNote}
-        />
-      )}
-
-      {isBoardChangeDialogOpen && (
-        <RollingPaperBoardChangeDialog
-          category={category}
-          currentChannel={channel}
-          channels={categoryChannels}
-          placedNotes={scopedPlacedNotes}
-          onClose={() => setIsBoardChangeDialogOpen(false)}
-          onSelectChannel={(nextChannel) => {
-            setIsBoardChangeDialogOpen(false);
-            resetBoardViewport({ animateFocusedNote: false });
-            navigate(getRollingPaperBoardPath(category.id, nextChannel.id));
-          }}
-        />
-      )}
-
-      {isCategoryChangeDialogOpen && (
-        <RollingPaperCategoryChangeDialog
-          currentCategory={category}
-          categories={boardCategories}
-          onClose={() => setIsCategoryChangeDialogOpen(false)}
-          onSelectCategory={(nextCategory) => {
-            setIsCategoryChangeDialogOpen(false);
-            resetBoardViewport();
-            navigate(`/rolling-paper/categories/${nextCategory.id}/channels`);
-          }}
-        />
-      )}
-    </RollingPaperPageTransition>
+        {isCategoryChangeDialogOpen && (
+          <RollingPaperCategoryChangeDialog
+            currentCategory={category}
+            categories={boardCategories}
+            onClose={() => setIsCategoryChangeDialogOpen(false)}
+            onSelectCategory={(nextCategory) => {
+              setIsCategoryChangeDialogOpen(false);
+              resetBoardViewport();
+              navigate(`/rolling-paper/categories/${nextCategory.id}/channels`);
+            }}
+          />
+        )}
+      </RollingPaperPageTransition>
+    </>
   );
 }

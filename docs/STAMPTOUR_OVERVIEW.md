@@ -73,20 +73,24 @@ const [openBoothId, setOpenBoothId] = useState<number | null>(BOOTHS[0]?.id ?? n
 
 ### BoothCard (`src/components/stampTour/BoothCard.tsx`)
 
-부스 상세 아코디언 카드. `isExpanded` 상태에 따라 진행장소·시간·대상·지도 이미지를 CSS grid로 애니메이션 展開한다.
+부스 상세 아코디언 카드. `isExpanded` 상태에 따라 진행장소·시간·대상·지도 이미지를 펼치고 닫는다.
+
+`ResizeObserver`로 콘텐츠 영역의 실제 픽셀 높이를 측정해 framer-motion에 전달한다. `height: auto` 방식은 애니메이션 시작 시점에 DOM 측정 → reflow가 발생해 close 시 jank가 생기는데, 픽셀값을 미리 확보해 두면 이 측정 단계 없이 바로 애니메이션한다.
+
+콘텐츠는 항상 DOM에 마운트되어 있으므로 이미지가 카드를 열기 전에 미리 로드된다.
 
 ## 이미지 에셋
 
 모든 이미지는 WebP 포맷으로 관리한다. `src/assets/stampTour/` 디렉토리에 위치한다.
 
-| 파일                   | 용도                            | 비고                                                     |
-| ---------------------- | ------------------------------- | -------------------------------------------------------- |
-| `stampHero.webp`       | 소개 탭 히어로 이미지           | `fetchPriority="high"`, `width`/`height` 명시 (CLS 방지) |
-| `step_{1~3}.webp`      | ProcessCard 일러스트            | `loading="lazy"`                                         |
-| `step_{1~3}_bg.webp`   | ProcessCard 배경                | `loading="lazy"`                                         |
-| `prize_{1~3}.webp`     | 경품 이미지 (468px, @3x)        | `loading="lazy"`                                         |
-| `prize_stars.webp`     | 경품 별 장식                    | `loading="lazy"`                                         |
-| `booth_map_{1~7}.webp` | 부스 위치 지도 (861×692px, @3x) | `loading="lazy"`, Figma @3x export                       |
+| 파일                   | 용도                            | 비고                                                        |
+| ---------------------- | ------------------------------- | ----------------------------------------------------------- |
+| `stampHero.webp`       | 소개 탭 히어로 이미지           | `fetchPriority="high"`, `width`/`height` 명시 (CLS 방지)    |
+| `step_{1~3}.webp`      | ProcessCard 일러스트            | `loading="lazy"`                                            |
+| `step_{1~3}_bg.webp`   | ProcessCard 배경                | `loading="lazy"`                                            |
+| `prize_{1~3}.webp`     | 경품 이미지 (468px, @3x)        | `loading="lazy"`                                            |
+| `prize_stars.webp`     | 경품 별 장식                    | `loading="lazy"`                                            |
+| `booth_map_{1~7}.webp` | 부스 위치 지도 (861×692px, @3x) | Figma @3x export, `loading` 생략 (카드 마운트 시 사전 로드) |
 
 > SVG/PNG → WebP 변환으로 `/stamptour` 페이지 이미지 총량이 약 18MB에서 ~566KB로 감소했다.
 
