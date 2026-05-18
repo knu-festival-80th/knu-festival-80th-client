@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { tabIndicatorTransition } from '@/constants/animation';
 
 export type TabItem = {
   key: string;
@@ -59,7 +60,7 @@ export default function TabBar({
               <motion.div
                 layoutId={layoutId}
                 className="absolute -bottom-px left-0 right-0 h-0.5 bg-sub-red"
-                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                transition={tabIndicatorTransition}
               />
             )}
           </button>
