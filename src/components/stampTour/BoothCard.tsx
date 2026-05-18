@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import ViewAllButton from '@/components/home/ViewAllButton';
 import ZoneBadge from './ZoneBadge';
@@ -39,47 +40,37 @@ const BoothCard = ({
         </p>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateRows: isExpanded ? '1fr' : '0fr',
-          transition: 'grid-template-rows 0.3s ease',
-        }}
-      >
-        <div className="overflow-hidden">
-          <div
-            className="flex flex-col gap-5 pt-5"
-            style={{
-              opacity: isExpanded ? 1 : 0,
-              transition: 'opacity 0.25s ease',
-              transitionDelay: isExpanded ? '0.1s' : '0s',
-            }}
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="overflow-hidden"
           >
-            <div className="flex w-full flex-col gap-2.5">
-              <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
-                진행장소: {location}
-              </p>
-              <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
-                진행시간: {time}
-              </p>
-              <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
-                참여대상: {target}
-              </p>
+            <div className="flex flex-col gap-5 pt-5">
+              <div className="flex w-full flex-col gap-2.5">
+                <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
+                  진행장소: {location}
+                </p>
+                <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
+                  진행시간: {time}
+                </p>
+                <p className="font-wanted-sans text-body1 font-medium tracking-tight text-[#999]">
+                  참여대상: {target}
+                </p>
+              </div>
+              {mapDetailPath && (
+                <ViewAllButton to={mapDetailPath} label="자세히 보러가기" className="self-start" />
+              )}
+              <div className="aspect-[335/269] w-full overflow-hidden rounded-[8px]">
+                <img src={imageSrc} alt={imageAlt ?? name} className="size-full object-cover" />
+              </div>
             </div>
-            {mapDetailPath && (
-              <ViewAllButton to={mapDetailPath} label="자세히 보러가기" className="self-start" />
-            )}
-            <div className="aspect-[335/269] w-full overflow-hidden rounded-[8px]">
-              <img
-                src={imageSrc}
-                alt={imageAlt ?? name}
-                loading="lazy"
-                className="size-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <button
         type="button"
