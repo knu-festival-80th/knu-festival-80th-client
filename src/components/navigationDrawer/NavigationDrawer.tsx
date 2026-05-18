@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { LuX } from 'react-icons/lu';
 import { ALL_SECTION_IDS, NAV_ITEMS } from '@/constants/navigationDrawer';
 import type { NavigationDrawerProps } from '@/types/navigationDrawer';
@@ -47,11 +48,13 @@ export const NavigationDrawer = ({ isOpen, onClose }: NavigationDrawerProps) => 
           }}
         >
           <div className="flex h-16 shrink-0 items-center justify-between px-5">
-            <img
-              src={knu80thLogo}
-              alt="KNU 80주년 대동제"
-              className="h-4.5 w-47.5 object-contain"
-            />
+            <Link to="/" aria-label="홈으로 이동" onClick={onClose}>
+              <img
+                src={knu80thLogo}
+                alt="KNU 80주년 대동제"
+                className="h-4.5 w-47.5 object-contain"
+              />
+            </Link>
             <button type="button" aria-label="메뉴 닫기" className="text-text" onClick={onClose}>
               <LuX size={24} />
             </button>
