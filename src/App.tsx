@@ -38,6 +38,7 @@ const TimeTablePage = lazy(() => import('@/pages/TimeTablePage'));
 const StampTourPage = lazy(() => import('@/pages/StampTourPage'));
 const StampTourIntroView = lazy(() => import('@/components/stampTour/views/StampTourIntroView'));
 const StampBoothListView = lazy(() => import('@/components/stampTour/views/StampBoothListView'));
+const CreditsPage = lazy(() => import('@/pages/CreditsPage'));
 const InstatingPage = lazy(() => import('@/pages/InstatingPage'));
 const InstatingIntroView = lazy(() => import('@/components/instating/views/InstatingIntroView'));
 const InstatingApplyView = lazy(() => import('@/components/instating/views/InstatingApplyView'));
@@ -106,6 +107,7 @@ export default function App() {
                 <Route path="apply" element={<InstatingApplyView />} />
                 <Route path="result" element={<InstatingResultView />} />
               </Route>
+              <Route path="/credits" element={<CreditsPage />} />
               <Route path="/congrat-video" element={<CongratVideoPage />} />
               <Route path="/rolling-paper" element={<RollingPaperIntroPage />} />
               <Route
