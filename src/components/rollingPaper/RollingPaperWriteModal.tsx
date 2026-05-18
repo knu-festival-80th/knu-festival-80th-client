@@ -29,9 +29,11 @@ export default function RollingPaperWriteModal({
   frameVariant,
   placedNotes,
   isSubmitting = false,
+  isPlacementSyncing = false,
   placementErrorMessage,
   onClose,
   onPlacementErrorClear,
+  onPlacementSyncRequest,
   onPlace,
 }: RollingPaperWriteModalProps) {
   const [step, setStep] = useState<RollingPaperWriteStep>('compose');
@@ -71,6 +73,12 @@ export default function RollingPaperWriteModal({
       document.body.style.overflow = originalOverflow;
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || step !== 'place') return;
+
+    onPlacementSyncRequest?.({ immediate: true });
+  }, [isOpen, onPlacementSyncRequest, step]);
 
   if (!isOpen) {
     return null;
@@ -115,6 +123,7 @@ export default function RollingPaperWriteModal({
   const handlePlacementChange = (placement: RollingPaperPlacement) => {
     onPlacementErrorClear?.();
     setRequestedPlacement(placement);
+    onPlacementSyncRequest?.();
   };
 
   return createPortal(
@@ -148,6 +157,7 @@ export default function RollingPaperWriteModal({
             selectedPlacement={selectedPlacement}
             isPlacementAvailable={isPlacementAvailable}
             placementErrorMessage={placementErrorMessage}
+            isPlacementSyncing={isPlacementSyncing}
             scale={scale}
             pan={pan}
             onPlacementChange={handlePlacementChange}
