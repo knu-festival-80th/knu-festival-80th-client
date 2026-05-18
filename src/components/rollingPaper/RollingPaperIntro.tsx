@@ -11,18 +11,17 @@ export default function RollingPaperIntro() {
   return (
     <>
       <RollingPaperTabs active="intro" />
+      <section
+        className="relative flex min-h-[270px] items-end overflow-hidden px-5 py-[42px]"
+        style={{ backgroundImage: INTRO_HERO_BACKGROUND_IMAGE }}
+      >
+        <h1 className="relative font-wanted-sans text-[40px] font-bold leading-[1.4] tracking-[-0.02em] text-ink">
+          80주년
+          <br />
+          롤링페이퍼
+        </h1>
+      </section>
       <RollingPaperPageTransition className="bg-white">
-        <section
-          className="relative flex min-h-[270px] items-end overflow-hidden px-5 py-[42px]"
-          style={{ backgroundImage: INTRO_HERO_BACKGROUND_IMAGE }}
-        >
-          <h1 className="relative font-wanted-sans text-[40px] font-bold leading-[1.4] tracking-[-0.02em] text-ink">
-            80주년
-            <br />
-            롤링페이퍼
-          </h1>
-        </section>
-
         <section className="flex flex-col gap-12 px-5 pt-16 pb-12">
           <motion.div className="flex flex-col gap-5" {...rollingPaperItemMotion}>
             <div className="flex flex-col gap-1.5">
