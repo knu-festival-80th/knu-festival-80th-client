@@ -26,9 +26,10 @@ export const IntroTab = ({ onNavigateToPhotobooth, onPhotoboothIntent }: IntroTa
               웹 포토부스 알아보기
             </p>
             <p className="whitespace-pre-line font-wanted-sans text-base font-medium leading-[1.4] tracking-[-0.02rem] text-black/50">
-              {
-                '축제 순간을 촬영하거나 업로드하고,\n프레임·스티커로 꾸민 뒤 다운로드 및 SNS 공유!\n실시간 피드에서 다른 사진도 감상하고 좋아요까지'
-              }
+              {'프레임·필터 속의 호반우와 함께 사진을 촬영하고,\n다운로드 및 SNS에 공유해보세요!'}
+            </p>
+            <p className="whitespace-pre-line font-wanted-sans text-sm font-medium leading-[1.4] tracking-[-0.02rem] text-black/35">
+              {'촬영한 사진은 서버에 저장되거나 전송되지 않으며,\n본인 기기에만 저장돼요.'}
             </p>
           </div>
           <button
