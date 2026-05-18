@@ -2,12 +2,21 @@ import goodsbox from '@/assets/goods/goodsbox.webp';
 import { GradientBanner } from '@/components/common/GradientBanner';
 import { SectionTitle } from '@/components/common/SectionTitle';
 import { GoodsModal } from '@/components/goods/GoodsModal';
+import { GOODS_DETAIL_GUIDE_URL, GOODS_PURCHASE_GUIDE_URL } from '@/constants/goods';
 import { ALL_GOODS, POPULAR_GOODS } from '@/mocks/goods';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import { useGoodsModal } from '@/hooks/useGoodsModal';
 import { ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { fadeUpVariant } from '@/constants/animation';
 
 export default function GoodsPage() {
   const { selectedGoods, openModal, closeModal } = useGoodsModal();
+  const {
+    scrollRef: popularGoodsScrollRef,
+    isDragging: isPopularGoodsDragging,
+    dragHandlers: popularGoodsDragHandlers,
+  } = useHorizontalDragScroll<HTMLDivElement>();
 
   const scrollToPopularGoods = () => {
     document.getElementById('popular-goods')?.scrollIntoView({ behavior: 'smooth' });
@@ -19,25 +28,44 @@ export default function GoodsPage() {
 
       <section className="flex flex-col items-center bg-white px-5 pb-12 pt-20">
         <div className="flex w-full max-w-7xl flex-col items-center gap-12">
-          <SectionTitle
-            label="2026 Festival Goods"
-            title="2026 대동제 굿즈"
-            description={
-              '축제의 특별한 굿즈를 만나보세요!\n대동제의 무드를 담은 다양한 아이템들이 준비되어 있습니다. 마음에 드는 굿즈를 선택해 축제의 순간을 오래 간직해보세요.'
-            }
-            ctaLabel="굿즈 살펴보기"
-            onCtaClick={scrollToPopularGoods}
+          <motion.div
+            className="w-full"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+          >
+            <SectionTitle
+              label="2026 Festival Goods"
+              title="2026 대동제 굿즈"
+              description={
+                '축제의 특별한 굿즈를 만나보세요!\n대동제의 무드를 담은 다양한 아이템들이 준비되어 있습니다. 마음에 드는 굿즈를 선택해 축제의 순간을 오래 간직해보세요.'
+              }
+              ctaLabel="굿즈 살펴보기"
+              onCtaClick={scrollToPopularGoods}
+            />
+          </motion.div>
+          <motion.img
+            src={goodsbox}
+            alt="2026 대동제 굿즈"
+            className="h-auto w-full object-contain"
+            {...fadeUpVariant}
+            transition={{ ...fadeUpVariant.transition, delay: 0.1 }}
           />
-          <img src={goodsbox} alt="2026 대동제 굿즈" className="h-auto w-full object-contain" />
         </div>
       </section>
 
       <section className="flex flex-col gap-32 bg-white px-5 pb-32 pt-7">
-        <div id="popular-goods" className="flex flex-col gap-5">
+        <motion.div id="popular-goods" className="flex flex-col gap-5" {...fadeUpVariant}>
           <p className="font-wanted-sans text-xl font-bold leading-none tracking-[-0.02em] text-ink">
             현재 인기있는 굿즈
           </p>
-          <div className="-mx-5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div
+            ref={popularGoodsScrollRef}
+            {...popularGoodsDragHandlers}
+            className={`-mx-5 overflow-x-auto select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+              isPopularGoodsDragging ? 'cursor-grabbing' : 'cursor-grab'
+            }`}
+          >
             <div className="flex gap-5 px-5 pb-2">
               {POPULAR_GOODS.map((item) => (
                 <button
@@ -50,6 +78,7 @@ export default function GoodsPage() {
                     <img
                       src={item.images[0]}
                       alt={item.name}
+                      draggable={false}
                       loading="lazy"
                       decoding="async"
                       className="h-full w-full object-contain p-2"
@@ -67,9 +96,9 @@ export default function GoodsPage() {
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div id="all-goods" className="flex flex-col gap-5">
+        <motion.div id="all-goods" className="flex flex-col gap-5" {...fadeUpVariant}>
           <p className="font-wanted-sans text-xl font-bold leading-none tracking-[-0.02em] text-ink">
             전체 굿즈 목록
           </p>
@@ -85,6 +114,7 @@ export default function GoodsPage() {
                   <img
                     src={item.images[0]}
                     alt={item.name}
+                    draggable={false}
                     loading="lazy"
                     decoding="async"
                     className="h-full w-full object-contain p-2"
@@ -101,9 +131,9 @@ export default function GoodsPage() {
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        <div className="py-4.5 flex flex-col gap-5">
+        <motion.div className="py-4.5 flex flex-col gap-5" {...fadeUpVariant}>
           <SectionTitle
             label="Buy Now"
             title="지금 바로 구매하기"
@@ -111,7 +141,7 @@ export default function GoodsPage() {
           />
           <div className="flex flex-col gap-3">
             <a
-              href="https://www.instagram.com/p/DXv43Z9kzgo/?img_index=1"
+              href={GOODS_PURCHASE_GUIDE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex w-fit items-center gap-1.5 rounded-full border border-[#ff3d3d] py-2.5 pl-5 pr-3.5"
@@ -122,7 +152,7 @@ export default function GoodsPage() {
               <ArrowRight className="size-6 text-[#ff3d3d]" />
             </a>
             <a
-              href="https://www.instagram.com/p/DXv5AK6EyOI/?img_index=1"
+              href={GOODS_DETAIL_GUIDE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex w-fit items-center gap-1.5 rounded-full border border-[#ff3d3d] py-2.5 pl-5 pr-3.5"
@@ -133,7 +163,7 @@ export default function GoodsPage() {
               <ArrowRight className="size-6 text-[#ff3d3d]" />
             </a>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {selectedGoods && (

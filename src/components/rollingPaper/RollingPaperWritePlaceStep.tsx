@@ -15,6 +15,7 @@ import RollingPaperWritePlacementPreview from './RollingPaperWritePlacementPrevi
 
 type RollingPaperWritePlaceStepProps = {
   boardVariant: number;
+  frameVariant: number;
   colorId: RollingPaperStickerColorId;
   message: string;
   occupiedNotes: PlacedRollingPaperNote[];
@@ -61,6 +62,7 @@ function PlacementControlButton({
 
 export default function RollingPaperWritePlaceStep({
   boardVariant,
+  frameVariant,
   colorId,
   message,
   occupiedNotes,
@@ -95,6 +97,7 @@ export default function RollingPaperWritePlaceStep({
       <div className="mt-4">
         <RollingPaperWritePlacementPreview
           boardVariant={boardVariant}
+          frameVariant={frameVariant}
           colorId={colorId}
           message={message}
           occupiedNotes={occupiedNotes}

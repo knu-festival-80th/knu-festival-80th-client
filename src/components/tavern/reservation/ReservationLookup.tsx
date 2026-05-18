@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { FiChevronRight, FiX } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 
 import { lookupMyWaitings, cancelMyWaiting } from '@/apis/modules/waiting';
 import { toApiClientError } from '@/apis/error';
 import FieldInput from '@/components/tavern/shared/FieldInput';
 import type { ReservationLookupResult } from '@/components/tavern/types';
+import { fadeUpVariant } from '@/constants/animation';
 
 export default function ReservationLookup() {
   const [reservationName, setReservationName] = useState('');
@@ -81,15 +83,19 @@ export default function ReservationLookup() {
 
   return (
     <section className="flex flex-col gap-5 px-5 py-6">
-      <div className="flex flex-col gap-0.5">
+      <motion.div className="flex flex-col gap-0.5" {...fadeUpVariant}>
         <h1 className="text-[24px] font-bold leading-[1.6] tracking-[-0.48px]">예약 조회</h1>
         <p className="text-[16px] font-normal leading-[1.4] tracking-[-0.32px] text-[#808080]">
           예약했던 정보를 입력해주세요.
         </p>
-      </div>
+      </motion.div>
 
       <form className="flex flex-col gap-8" onSubmit={handleSearch}>
-        <div className="flex flex-col gap-[18px]">
+        <motion.div
+          className="flex flex-col gap-[18px]"
+          {...fadeUpVariant}
+          transition={{ ...fadeUpVariant.transition, delay: 0.1 }}
+        >
           <FieldInput
             id="reservation-name"
             label="예약자명"
@@ -107,7 +113,7 @@ export default function ReservationLookup() {
             inputMode="numeric"
             onChange={setPhoneNumber}
           />
-        </div>
+        </motion.div>
 
         {error && (
           <p className="rounded-[8px] bg-red-50 px-4 py-3 text-[14px] font-medium text-[#ff3d3d]">
@@ -115,15 +121,17 @@ export default function ReservationLookup() {
           </p>
         )}
 
-        <button
+        <motion.button
           type="submit"
           className={`h-[51px] w-full rounded-[8px] text-[16px] font-semibold tracking-[-0.32px] text-white ${
             canSearch && !loading ? 'bg-[#ff3d3d]' : 'bg-[#cccccc]'
           }`}
           disabled={!canSearch || loading}
+          {...fadeUpVariant}
+          transition={{ ...fadeUpVariant.transition, delay: 0.15 }}
         >
           {loading ? '조회 중...' : '조회하기'}
-        </button>
+        </motion.button>
       </form>
     </section>
   );

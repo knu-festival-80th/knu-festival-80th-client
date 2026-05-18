@@ -14,7 +14,7 @@ import type { WaitingActionType } from './waiting/WaitingCard';
 import WaitingInsertSheet from './waiting/WaitingInsertSheet';
 
 interface ActionConfirmState {
-  type: 'call' | 'cancel' | 'skip';
+  type: 'call' | 'enter' | 'cancel' | 'skip';
   waiting: WaitingItem;
 }
 
@@ -26,6 +26,11 @@ const ACTION_CONFIRM_META: Record<
     title: '호출하시겠어요?',
     desc: '해당 팀에게 SMS가 발송돼요.',
     confirmLabel: '호출하기',
+  },
+  enter: {
+    title: '입장 완료 처리할까요?',
+    desc: '입장 완료하면 다른 부스 대기가 자동 취소돼요.',
+    confirmLabel: '입장 완료',
   },
   cancel: {
     title: '대기를 취소할까요?',
@@ -82,12 +87,8 @@ export default function WaitingListPage() {
 
   const handleAction = useCallback(
     (type: WaitingActionType, waiting: WaitingItem) => {
-      if (type === 'call' || type === 'cancel' || type === 'skip') {
+      if (type === 'call' || type === 'enter' || type === 'cancel' || type === 'skip') {
         setActionConfirm({ type, waiting });
-        return;
-      }
-      if (type === 'enter') {
-        actions.enter.mutate(waiting.waitingId);
         return;
       }
       if (type === 'resend') {
@@ -113,6 +114,7 @@ export default function WaitingListPage() {
     if (!actionConfirm) return;
     const id = actionConfirm.waiting.waitingId;
     if (actionConfirm.type === 'call') actions.call.mutate(id);
+    else if (actionConfirm.type === 'enter') actions.enter.mutate(id);
     else if (actionConfirm.type === 'cancel') actions.cancel.mutate(id);
     else if (actionConfirm.type === 'skip') actions.skip.mutate(id);
     setActionConfirm(null);

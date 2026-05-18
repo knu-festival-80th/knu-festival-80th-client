@@ -1,6 +1,8 @@
 import { X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { GOODS_DETAIL_GUIDE_URL } from '@/constants/goods';
+import { useHorizontalDragScroll } from '@/hooks/useHorizontalDragScroll';
 import type { GoodsItem } from '@/types/goods';
 
 export interface GoodsModalProps {
@@ -9,7 +11,11 @@ export interface GoodsModalProps {
 }
 export const GoodsModal = ({ goods, onClose }: GoodsModalProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const {
+    scrollRef,
+    isDragging: isImageDragging,
+    dragHandlers: imageDragHandlers,
+  } = useHorizontalDragScroll<HTMLDivElement>();
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -38,8 +44,11 @@ export const GoodsModal = ({ goods, onClose }: GoodsModalProps) => {
           <div className="relative">
             <div
               ref={scrollRef}
+              {...imageDragHandlers}
               onScroll={handleScroll}
-              className="flex overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className={`flex snap-x snap-mandatory overflow-x-auto select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+                isImageDragging ? 'cursor-grabbing' : 'cursor-grab'
+              }`}
             >
               {goods.images.map((img, i) => (
                 <div
@@ -49,6 +58,7 @@ export const GoodsModal = ({ goods, onClose }: GoodsModalProps) => {
                   <img
                     src={img}
                     alt={`${goods.name} ${i + 1}`}
+                    draggable={false}
                     className="h-full w-full object-contain p-4"
                   />
                 </div>
@@ -78,14 +88,16 @@ export const GoodsModal = ({ goods, onClose }: GoodsModalProps) => {
           </div>
 
           <div className="px-5">
-            <button
-              type="button"
+            <a
+              href={GOODS_DETAIL_GUIDE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex h-12.5 w-full items-center justify-center rounded-lg bg-[#ff3d3d]"
             >
               <span className="font-wanted-sans text-base font-medium leading-none tracking-[-0.02em] text-white">
                 굿즈 상세정보 보기
               </span>
-            </button>
+            </a>
           </div>
         </div>
 

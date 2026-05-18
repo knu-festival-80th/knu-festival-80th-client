@@ -282,10 +282,25 @@ function MapPickerModalInner({
     );
   };
 
-  const pinColor = boothColor ?? (boothType === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
+  const pinColor =
+    boothColor ??
+    (boothType === 'BOOTH'
+      ? '#15ccb1'
+      : boothType === 'STAGE'
+        ? '#8B5CF6'
+        : boothType === 'STAMP'
+          ? '#FFDBF5'
+          : '#ff3d3d');
 
   const getMarkerColor = (marker: BoothMapItem) =>
-    marker.color ?? (marker.type === 'BOOTH' ? '#15ccb1' : '#ff3d3d');
+    marker.color ??
+    (marker.type === 'BOOTH'
+      ? '#15ccb1'
+      : marker.type === 'STAGE'
+        ? '#8B5CF6'
+        : marker.type === 'STAMP'
+          ? '#FFDBF5'
+          : '#ff3d3d');
 
   const zoomOnPin = (factor: number) => {
     if (pin) {
